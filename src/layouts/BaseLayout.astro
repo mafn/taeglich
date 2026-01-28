@@ -5,17 +5,19 @@ interface Props {
   title?: string;
   description?: string;
   image?: string;
+  canonicalURL?: string | URL;
 }
 
 const {
   title = "taeglich",
   description = "Daily digital artifacts.",
   image = "/favicon.svg",
+  canonicalURL: propCanonicalURL,
 } = Astro.props;
 
-const canonicalURL = Astro.site
-  ? new URL(Astro.url.pathname, Astro.site)
-  : undefined;
+const canonicalURL =
+  propCanonicalURL ||
+  (Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined);
 ---
 
 <!doctype html>
@@ -49,13 +51,21 @@ const canonicalURL = Astro.site
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
   </head>
   <body class="flex min-h-screen flex-col bg-white text-gray-900 antialiased">
-    <header class="p-4">
+    <header class="flex items-center justify-between p-4">
       <nav>
         <a
           href="/"
           class="font-mono text-sm font-bold text-gray-900 hover:underline"
         >
           taeglich
+        </a>
+      </nav>
+      <nav>
+        <a
+          href="/archive"
+          class="font-mono text-sm text-gray-500 hover:text-gray-900 hover:underline"
+        >
+          [ history ]
         </a>
       </nav>
     </header>

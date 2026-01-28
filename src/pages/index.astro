@@ -2,6 +2,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import type { DayMeta } from "../types";
 
+// 1. Find all days
 const metas = import.meta.glob("../days/*/meta.ts", { eager: true });
 
 const days = Object.keys(metas)
@@ -15,46 +16,35 @@ const days = Object.keys(metas)
   })
   .filter((day) => !day.draft)
   .sort((a, b) => b.date.localeCompare(a.date));
+
+const latestDay = days[0];
+
+if (!latestDay) {
+  throw new Error("No published days found!");
+}
+
+// 2. Load the latest artifact
+const artifacts = import.meta.glob("../days/*/Artifact.astro");
+const artifactPath = `../days/${latestDay.date}/Artifact.astro`;
+const ArtifactLoader = artifacts[artifactPath];
+
+if (!ArtifactLoader) {
+  throw new Error(`Missing Artifact.astro for date: ${latestDay.date}`);
+}
+
+const { default: Artifact } = (await ArtifactLoader()) as { default: any };
+
+// 3. Construct canonical URL for the specific day
+const canonicalURL = Astro.site
+  ? new URL(`/d/${latestDay.date}`, Astro.site)
+  : undefined;
 ---
 
-<BaseLayout title="Taeglich Archive">
-  <div class="mx-auto max-w-2xl px-4 py-12">
-    <header class="mb-12">
-      <h1 class="text-3xl font-bold tracking-tight text-gray-900">taeglich</h1>
-      <p class="mt-2 text-lg text-gray-600">
-        Daily digital artifacts. One per day. Frozen in time.
-      </p>
-    </header>
-
-    <section>
-      <ul class="space-y-4">
-        {
-          days.map((day) => (
-            <li>
-              <a
-                href={`/d/${day.date}`}
-                class="group block border-l-2 border-gray-100 pl-4 transition-colors hover:border-gray-900"
-              >
-                <div class="flex items-baseline justify-between">
-                  <span class="font-mono text-sm text-gray-500">
-                    {day.date}
-                  </span>
-                </div>
-                <h2 class="text-lg font-medium text-gray-900 group-hover:underline">
-                  {day.title}
-                </h2>
-              </a>
-            </li>
-          ))
-        }
-        {
-          days.length === 0 && (
-            <li class="py-8 text-center text-gray-500 italic">
-              No artifacts yet. Check back tomorrow.
-            </li>
-          )
-        }
-      </ul>
-    </section>
-  </div>
+<BaseLayout
+  title={latestDay.title}
+  description={latestDay.description}
+  image={latestDay.ogImage}
+  canonicalURL={canonicalURL}
+>
+  <Artifact />
 </BaseLayout>
