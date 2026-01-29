@@ -1,0 +1,50 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import type { DayMeta } from "../types";
+
+// 1. Find all days
+const metas = import.meta.glob("../days/*/meta.ts", { eager: true });
+
+const days = Object.keys(metas)
+  .map((path) => {
+    const date = path.split("/").at(-2)!;
+    const metaModule = metas[path] as { default: DayMeta };
+    return {
+      date,
+      ...metaModule.default,
+    };
+  })
+  .filter((day) => !day.draft)
+  .sort((a, b) => b.date.localeCompare(a.date));
+
+const latestDay = days[0];
+
+if (!latestDay) {
+  throw new Error("No published days found!");
+}
+
+// 2. Load the latest artifact
+const artifacts = import.meta.glob("../days/*/Artifact.astro");
+const artifactPath = `../days/${latestDay.date}/Artifact.astro`;
+const ArtifactLoader = artifacts[artifactPath];
+
+if (!ArtifactLoader) {
+  throw new Error(`Missing Artifact.astro for date: ${latestDay.date}`);
+}
+
+const { default: Artifact } = (await ArtifactLoader()) as { default: any };
+
+// 3. Construct canonical URL for the specific day
+const canonicalURL = Astro.site
+  ? new URL(`/d/${latestDay.date}`, Astro.site)
+  : undefined;
+---
+
+<BaseLayout
+  title={latestDay.title}
+  description={latestDay.description}
+  image={latestDay.ogImage}
+  canonicalURL={canonicalURL}
+>
+  <Artifact />
+</BaseLayout>

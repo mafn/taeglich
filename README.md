@@ -3,6 +3,7 @@
 A daily website.
 
 Every day:
+
 - one page
 - one date
 - one mood
@@ -18,6 +19,7 @@ It’s always finished.
 taegli.ch is a place to vibe-code one page per day.
 
 Each page:
+
 - belongs to a specific date
 - has a stable URL
 - looks different from other days
@@ -62,6 +64,7 @@ There is no brand consistency.
 That is intentional.
 
 Styles may range from:
+
 - boring
 - retro
 - terminal-like
@@ -71,6 +74,7 @@ Styles may range from:
 - accidentally elegant
 
 The only hard rules:
+
 - text is readable
 - links are obvious
 - things are usable with a keyboard
@@ -82,6 +86,7 @@ Everything else is fair game.
 ## Content
 
 A daily page might be:
+
 - a puzzle
 - a sudoku
 - a tiny game
@@ -92,6 +97,7 @@ A daily page might be:
 - something actually useful
 
 It does not need:
+
 - accounts
 - comments
 - feeds
@@ -106,6 +112,7 @@ Small is the point.
 The site is meant to be discoverable over time.
 
 Pages are:
+
 - canonical
 - linkable
 - fast
@@ -119,6 +126,7 @@ Everyone else is free to ignore it.
 ## The rule
 
 If it takes more than:
+
 - one evening
 - one coffee
 - one mood

@@ -1,0 +1,46 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+import type { DayMeta } from "../../types";
+
+export async function getStaticPaths() {
+  const metas = import.meta.glob("../../days/*/meta.ts", { eager: true });
+
+  return Object.keys(metas).map((path) => {
+    const date = path.split("/").at(-2);
+    if (!date) throw new Error(`Could not parse date from path: ${path}`);
+
+    // Cast the module default export to DayMeta
+    const metaModule = metas[path] as { default: DayMeta };
+
+    return {
+      params: { date },
+      props: {
+        meta: metaModule.default,
+      },
+    };
+  });
+}
+
+const { date } = Astro.params;
+const { meta } = Astro.props;
+
+// Load artifacts here (non-eager to keep bundles split)
+const artifacts = import.meta.glob("../../days/*/Artifact.astro");
+const artifactPath = `../../days/${date}/Artifact.astro`;
+const ArtifactLoader = artifacts[artifactPath];
+
+if (!ArtifactLoader) {
+  throw new Error(`Missing Artifact.astro for date: ${date}`);
+}
+
+const { default: Artifact } = (await ArtifactLoader()) as any;
+---
+
+<BaseLayout
+  title={meta.title || `Artifact ${date}`}
+  description={meta.description}
+  image={meta.ogImage}
+>
+  <Artifact />
+</BaseLayout>
