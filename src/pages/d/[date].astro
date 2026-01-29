@@ -34,7 +34,7 @@ if (!ArtifactLoader) {
   throw new Error(`Missing Artifact.astro for date: ${date}`);
 }
 
-const Artifact = (await ArtifactLoader()) as any;
+const { default: Artifact } = (await ArtifactLoader()) as any;
 ---
 
 <BaseLayout
@@ -42,5 +42,5 @@ const Artifact = (await ArtifactLoader()) as any;
   description={meta.description}
   image={meta.ogImage}
 >
-  <Artifact.default />
+  <Artifact />
 </BaseLayout>

@@ -1,0 +1,400 @@
+---
+/**
+ * Sudoku + Pi (minimal)
+ * - Row 1 uses Pi in order, skipping invalid digits (shown per cell).
+ * - Rows 2-9 use contiguous 9-digit Pi blocks; skipped digits shown to the right.
+ * - Inputs are manual; explanation appears only when solved.
+ */
+---
+
+<div class="flex w-full flex-col items-center overflow-x-hidden px-4 py-12">
+  <div class="relative inline-block sm:[--cell:3rem]" style="--cell: 2.5rem">
+    <div id="grid" class="grid grid-cols-9 border-2 border-gray-900 bg-white">
+      {
+        Array.from({ length: 81 }).map((_, i) => {
+          const r = Math.floor(i / 9);
+          const c = i % 9;
+          return (
+            <div
+              data-index={i}
+              class:list={[
+                "cell relative flex h-10 w-10 items-center justify-center border-t border-l border-gray-200 font-mono text-lg transition-colors duration-150 sm:h-12 sm:w-12",
+                r === 0 && "border-t-0",
+                c === 0 && "border-l-0",
+                r > 0 && r % 3 === 0 && "border-t-2 border-t-gray-900",
+                c > 0 && c % 3 === 0 && "border-l-2 border-l-gray-900",
+              ]}
+            >
+              <input
+                type="text"
+                inputmode="numeric"
+                maxlength="1"
+                aria-label={`Row ${r + 1}, Column ${c + 1}`}
+                data-index={i}
+                class="absolute inset-0 h-full w-full cursor-pointer bg-transparent text-center font-semibold text-gray-900 caret-transparent outline-none selection:bg-transparent hover:bg-gray-50 focus:bg-blue-100"
+              />
+              {r === 0 && (
+                <span
+                  class="pi-skip absolute top-1 right-1 text-[9px] leading-none text-gray-400"
+                  data-col={c}
+                />
+              )}
+              {r > 0 && c === 0 && (
+                <span
+                  class="row-start-label absolute top-1/2 -left-[calc(7rem+5px)] w-28 -translate-y-1/2 text-right font-mono text-[9px] leading-none text-gray-400 opacity-0 transition-opacity duration-300"
+                  data-row={r}
+                />
+              )}
+              {i === 0 && (
+                <span
+                  id="pi-dot"
+                  class="absolute -right-1 bottom-1 z-10 text-2xl leading-none font-bold text-gray-400 opacity-0 transition-opacity duration-500"
+                >
+                  .
+                </span>
+              )}
+            </div>
+          );
+        })
+      }
+    </div>
+
+    <div
+      class="pointer-events-none absolute top-0 left-full ml-1 hidden sm:block"
+    >
+      <div
+        class="relative overflow-hidden border-2 border-gray-200 bg-white/50"
+        style="width: calc((var(--cell) * 5) + 4px); mask-image: linear-gradient(90deg, #000 0%, #000 70%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 70%, transparent 100%);"
+      >
+        <div
+          id="row-skips"
+          class="flex flex-col text-gray-400"
+          aria-live="polite"
+        >
+          {
+            Array.from({ length: 9 }).map((_, r) => (
+              <div
+                class:list={[
+                  "flex h-10 items-center border-t border-gray-100 sm:h-12",
+                  r === 0 && "border-t-0",
+                  r > 0 && r % 3 === 0 && "border-t-2 border-t-gray-200",
+                ]}
+                data-row-container={r}
+              />
+            ))
+          }
+        </div>
+        <div
+          class="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-r from-transparent to-white"
+        >
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    id="explanation"
+    class="mt-6 hidden max-w-[560px] text-sm leading-relaxed text-gray-700"
+  >
+    <p>
+      A birthday cut from π: the first row walks forward (skipping what can’t
+      fit in the row). Each next row waits for the next clean nine-digit run.
+    </p>
+  </div>
+</div>
+
+<script>
+  const PI_SUDOKU = {
+    solution: [
+      3, 1, 4, 5, 9, 2, 6, 8, 7, 5, 7, 6, 8, 1, 3, 4, 9, 2, 2, 9, 8, 4, 6, 7, 3,
+      5, 1, 8, 6, 9, 7, 5, 4, 2, 1, 3, 7, 5, 1, 2, 3, 6, 9, 4, 8, 4, 3, 2, 1, 8,
+      9, 7, 6, 5, 6, 2, 5, 3, 4, 1, 8, 7, 9, 1, 4, 7, 9, 2, 8, 5, 3, 6, 9, 8, 3,
+      6, 7, 5, 1, 2, 4,
+    ],
+    row0Skips: ["", "", "", "1", "", "", "", "535", "9"],
+    rowSkips: [
+      "",
+      "932384626433832795028841971693",
+      "045302240819727856471983963087",
+      "011631970319057294534643406340",
+      "423533032716970799893396089582",
+      "015463310232295661006346648765",
+      "178567138996053004372095744985",
+      "420648641921562296002442187406",
+      "797420994057839163311463680898",
+    ],
+    rowStartIndex: [
+      null,
+      12769,
+      15592871,
+      15727140,
+      17541241,
+      136345743,
+      162287878,
+      530608483,
+      625984639,
+    ],
+  };
+
+  const { solution, row0Skips, rowSkips, rowStartIndex } = PI_SUDOKU;
+  const inputs = document.querySelectorAll("#grid input");
+  const rowSkipsEl = document.getElementById("row-skips");
+  const explanationEl = document.getElementById("explanation");
+  const piDot = document.getElementById("pi-dot");
+  const row0SkipEls = Array.from(document.querySelectorAll("#grid .pi-skip"));
+  const rowStartEls = Array.from(
+    document.querySelectorAll("#grid .row-start-label"),
+  );
+  const STORAGE_KEY = "taeglich-2026-01-30-sudoku";
+  const COMPLETED_KEY = "taeglich:completed:2026-01-30";
+  const MAX_SKIP_DISPLAY = 1200;
+  const GHOST_COUNT = 5;
+
+  row0SkipEls.forEach((el) => {
+    const col = Number(el.getAttribute("data-col"));
+    el.dataset.skip = row0Skips[col] || "";
+    el.textContent = "";
+  });
+
+  function updateRow0SkipsVisibility() {
+    row0SkipEls.forEach((el) => {
+      const col = Number(el.getAttribute("data-col"));
+      if (col === 0) {
+        el.textContent = "";
+        return;
+      }
+      const prev = inputs[col - 1].disabled === true;
+      const curr = inputs[col].disabled === true;
+      el.textContent = prev && curr ? el.dataset.skip || "" : "";
+    });
+  }
+
+  function isRowComplete(r) {
+    for (let c = 0; c < 9; c++) {
+      const input = inputs[r * 9 + c];
+      if (!input || input.disabled !== true) return false;
+    }
+    return true;
+  }
+
+  function revealRowSkip(rowIndex) {
+    if (!rowSkipsEl) return;
+    if (!rowSkips[rowIndex]) return;
+
+    // Shift up by 1: Skips for "Row X" appear next to "Row X-1"
+    const targetContainerIdx = rowIndex - 1;
+    if (targetContainerIdx < 0) return;
+
+    const container = rowSkipsEl.querySelector(
+      `[data-row-container='${targetContainerIdx}']`,
+    );
+    if (!container || container.hasChildNodes()) return;
+
+    const digits = rowSkips[rowIndex]
+      .slice(0, MAX_SKIP_DISPLAY)
+      .slice(0, GHOST_COUNT);
+    for (let i = 0; i < GHOST_COUNT; i++) {
+      const cell = document.createElement("div");
+      // Use exact sizing and subtle borders to match main grid style
+      cell.className =
+        "flex h-full w-10 sm:w-12 items-center justify-center border-r border-gray-100 text-gray-400 font-mono text-2xl leading-none";
+
+      if (i === GHOST_COUNT - 1) cell.classList.remove("border-r");
+
+      cell.textContent = digits[i] || "";
+      container.appendChild(cell);
+    }
+  }
+
+  function isSolved() {
+    return Array.from(inputs).every((input) => input.disabled === true);
+  }
+
+  function markCompleted() {
+    try {
+      localStorage.setItem(COMPLETED_KEY, "1");
+    } catch {
+      // ignore (private mode / storage disabled)
+    }
+  }
+
+  function persistState() {
+    const values = Array.from(inputs).map((input, idx) => {
+      if (input.disabled !== true) return 0;
+      return solution[idx];
+    });
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(values));
+    } catch {
+      // ignore
+    }
+  }
+
+  function restoreState() {
+    let raw;
+    try {
+      raw = localStorage.getItem(STORAGE_KEY);
+    } catch {
+      return;
+    }
+    if (!raw) return;
+    let values;
+    try {
+      values = JSON.parse(raw);
+    } catch {
+      return;
+    }
+    if (!Array.isArray(values) || values.length !== 81) return;
+    values.forEach((val, idx) => {
+      if (val === solution[idx]) {
+        const input = inputs[idx];
+        input.value = String(val);
+        input.disabled = true;
+        input.classList.add("bg-gray-50");
+      }
+    });
+  }
+
+  function syncProgress() {
+    updateRow0SkipsVisibility();
+    if (piDot) {
+      const c0 = inputs[0].disabled === true;
+      const c1 = inputs[1].disabled === true;
+      piDot.classList.toggle("opacity-0", !(c0 && c1));
+    }
+    for (let r = 0; r < 8; r++) {
+      if (isRowComplete(r)) revealRowSkip(r + 1);
+    }
+    rowStartEls.forEach((el) => {
+      const rowIndex = Number(el.getAttribute("data-row"));
+      const prevComplete = isRowComplete(rowIndex - 1);
+      const firstCell = inputs[rowIndex * 9].disabled === true;
+      el.textContent = rowStartIndex[rowIndex]
+        ? `${rowStartIndex[rowIndex]}th`
+        : "";
+      el.classList.toggle("opacity-0", !(prevComplete || firstCell));
+    });
+    if (isSolved() && explanationEl) {
+      explanationEl.classList.remove("hidden");
+      markCompleted();
+    }
+  }
+
+  function focusNext(startIdx) {
+    for (let i = startIdx + 1; i < inputs.length; i++) {
+      const input = inputs[i];
+      if (input.disabled !== true) {
+        input.focus();
+        return;
+      }
+    }
+  }
+
+  function flashInvalid(input) {
+    input.classList.add("text-red-500", "bg-red-50");
+    setTimeout(() => {
+      input.classList.remove("text-red-500", "bg-red-50");
+    }, 300);
+  }
+
+  function updateHighlights(focusedIdx) {
+    const r = Math.floor(focusedIdx / 9);
+    const c = focusedIdx % 9;
+    const bR = Math.floor(r / 3) * 3;
+    const bC = Math.floor(c / 3) * 3;
+    const val = inputs[focusedIdx].value;
+
+    inputs.forEach((input, i) => {
+      const cell = input.parentElement;
+      const ir = Math.floor(i / 9);
+      const ic = i % 9;
+      const ibR = Math.floor(ir / 3) * 3;
+      const ibC = Math.floor(ic / 3) * 3;
+
+      const isPeer = ir === r || ic === c || (ibR === bR && ibC === bC);
+      const isSameValue = val && input.value === val;
+
+      cell.classList.toggle("bg-blue-50/30", isPeer && i !== focusedIdx);
+      cell.classList.toggle("bg-blue-100/50", isSameValue && i !== focusedIdx);
+    });
+  }
+
+  function clearHighlights() {
+    inputs.forEach((input) => {
+      input.parentElement.classList.remove("bg-blue-50/30", "bg-blue-100/50");
+    });
+  }
+
+  restoreState();
+  syncProgress();
+  focusNext(-1);
+
+  inputs.forEach((input, idx) => {
+    input.addEventListener("focus", () => updateHighlights(idx));
+    input.addEventListener("blur", clearHighlights);
+
+    input.addEventListener("input", (e) => {
+      const target = e.target;
+      const raw = target.value.trim();
+
+      if (raw === "") return;
+      if (!/^[1-9]$/.test(raw)) {
+        target.value = "";
+        return;
+      }
+
+      const val = parseInt(raw, 10);
+      if (val !== solution[idx]) {
+        target.value = "";
+        flashInvalid(target);
+        return;
+      }
+
+      target.value = String(val);
+      target.disabled = true;
+      target.classList.add("bg-gray-50");
+
+      syncProgress();
+      updateHighlights(idx);
+      const r = Math.floor(idx / 9);
+      if (r < 8 && isRowComplete(r)) revealRowSkip(r + 1);
+      if (isSolved() && explanationEl) {
+        explanationEl.classList.remove("hidden");
+        markCompleted();
+      }
+      persistState();
+      focusNext(idx);
+    });
+
+    input.addEventListener("keydown", (e) => {
+      const NAV_KEYS = {
+        ArrowUp: -9,
+        ArrowDown: 9,
+        ArrowLeft: -1,
+        ArrowRight: 1,
+      };
+
+      if (e.key in NAV_KEYS) {
+        e.preventDefault();
+        const currentIdx = idx;
+        const offset = NAV_KEYS[e.key];
+        let nextIdx = currentIdx + offset;
+
+        // Simple boundary checks to prevent wrapping weirdly if desired,
+        // but for now pure grid navigation (wrapping at ends of rows) is fine
+        // or we can clamp.
+        if (nextIdx >= 0 && nextIdx < 81) {
+          inputs[nextIdx].focus();
+        }
+        return;
+      }
+
+      if (
+        !/^[1-9]$/.test(e.key) &&
+        !["Backspace", "Delete", "Tab"].includes(e.key)
+      ) {
+        e.preventDefault();
+      }
+    });
+  });
+</script>
