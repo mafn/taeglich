@@ -18,12 +18,12 @@
     <div
       id="terminal"
       class="absolute inset-0 flex flex-col overflow-hidden p-4"
-      aria-live="polite"
       aria-atomic="false"
     >
       <div
         id="output"
         class="flex flex-col gap-0.5 break-words whitespace-pre-wrap"
+        aria-live="off"
       >
         <!-- Lines will be injected here -->
       </div>
@@ -33,7 +33,7 @@
           <input
             type="text"
             id="cmd-input"
-            class="w-full border-none bg-transparent p-0 font-mono text-inherit outline-none focus:ring-0"
+            class="w-full border-none bg-transparent p-0 font-mono text-inherit focus:ring-1 focus:ring-gray-700 focus:outline-none"
             autocomplete="off"
             autocorrect="off"
             autocapitalize="off"
@@ -54,7 +54,7 @@
       </div>
       <button
         id="power-btn"
-        class="pointer-events-auto mt-8 border border-orange-900 px-4 py-2 text-xs text-orange-900 opacity-0 transition-opacity hover:border-orange-500 hover:text-orange-500 hover:opacity-100 focus:opacity-100"
+        class="pointer-events-auto mt-8 border border-orange-900 px-4 py-2 text-xs text-orange-900 opacity-40 transition-opacity hover:border-orange-500 hover:text-orange-500 hover:opacity-100 focus:opacity-100"
       >
         [ POWER OFF ]
       </button>
@@ -255,6 +255,7 @@
   function startLogin() {
     STATE.booting = false;
     STATE.needsLogin = true;
+    outputEl.setAttribute("aria-live", "polite");
     printLine("");
     printLine("Give root password for maintenance");
     printLine("(or press Control-D to continue):");
@@ -526,7 +527,7 @@
   // Power Off button logic
   powerBtn.addEventListener("click", () => {
     document.body.innerHTML =
-      '<div class="w-full h-screen bg-black flex items-center justify-center text-gray-900 cursor-none">NO SIGNAL</div>';
+      '<div class="w-full h-screen bg-black flex items-center justify-center text-gray-600 cursor-none">NO SIGNAL</div>';
   });
 
   // Start
