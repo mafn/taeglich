@@ -17,34 +17,66 @@ const days = Object.keys(metas)
   .filter((day) => !day.draft)
   .sort((a, b) => b.date.localeCompare(a.date));
 
-const latestDay = days[0];
+const availableDates = days.map((d) => d.date);
 
-if (!latestDay) {
+// 2. Determine "featured" day (today or latest non-future)
+const now = new Date();
+const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+
+// Find the latest day that is NOT in the future relative to build time
+const featuredDay = days.find((d) => d.date <= todayStr) || days[0];
+
+if (!featuredDay) {
   throw new Error("No published days found!");
 }
 
-// 2. Load the latest artifact
+// 3. Load the featured artifact
 const artifacts = import.meta.glob("../days/*/Artifact.astro");
-const artifactPath = `../days/${latestDay.date}/Artifact.astro`;
+const artifactPath = `../days/${featuredDay.date}/Artifact.astro`;
 const ArtifactLoader = artifacts[artifactPath];
 
 if (!ArtifactLoader) {
-  throw new Error(`Missing Artifact.astro for date: ${latestDay.date}`);
+  throw new Error(`Missing Artifact.astro for date: ${featuredDay.date}`);
 }
 
 const { default: Artifact } = (await ArtifactLoader()) as { default: any };
 
-// 3. Construct canonical URL for the specific day
+// 4. Construct canonical URL for the specific day
 const canonicalURL = Astro.site
-  ? new URL(`/d/${latestDay.date}`, Astro.site)
+  ? new URL(`/d/${featuredDay.date}`, Astro.site)
   : undefined;
 ---
 
 <BaseLayout
-  title={latestDay.title}
-  description={latestDay.description}
-  image={latestDay.ogImage}
+  title={featuredDay.title}
+  description={featuredDay.description}
+  image={featuredDay.ogImage}
   canonicalURL={canonicalURL}
 >
   <Artifact />
+
+  <script
+    is:inline
+    define:vars={{ availableDates, currentDay: featuredDay.date }}
+  >
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function getLocalYYYYMMDD() {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+
+    const today = getLocalYYYYMMDD();
+    // If the user's local "today" has an artifact, and it's NOT the one we rendered,
+    // redirect them to their actual today.
+    if (
+      today !== currentDay &&
+      Array.isArray(availableDates) &&
+      availableDates.includes(today)
+    ) {
+      window.location.replace(`/d/${today}`);
+    }
+  </script>
 </BaseLayout>
