@@ -6,6 +6,7 @@ interface Props {
   description?: string;
   image?: string;
   canonicalURL?: string | URL;
+  renderH1?: boolean;
 }
 
 const {
@@ -13,6 +14,7 @@ const {
   description = "Daily digital artifacts.",
   image = "/favicon.svg",
   canonicalURL: propCanonicalURL,
+  renderH1 = true,
 } = Astro.props;
 
 const canonicalURL =
@@ -52,15 +54,15 @@ const canonicalURL =
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
   </head>
   <body class="flex min-h-screen flex-col bg-white text-gray-900 antialiased">
-	    <header class="flex items-center justify-between p-4">
-	      <nav>
-	        <a
-	          href="/today"
-	          class="font-mono text-sm font-bold text-gray-900 hover:underline"
-	        >
-	          taeglich
-	        </a>
-	      </nav>
+    <header class="flex items-center justify-between p-4">
+      <nav>
+        <a
+          href="/today"
+          class="font-mono text-sm font-bold text-gray-900 hover:underline"
+        >
+          taeglich
+        </a>
+      </nav>
       <nav>
         <a
           href="/archive"
@@ -72,6 +74,7 @@ const canonicalURL =
     </header>
 
     <main class="flex-1">
+      {renderH1 && <h1 class="sr-only">{title}</h1>}
       <slot />
     </main>
 
