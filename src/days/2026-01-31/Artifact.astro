@@ -33,9 +33,10 @@
           <input
             type="text"
             id="cmd-input"
-            name="password-input-ignore"
-            class="w-full border-none bg-transparent p-0 font-mono text-inherit focus:ring-0 focus:outline-none focus-visible:ring-1 focus-visible:ring-gray-700"
-            autocomplete="new-password"
+            name="terminal-input"
+            class="w-full border-none bg-transparent p-0 font-mono text-inherit outline-none focus:ring-0 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-gray-500 focus-visible:outline-dashed"
+            autofocus
+            autocomplete="off"
             autocorrect="off"
             autocapitalize="off"
             spellcheck="false"
@@ -201,6 +202,7 @@
   const terminalEl = document.getElementById("terminal");
   const safeShutdownEl = document.getElementById("safe-shutdown");
   const powerBtn = document.getElementById("power-btn");
+  const COMPLETED_KEY = "taeglich:completed:2026-01-31";
 
   // --- Utils ---
   function sleep(ms) {
@@ -232,8 +234,58 @@
     return `${STATE.cwd}${separator}${path}`;
   }
 
+  function showNoSignal() {
+    document.body.innerHTML =
+      '<div class="w-full h-screen bg-black flex flex-col items-center justify-center text-gray-600 cursor-none gap-4"><div class="text-xl">NO SIGNAL</div><div class="text-xs text-gray-800 font-mono">[ESC] to hard reset</div></div>';
+  }
+
+  function handleTabCompletion() {
+    const raw = inputEl.value;
+    const parts = raw.split(/\s+/);
+
+    // Simple completion: only complete the last argument if it looks like a path
+    if (parts.length < 2) return; // Command completion could go here, but let's stick to files for now
+
+    const partial = parts.pop();
+    const cmdBase = parts.join(" ") + " ";
+
+    // Determine directory to search
+    let searchDir = STATE.cwd;
+    let filePrefix = partial;
+
+    if (partial.includes("/")) {
+      const lastSlash = partial.lastIndexOf("/");
+      const dirPart = partial.substring(0, lastSlash + 1);
+      filePrefix = partial.substring(lastSlash + 1);
+      searchDir = resolvePath(dirPart);
+    }
+
+    const dirEntry = FS[searchDir];
+    if (dirEntry && dirEntry.type === "dir") {
+      const matches = dirEntry.children.filter((name) =>
+        name.startsWith(filePrefix),
+      );
+      if (matches.length === 1) {
+        // Found unique match
+        const completion = matches[0].substring(filePrefix.length);
+        inputEl.value = raw + completion;
+        if (FS[resolvePath(partial + completion)]?.type === "dir") {
+          inputEl.value += "/";
+        }
+      }
+    }
+  }
+
   // --- Sequences ---
   async function runBootSequence() {
+    // Check persistence
+    try {
+      if (localStorage.getItem(COMPLETED_KEY)) {
+        showNoSignal();
+        return;
+      }
+    } catch {}
+
     inputLineEl.classList.add("hidden");
 
     // Initial batch
@@ -328,6 +380,15 @@
 
   // --- Event Handling ---
   inputEl.addEventListener("keydown", async (e) => {
+    // Tab Completion
+    if (e.key === "Tab") {
+      e.preventDefault();
+      if (STATE.loggedIn) {
+        handleTabCompletion();
+      }
+      return;
+    }
+
     // History Navigation
     if (e.key === "ArrowUp") {
       e.preventDefault();
@@ -522,13 +583,27 @@
 
   // Keep focus
   document.addEventListener("click", () => {
-    if (!STATE.panic) inputEl.focus();
+    if (!STATE.panic && !localStorage.getItem(COMPLETED_KEY)) inputEl.focus();
+  });
+
+  // ESC to reset
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      try {
+        if (localStorage.getItem(COMPLETED_KEY)) {
+          localStorage.removeItem(COMPLETED_KEY);
+          window.location.reload();
+        }
+      } catch {}
+    }
   });
 
   // Power Off button logic
   powerBtn.addEventListener("click", () => {
-    document.body.innerHTML =
-      '<div class="w-full h-screen bg-black flex items-center justify-center text-gray-600 cursor-none">NO SIGNAL</div>';
+    try {
+      localStorage.setItem(COMPLETED_KEY, "1");
+    } catch {}
+    showNoSignal();
   });
 
   // Start
