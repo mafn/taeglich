@@ -62,6 +62,17 @@
       </button>
     </div>
 
+    <!-- No Signal Overlay -->
+    <div
+      id="no-signal-overlay"
+      class="pointer-events-none absolute inset-0 z-40 flex hidden flex-col items-center justify-center bg-black text-center text-gray-600"
+    >
+      <div class="text-xl font-bold md:text-2xl">NO SIGNAL</div>
+      <div class="mt-4 font-mono text-xs text-gray-800">
+        [ESC] to hard reset
+      </div>
+    </div>
+
     <!-- CRT overlay effects (scanlines/glow) -->
     <div
       class="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] opacity-20"
@@ -201,8 +212,11 @@
   const inputEl = document.getElementById("cmd-input");
   const terminalEl = document.getElementById("terminal");
   const safeShutdownEl = document.getElementById("safe-shutdown");
+  const noSignalEl = document.getElementById("no-signal-overlay");
   const powerBtn = document.getElementById("power-btn");
   const COMPLETED_KEY = "taeglich:completed:2026-01-31";
+  const POWER_STATE_KEY = "taeglich:power:2026-01-31";
+  const REPAIRED_KEY = "taeglich:repaired:2026-01-31";
 
   // --- Utils ---
   function sleep(ms) {
@@ -224,40 +238,83 @@
   }
 
   function resolvePath(path) {
-    if (path.startsWith("/")) return path;
-    if (path === "..") {
-      if (STATE.cwd === "/") return "/";
-      return STATE.cwd.substring(0, STATE.cwd.lastIndexOf("/")) || "/";
+    // 1. Determine absolute starting point
+    let absolute = path.startsWith("/")
+      ? path
+      : (STATE.cwd === "/" ? "/" : STATE.cwd + "/") + path;
+
+    // 2. Split and process segments
+    const parts = absolute.split("/").filter((p) => p !== "" && p !== ".");
+    const stack = [];
+
+    for (const p of parts) {
+      if (p === "..") {
+        stack.pop();
+      } else {
+        stack.push(p);
+      }
     }
-    if (path === ".") return STATE.cwd;
-    const separator = STATE.cwd === "/" ? "" : "/";
-    return `${STATE.cwd}${separator}${path}`;
+
+    // 3. Reassemble
+    return "/" + stack.join("/");
   }
 
   function showNoSignal() {
-    document.body.innerHTML =
-      '<div class="w-full h-screen bg-black flex flex-col items-center justify-center text-gray-600 cursor-none gap-4"><div class="text-xl">NO SIGNAL</div><div class="text-xs text-gray-800 font-mono">[ESC] to hard reset</div></div>';
+    if (noSignalEl) {
+      noSignalEl.classList.remove("hidden");
+    }
   }
 
   function handleTabCompletion() {
     const raw = inputEl.value;
-    const parts = raw.split(/\s+/);
+    if (!raw.trim()) return;
 
-    // Simple completion: only complete the last argument if it looks like a path
-    if (parts.length < 2) return; // Command completion could go here, but let's stick to files for now
+    // Keep track of leading spaces
+    const leadingSpaces = raw.match(/^\s*/)[0];
+    const trimmed = raw.trim();
+    const parts = trimmed.split(/\s+/);
+
+    // Case 1: Command Completion (first word)
+    if (parts.length === 1 && !raw.endsWith(" ")) {
+      const partial = parts[0];
+      const commands = [
+        "help",
+        "ls",
+        "cd",
+        "cat",
+        "uname",
+        "whoami",
+        "fsck",
+        "reboot",
+        "exit",
+      ];
+      const matches = commands.filter((c) => c.startsWith(partial));
+
+      if (matches.length === 1) {
+        inputEl.value = leadingSpaces + matches[0] + " ";
+      }
+      return;
+    }
+
+    // Case 2: File/Path Completion
+    if (raw.endsWith(" ")) return;
 
     const partial = parts.pop();
-    const cmdBase = parts.join(" ") + " ";
+    const cmdBase =
+      leadingSpaces + parts.join(" ") + (parts.length > 0 ? " " : "");
 
-    // Determine directory to search
-    let searchDir = STATE.cwd;
-    let filePrefix = partial;
+    let searchDir;
+    let filePrefix;
+    let dirPartOriginal = "";
 
     if (partial.includes("/")) {
       const lastSlash = partial.lastIndexOf("/");
-      const dirPart = partial.substring(0, lastSlash + 1);
+      dirPartOriginal = partial.substring(0, lastSlash + 1);
       filePrefix = partial.substring(lastSlash + 1);
-      searchDir = resolvePath(dirPart);
+      searchDir = resolvePath(dirPartOriginal);
+    } else {
+      searchDir = STATE.cwd;
+      filePrefix = partial;
     }
 
     const dirEntry = FS[searchDir];
@@ -266,12 +323,13 @@
         name.startsWith(filePrefix),
       );
       if (matches.length === 1) {
-        // Found unique match
-        const completion = matches[0].substring(filePrefix.length);
-        inputEl.value = raw + completion;
-        if (FS[resolvePath(partial + completion)]?.type === "dir") {
-          inputEl.value += "/";
-        }
+        const matchName = matches[0];
+        const fullPath =
+          searchDir === "/" ? `/${matchName}` : `${searchDir}/${matchName}`;
+        const isDir = FS[fullPath]?.type === "dir";
+
+        inputEl.value =
+          cmdBase + dirPartOriginal + matchName + (isDir ? "/" : "");
       }
     }
   }
@@ -280,9 +338,12 @@
   async function runBootSequence() {
     // Check persistence
     try {
-      if (localStorage.getItem(COMPLETED_KEY)) {
+      if (localStorage.getItem(POWER_STATE_KEY)) {
         showNoSignal();
         return;
+      }
+      if (localStorage.getItem(REPAIRED_KEY)) {
+        STATE.repaired = true;
       }
     } catch {}
 
@@ -297,12 +358,30 @@
 
     // Second batch
     for (let i = 15; i < BOOT_LOG.length; i++) {
-      printLine(BOOT_LOG[i]);
+      // Check if we should skip fsck error logs
+      const line = BOOT_LOG[i];
+      if (
+        STATE.repaired &&
+        (line.includes("systemd-fsck") ||
+          line.includes("Dependency failed") ||
+          line.includes("emergency mode") ||
+          line.includes("logging in") ||
+          line.includes("root password"))
+      ) {
+        continue;
+      }
+
+      printLine(line);
       await sleep(Math.random() * 30 + 10);
     }
 
-    await sleep(500);
-    startLogin();
+    if (STATE.repaired) {
+      await sleep(500);
+      await triggerPanic();
+    } else {
+      await sleep(500);
+      startLogin();
+    }
   }
 
   function startLogin() {
@@ -340,106 +419,158 @@
 
   async function runRepair() {
     inputLineEl.classList.add("hidden");
+
     printLine("");
+
     for (const line of REPAIR_LOG) {
       printLine(line);
+
       await sleep(200);
     }
+
     STATE.repaired = true;
+
+    try {
+      localStorage.setItem(REPAIRED_KEY, "1");
+    } catch {}
+
     printLine("/dev/sda1: FILE SYSTEM WAS MODIFIED");
+
     await sleep(100);
 
     // Return to shell
+
     inputLineEl.classList.remove("hidden");
+
     inputEl.value = "";
+
     inputEl.focus();
+
     scrollToBottom();
   }
 
   async function triggerPanic() {
     STATE.panic = true;
+
     inputLineEl.classList.add("hidden");
+
     printLine("");
+
     printLine("Continuing boot...");
+
     await sleep(800);
 
     // Panic lines
+
     for (const line of PANIC_LOG) {
       printLine(line, "text-white bg-black font-bold");
+
       await sleep(30);
     }
 
     await sleep(2000);
 
     // Clear screen for "Safe to turn off"
+
     terminalEl.classList.add("hidden");
+
     safeShutdownEl.classList.remove("hidden");
+
     safeShutdownEl.classList.add("flex");
+
     powerBtn.focus();
   }
 
   // --- Event Handling ---
+
   inputEl.addEventListener("keydown", async (e) => {
     // Tab Completion
+
     if (e.key === "Tab") {
       e.preventDefault();
+
       if (STATE.loggedIn) {
         handleTabCompletion();
       }
+
       return;
     }
 
     // History Navigation
+
     if (e.key === "ArrowUp") {
       e.preventDefault();
+
       if (STATE.historyIndex < STATE.history.length - 1) {
         STATE.historyIndex++;
+
         const cmd =
           STATE.history[STATE.history.length - 1 - STATE.historyIndex];
+
         if (cmd) inputEl.value = cmd;
       }
+
       return;
     }
+
     if (e.key === "ArrowDown") {
       e.preventDefault();
+
       if (STATE.historyIndex > 0) {
         STATE.historyIndex--;
+
         const cmd =
           STATE.history[STATE.history.length - 1 - STATE.historyIndex];
+
         if (cmd) inputEl.value = cmd;
       } else if (STATE.historyIndex === 0) {
         STATE.historyIndex = -1;
+
         inputEl.value = "";
       }
+
       return;
     }
 
     // Handle Ctrl+D
+
     if (e.ctrlKey && e.key === "d") {
       e.preventDefault();
+
       printLine(STATE.currentPrompt + "^D");
 
       if (STATE.needsLogin) {
         await sleep(200);
+
         printLine("");
+
         printLine("Reloading system...");
+
         await sleep(1000);
+
         inputEl.value = "";
+
         window.location.reload();
+
         return;
       }
     }
 
     if (e.key === "Enter") {
       e.preventDefault();
+
       const raw = inputEl.value;
+
       const val = raw.trim();
 
       // Echo
+
       if (inputEl.type !== "password") {
         printLine(STATE.currentPrompt + raw);
+
         if (val) {
           STATE.history.push(val);
+
           STATE.historyIndex = -1;
         }
       } else {
@@ -455,31 +586,45 @@
           startShell();
         } else {
           printLine("Login incorrect");
+
           await sleep(500);
+
           printLine("");
+
           printLine("Give root password for maintenance");
+
           printLine("(or press Control-D to continue):");
         }
+
         return;
       }
 
       if (STATE.loggedIn) {
         const parts = val.split(/\s+/);
+
         const cmd = parts[0];
+
         const arg = parts[1];
 
         switch (cmd) {
           case "help":
             printLine("Available commands:");
+
             printLine("  fsck        Check and repair filesystem");
+
             printLine("  reboot      Reboot the system");
+
             printLine("  exit        Continue boot sequence");
+
             printLine("  ls, cd, cat (Basic file ops)");
+
             break;
 
           case "ls": {
             const path = arg ? resolvePath(arg) : STATE.cwd;
+
             const entry = FS[path];
+
             if (entry && entry.type === "dir") {
               printLine(entry.children.join("  "));
             } else if (entry) {
@@ -489,6 +634,7 @@
                 `ls: cannot access '${arg}': No such file or directory`,
               );
             }
+
             break;
           }
 
@@ -497,12 +643,14 @@
               STATE.cwd = "/"; // cd home (root in rescue)
             } else {
               const target = resolvePath(arg);
+
               if (FS[target] && FS[target].type === "dir") {
                 STATE.cwd = target;
               } else {
                 printLine(`cd: ${arg}: No such file or directory`);
               }
             }
+
             break;
           }
 
@@ -511,7 +659,9 @@
               printLine("cat: missing operand");
             } else {
               const target = resolvePath(arg);
+
               const entry = FS[target];
+
               if (entry && entry.type === "file") {
                 printLine(entry.content);
               } else if (entry && entry.type === "dir") {
@@ -520,6 +670,7 @@
                 printLine(`cat: ${arg}: No such file or directory`);
               }
             }
+
             break;
           }
 
@@ -531,10 +682,12 @@
             } else {
               printLine("Linux");
             }
+
             break;
 
           case "whoami":
             printLine("root");
+
             break;
 
           case "fsck":
@@ -557,10 +710,12 @@
             } else {
               printLine(`fsck: ${arg}: no such device or permission denied`);
             }
+
             break;
 
           case "reboot":
             window.location.reload();
+
             break;
 
           case "exit":
@@ -569,6 +724,7 @@
             } else {
               await triggerPanic();
             }
+
             break;
 
           default:
@@ -576,6 +732,7 @@
               printLine(`sh: ${val}: not found`);
             }
         }
+
         scrollToBottom();
       }
     }
@@ -583,15 +740,18 @@
 
   // Keep focus
   document.addEventListener("click", () => {
-    if (!STATE.panic && !localStorage.getItem(COMPLETED_KEY)) inputEl.focus();
+    if (!STATE.panic && !inputLineEl.classList.contains("hidden")) {
+      inputEl.focus();
+    }
   });
 
   // ESC to reset
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       try {
-        if (localStorage.getItem(COMPLETED_KEY)) {
-          localStorage.removeItem(COMPLETED_KEY);
+        if (localStorage.getItem(POWER_STATE_KEY)) {
+          localStorage.removeItem(POWER_STATE_KEY);
+          localStorage.removeItem(REPAIRED_KEY);
           window.location.reload();
         }
       } catch {}
@@ -602,10 +762,10 @@
   powerBtn.addEventListener("click", () => {
     try {
       localStorage.setItem(COMPLETED_KEY, "1");
+      localStorage.setItem(POWER_STATE_KEY, "1");
     } catch {}
     showNoSignal();
   });
-
   // Start
   runBootSequence();
 </script>

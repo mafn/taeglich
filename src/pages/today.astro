@@ -1,0 +1,58 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import type { DayMeta } from "../types";
+
+const metas = import.meta.glob("../days/*/meta.ts", { eager: true });
+
+const days = Object.keys(metas)
+  .map((path) => {
+    const date = path.split("/").at(-2)!;
+    const metaModule = metas[path] as { default: DayMeta };
+    return { date, ...metaModule.default };
+  })
+  .filter((day) => !day.draft)
+  .sort((a, b) => b.date.localeCompare(a.date));
+
+const availableDates = days.map((d) => d.date);
+const latestDay = days[0]?.date;
+---
+
+<BaseLayout title="Today">
+  <div class="mx-auto max-w-2xl px-4 py-12">
+    <h1 class="text-2xl font-bold tracking-tight text-gray-900">
+      Redirecting…
+    </h1>
+    <p class="mt-2 text-gray-600">Taking you to today’s artifact.</p>
+
+    <noscript>
+      <p class="mt-6 text-gray-600">
+        JavaScript is required to resolve “today” at runtime.
+      </p>
+      <p class="mt-2">
+        {latestDay ? (
+          <a class="underline" href={`/d/${latestDay}`}>Go to latest day</a>
+        ) : (
+          <a class="underline" href="/archive">Go to archive</a>
+        )}
+      </p>
+    </noscript>
+  </div>
+
+  <script is:inline define:vars={{ availableDates, latestDay }}>
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function getLocalYYYYMMDD() {
+      const d = new Date();
+      return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+
+    const today = getLocalYYYYMMDD();
+    const hasToday = Array.isArray(availableDates) && availableDates.includes(today);
+
+    const target = hasToday ? `/d/${today}` : latestDay ? `/d/${latestDay}` : "/archive";
+    window.location.replace(target);
+  </script>
+</BaseLayout>
+
