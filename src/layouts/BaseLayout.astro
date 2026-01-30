@@ -26,6 +26,7 @@ const canonicalURL =
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
     <meta name="generator" content={Astro.generator} />
 
     <!-- Canonical URL -->
@@ -51,15 +52,15 @@ const canonicalURL =
     <meta property="twitter:image" content={new URL(image, Astro.url)} />
   </head>
   <body class="flex min-h-screen flex-col bg-white text-gray-900 antialiased">
-    <header class="flex items-center justify-between p-4">
-      <nav>
-        <a
-          href="/"
-          class="font-mono text-sm font-bold text-gray-900 hover:underline"
-        >
-          taeglich
-        </a>
-      </nav>
+	    <header class="flex items-center justify-between p-4">
+	      <nav>
+	        <a
+	          href="/today"
+	          class="font-mono text-sm font-bold text-gray-900 hover:underline"
+	        >
+	          taeglich
+	        </a>
+	      </nav>
       <nav>
         <a
           href="/archive"

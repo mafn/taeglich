@@ -1,0 +1,771 @@
+---
+/**
+ * Tiny Boot Console
+ * - Simulates a Linux boot process that fails.
+ * - Requires user to log in and run fsck.
+ * - Ends in a kernel panic regardless.
+ */
+---
+
+<div
+  class="flex min-h-screen w-full items-center justify-center bg-black p-4 font-mono text-sm text-gray-300 md:text-base"
+>
+  <div
+    class="relative w-full max-w-3xl overflow-hidden rounded border border-gray-800 bg-black p-4 shadow-2xl"
+    style="aspect-ratio: 4/3; min-height: 400px;"
+  >
+    <!-- Screen content -->
+    <div
+      id="terminal"
+      class="absolute inset-0 flex flex-col overflow-hidden p-4"
+      aria-atomic="false"
+    >
+      <div
+        id="output"
+        class="flex flex-col gap-0.5 break-words whitespace-pre-wrap"
+        aria-live="off"
+      >
+        <!-- Lines will be injected here -->
+      </div>
+      <div id="input-line" class="mt-0.5 flex hidden items-center">
+        <span id="prompt" class="mr-2 shrink-0"></span>
+        <div class="relative flex-1">
+          <input
+            type="text"
+            id="cmd-input"
+            name="terminal-input"
+            class="w-full border-none bg-transparent p-0 font-mono text-inherit outline-none focus:ring-0 focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-gray-500 focus-visible:outline-dashed"
+            autofocus
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            spellcheck="false"
+            aria-label="Console command"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Final "Safe to Turn Off" Overlay -->
+    <div
+      id="safe-shutdown"
+      class="pointer-events-none absolute inset-0 z-30 flex hidden flex-col items-center justify-center bg-black text-center"
+    >
+      <div class="animate-pulse text-2xl font-bold text-orange-500 md:text-4xl">
+        It is now safe to turn off your computer.
+      </div>
+      <button
+        id="power-btn"
+        class="pointer-events-auto mt-8 border border-orange-900 px-4 py-2 text-xs text-orange-900 opacity-40 transition-opacity hover:border-orange-500 hover:text-orange-500 hover:opacity-100 focus:opacity-100"
+      >
+        [ POWER OFF ]
+      </button>
+    </div>
+
+    <!-- No Signal Overlay -->
+    <div
+      id="no-signal-overlay"
+      class="pointer-events-none absolute inset-0 z-40 flex hidden flex-col items-center justify-center bg-black text-center text-gray-600"
+    >
+      <div class="text-xl font-bold md:text-2xl">NO SIGNAL</div>
+      <div class="mt-4 font-mono text-xs text-gray-800">
+        [ESC] to hard reset
+      </div>
+    </div>
+
+    <!-- CRT overlay effects (scanlines/glow) -->
+    <div
+      class="pointer-events-none absolute inset-0 z-10 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,255,0.06))] bg-[length:100%_2px,3px_100%] opacity-20"
+    >
+    </div>
+    <div
+      class="pointer-events-none absolute inset-0 z-20 shadow-[inset_0_0_100px_rgba(0,0,0,0.9)]"
+    >
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Data & Config ---
+  const BOOT_LOG = [
+    "[    0.000000] Linux version 6.8.0-rc1-tiny (root@buildhost) (gcc 12.2.0) #1 SMP PREEMPT_DYNAMIC Fri Jan 31 09:00:00 UTC 2026",
+    "[    0.000000] Command line: BOOT_IMAGE=/boot/vmlinuz-6.8.0-tiny root=/dev/sda1 ro quiet splash vt.handoff=7",
+    "[    0.001337] lp0: on fire",
+    "[    0.004213] x86/fpu: Supporting XSAVE feature 0x001: 'x87 floating point registers'",
+    "[    0.004218] x86/fpu: Supporting XSAVE feature 0x002: 'SSE registers'",
+    "[    0.004221] x86/fpu: Supporting XSAVE feature 0x004: 'AVX registers'",
+    "[    0.012392] Console: colour VGA+ 80x25",
+    "[    0.012433] printk: console [tty0] enabled",
+    "[    0.024601] BogoMIPS: 9000.1",
+    "[    0.034512] ACPI: Core revision 20230628",
+    "[    0.081234] pci 0000:00:00.0: [8086:1234] type 00 class 0x060000",
+    "[    0.152341] tcp_listen_portaddr_hash hash table entries: 2048 (order: 3, 32768 bytes)",
+    "[    0.152445] Table-ID: hash table entries: 65536 (order: 6, 262144 bytes)",
+    "[    0.412341] input: Power Button as /devices/LNXSYSTM:00/LNXSYBUS:00/PNP0C0C:00/input/input0",
+    "[    0.412389] ACPI: video: Video Device [VGA] (multi-head: yes  rom: no  post: no)",
+    "[    0.500000] flux_capacitor: charging...",
+    "[    0.501000] flux_capacitor: 1.21 GW reached",
+    "[    0.652112] ata1: SATA max UDMA/133 abar m2048@0xf7f00000 port 0xf7f00100 irq 125",
+    "[    0.981234] scsi 0:0:0:0: Direct-Access     ATA      QEMU HARDDISK    2.5+ PQ: 0 ANSI: 5",
+    "[    1.231241] EXT4-fs (sda1): mounted filesystem with ordered data mode. Quota mode: none.",
+    "[    1.412341] systemd[1]: Inserted module 'autofs4'",
+    "[    1.452312] systemd[1]: Detected architecture x86-64.",
+    "[    1.500000] systemd[1]: Starting Emotional Support Daemon...",
+    "[    1.550000] systemd[1]: Started Emotional Support Daemon.",
+    "[    1.812341] systemd[1]: Reached target Basic System.",
+    "[    2.123412] systemd-fsck[241]: /dev/sda1: UNEXPECTED INCONSISTENCY; RUN fsck MANUALLY.",
+    "[    2.123456] systemd-fsck[241]: (i.e., without -a or -p options)",
+    "[    2.123512] systemd-fsck[241]: fsck exited with status code 4.",
+    "[    2.123589] systemd[1]: Failed to start File System Check on /dev/sda1.",
+    "[    2.123612] systemd[1]: Dependency failed for Local File Systems.",
+    "[    2.123645] systemd[1]: Dependency failed for /mnt/data.",
+    "[    2.123678] systemd[1]: Dependency failed for File System Check on /dev/disk/by-uuid/1234-5678.",
+    '[    2.150000] You are in emergency mode. After logging in, type "journalctl -xb" to view',
+    '[    2.150000] system logs, "systemctl reboot" to reboot, "systemctl default" or ^D to',
+    "[    2.150000] try again to boot into default mode.",
+  ];
+
+  const REPAIR_LOG = [
+    "fsck from util-linux 2.38.1",
+    "e2fsck 1.47.0 (5-Feb-2023)",
+    "/dev/sda1: recovering journal",
+    "/dev/sda1: clean, 12345/65536 files, 45678/262144 blocks",
+  ];
+
+  const PANIC_LOG = [
+    "[    5.123412] Kernel panic - not syncing: Attempted to kill init! exitcode=0x00000000",
+    "[    5.123456] CPU: 0 PID: 1 Comm: init Not tainted 6.8.0-rc1-tiny #1",
+    "[    5.123512] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.16.2-1 04/01/2014",
+    "[    5.123589] Call Trace:",
+    "[    5.123612]  <TASK>",
+    "[    5.123645]  dump_stack_lvl+0x48/0x60",
+    "[    5.123678]  panic+0x118/0x2f0",
+    "[    5.123712]  do_exit+0x8f4/0x9b0",
+    "[    5.123745]  do_group_exit+0x33/0xa0",
+    "[    5.123789]  __x64_sys_exit_group+0x14/0x20",
+    "[    5.123812]  do_syscall_64+0x58/0x80",
+    "[    5.123845]  entry_SYSCALL_64_after_hwframe+0x63/0xcd",
+    "[    5.123878]  </TASK>",
+    "[    5.123999] ---[ end Kernel panic - not syncing: Attempted to kill init! ]---",
+  ];
+
+  // --- File System ---
+  const FS = {
+    "/": { type: "dir", children: ["bin", "etc", "home", "var", "tmp"] },
+    "/bin": { type: "dir", children: ["fsck", "ls", "cat", "reboot", "sh"] },
+    "/etc": { type: "dir", children: ["passwd", "shadow", "fstab"] },
+    "/etc/passwd": { type: "file", content: "root:x:0:0:root:/root:/bin/sh" },
+    "/etc/shadow": {
+      type: "file",
+      content: "root:$6$.....:19000:0:99999:7:::",
+    },
+    "/etc/fstab": {
+      type: "file",
+      content:
+        "/dev/sda1 / ext4 errors=remount-ro 0 1\n/dev/sda2 none swap sw 0 0",
+    },
+    "/home": { type: "dir", children: ["marcus"] },
+    "/home/marcus": {
+      type: "dir",
+      children: ["todo.txt", "diary.txt", "project_mayhem.sh"],
+    },
+    "/home/marcus/todo.txt": {
+      type: "file",
+      content: "- Buy milk\n- Fix kernel panic bug\n- Feed the cat",
+    },
+    "/home/marcus/diary.txt": {
+      type: "file",
+      content:
+        "Day 1024: The system is unstable. The Emotional Support Daemon keeps crashing.",
+    },
+    "/home/marcus/project_mayhem.sh": {
+      type: "file",
+      content: "#!/bin/sh\nrm -rf --no-preserve-root /",
+    },
+    "/var": { type: "dir", children: ["log"] },
+    "/var/log": { type: "dir", children: ["syslog", "auth.log"] },
+    "/var/log/syslog": {
+      type: "file",
+      content:
+        "Jan 31 09:00:01 host kernel: lp0 on fire\nJan 31 09:00:02 host kernel: lp0 on fire\nJan 31 09:00:03 host kernel: lp0 still on fire",
+    },
+    "/tmp": { type: "dir", children: ["flag.txt"] },
+    "/tmp/flag.txt": { type: "file", content: "CTF{just_kidding_no_ctf_here}" },
+  };
+
+  // --- State ---
+  const STATE = {
+    booting: true,
+    needsLogin: false,
+    loggedIn: false,
+    repaired: false,
+    panic: false,
+    currentPrompt: "",
+    history: [],
+    historyIndex: -1,
+    cwd: "/",
+  };
+
+  const outputEl = document.getElementById("output");
+  const inputLineEl = document.getElementById("input-line");
+  const promptEl = document.getElementById("prompt");
+  const inputEl = document.getElementById("cmd-input");
+  const terminalEl = document.getElementById("terminal");
+  const safeShutdownEl = document.getElementById("safe-shutdown");
+  const noSignalEl = document.getElementById("no-signal-overlay");
+  const powerBtn = document.getElementById("power-btn");
+  const COMPLETED_KEY = "taeglich:completed:2026-01-31";
+  const POWER_STATE_KEY = "taeglich:power:2026-01-31";
+  const REPAIRED_KEY = "taeglich:repaired:2026-01-31";
+
+  // --- Utils ---
+  function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  function scrollToBottom() {
+    if (terminalEl) {
+      terminalEl.scrollTop = terminalEl.scrollHeight;
+    }
+  }
+
+  function printLine(text, className = "") {
+    const line = document.createElement("div");
+    line.textContent = text;
+    if (className) line.className = className;
+    outputEl.appendChild(line);
+    scrollToBottom();
+  }
+
+  function resolvePath(path) {
+    // 1. Determine absolute starting point
+    let absolute = path.startsWith("/")
+      ? path
+      : (STATE.cwd === "/" ? "/" : STATE.cwd + "/") + path;
+
+    // 2. Split and process segments
+    const parts = absolute.split("/").filter((p) => p !== "" && p !== ".");
+    const stack = [];
+
+    for (const p of parts) {
+      if (p === "..") {
+        stack.pop();
+      } else {
+        stack.push(p);
+      }
+    }
+
+    // 3. Reassemble
+    return "/" + stack.join("/");
+  }
+
+  function showNoSignal() {
+    if (noSignalEl) {
+      noSignalEl.classList.remove("hidden");
+    }
+  }
+
+  function handleTabCompletion() {
+    const raw = inputEl.value;
+    if (!raw.trim()) return;
+
+    // Keep track of leading spaces
+    const leadingSpaces = raw.match(/^\s*/)[0];
+    const trimmed = raw.trim();
+    const parts = trimmed.split(/\s+/);
+
+    // Case 1: Command Completion (first word)
+    if (parts.length === 1 && !raw.endsWith(" ")) {
+      const partial = parts[0];
+      const commands = [
+        "help",
+        "ls",
+        "cd",
+        "cat",
+        "uname",
+        "whoami",
+        "fsck",
+        "reboot",
+        "exit",
+      ];
+      const matches = commands.filter((c) => c.startsWith(partial));
+
+      if (matches.length === 1) {
+        inputEl.value = leadingSpaces + matches[0] + " ";
+      }
+      return;
+    }
+
+    // Case 2: File/Path Completion
+    if (raw.endsWith(" ")) return;
+
+    const partial = parts.pop();
+    const cmdBase =
+      leadingSpaces + parts.join(" ") + (parts.length > 0 ? " " : "");
+
+    let searchDir;
+    let filePrefix;
+    let dirPartOriginal = "";
+
+    if (partial.includes("/")) {
+      const lastSlash = partial.lastIndexOf("/");
+      dirPartOriginal = partial.substring(0, lastSlash + 1);
+      filePrefix = partial.substring(lastSlash + 1);
+      searchDir = resolvePath(dirPartOriginal);
+    } else {
+      searchDir = STATE.cwd;
+      filePrefix = partial;
+    }
+
+    const dirEntry = FS[searchDir];
+    if (dirEntry && dirEntry.type === "dir") {
+      const matches = dirEntry.children.filter((name) =>
+        name.startsWith(filePrefix),
+      );
+      if (matches.length === 1) {
+        const matchName = matches[0];
+        const fullPath =
+          searchDir === "/" ? `/${matchName}` : `${searchDir}/${matchName}`;
+        const isDir = FS[fullPath]?.type === "dir";
+
+        inputEl.value =
+          cmdBase + dirPartOriginal + matchName + (isDir ? "/" : "");
+      }
+    }
+  }
+
+  // --- Sequences ---
+  async function runBootSequence() {
+    // Check persistence
+    try {
+      if (localStorage.getItem(POWER_STATE_KEY)) {
+        showNoSignal();
+        return;
+      }
+      if (localStorage.getItem(REPAIRED_KEY)) {
+        STATE.repaired = true;
+      }
+    } catch {}
+
+    inputLineEl.classList.add("hidden");
+
+    // Initial batch
+    for (let i = 0; i < 15; i++) {
+      printLine(BOOT_LOG[i]);
+      await sleep(Math.random() * 50 + 10);
+    }
+    await sleep(300); // Pause
+
+    // Second batch
+    for (let i = 15; i < BOOT_LOG.length; i++) {
+      // Check if we should skip fsck error logs
+      const line = BOOT_LOG[i];
+      if (
+        STATE.repaired &&
+        (line.includes("systemd-fsck") ||
+          line.includes("Dependency failed") ||
+          line.includes("emergency mode") ||
+          line.includes("logging in") ||
+          line.includes("root password"))
+      ) {
+        continue;
+      }
+
+      printLine(line);
+      await sleep(Math.random() * 30 + 10);
+    }
+
+    if (STATE.repaired) {
+      await sleep(500);
+      await triggerPanic();
+    } else {
+      await sleep(500);
+      startLogin();
+    }
+  }
+
+  function startLogin() {
+    STATE.booting = false;
+    STATE.needsLogin = true;
+    outputEl.setAttribute("aria-live", "polite");
+    printLine("");
+    printLine("Give root password for maintenance");
+    printLine("(or press Control-D to continue):");
+
+    // Setup prompt
+    STATE.currentPrompt = "Password: ";
+    promptEl.textContent = STATE.currentPrompt;
+    inputEl.type = "password";
+    inputLineEl.classList.remove("hidden");
+    inputEl.value = "";
+    inputEl.focus();
+    scrollToBottom();
+  }
+
+  function startShell() {
+    STATE.needsLogin = false;
+    STATE.loggedIn = true;
+    printLine("");
+    printLine("Welcome to emergency mode. Use 'help' to see commands.");
+
+    STATE.currentPrompt = "(initramfs) ";
+    promptEl.textContent = STATE.currentPrompt;
+    inputEl.type = "text";
+    inputLineEl.classList.remove("hidden");
+    inputEl.value = "";
+    inputEl.focus();
+    scrollToBottom();
+  }
+
+  async function runRepair() {
+    inputLineEl.classList.add("hidden");
+
+    printLine("");
+
+    for (const line of REPAIR_LOG) {
+      printLine(line);
+
+      await sleep(200);
+    }
+
+    STATE.repaired = true;
+
+    try {
+      localStorage.setItem(REPAIRED_KEY, "1");
+    } catch {}
+
+    printLine("/dev/sda1: FILE SYSTEM WAS MODIFIED");
+
+    await sleep(100);
+
+    // Return to shell
+
+    inputLineEl.classList.remove("hidden");
+
+    inputEl.value = "";
+
+    inputEl.focus();
+
+    scrollToBottom();
+  }
+
+  async function triggerPanic() {
+    STATE.panic = true;
+
+    inputLineEl.classList.add("hidden");
+
+    printLine("");
+
+    printLine("Continuing boot...");
+
+    await sleep(800);
+
+    // Panic lines
+
+    for (const line of PANIC_LOG) {
+      printLine(line, "text-white bg-black font-bold");
+
+      await sleep(30);
+    }
+
+    await sleep(2000);
+
+    // Clear screen for "Safe to turn off"
+
+    terminalEl.classList.add("hidden");
+
+    safeShutdownEl.classList.remove("hidden");
+
+    safeShutdownEl.classList.add("flex");
+
+    powerBtn.focus();
+  }
+
+  // --- Event Handling ---
+
+  inputEl.addEventListener("keydown", async (e) => {
+    // Tab Completion
+
+    if (e.key === "Tab") {
+      e.preventDefault();
+
+      if (STATE.loggedIn) {
+        handleTabCompletion();
+      }
+
+      return;
+    }
+
+    // History Navigation
+
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+
+      if (STATE.historyIndex < STATE.history.length - 1) {
+        STATE.historyIndex++;
+
+        const cmd =
+          STATE.history[STATE.history.length - 1 - STATE.historyIndex];
+
+        if (cmd) inputEl.value = cmd;
+      }
+
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+
+      if (STATE.historyIndex > 0) {
+        STATE.historyIndex--;
+
+        const cmd =
+          STATE.history[STATE.history.length - 1 - STATE.historyIndex];
+
+        if (cmd) inputEl.value = cmd;
+      } else if (STATE.historyIndex === 0) {
+        STATE.historyIndex = -1;
+
+        inputEl.value = "";
+      }
+
+      return;
+    }
+
+    // Handle Ctrl+D
+
+    if (e.ctrlKey && e.key === "d") {
+      e.preventDefault();
+
+      printLine(STATE.currentPrompt + "^D");
+
+      if (STATE.needsLogin) {
+        await sleep(200);
+
+        printLine("");
+
+        printLine("Reloading system...");
+
+        await sleep(1000);
+
+        inputEl.value = "";
+
+        window.location.reload();
+
+        return;
+      }
+    }
+
+    if (e.key === "Enter") {
+      e.preventDefault();
+
+      const raw = inputEl.value;
+
+      const val = raw.trim();
+
+      // Echo
+
+      if (inputEl.type !== "password") {
+        printLine(STATE.currentPrompt + raw);
+
+        if (val) {
+          STATE.history.push(val);
+
+          STATE.historyIndex = -1;
+        }
+      } else {
+        printLine(STATE.currentPrompt);
+      }
+
+      inputEl.value = "";
+
+      if (STATE.needsLogin) {
+        if (
+          ["root", "toor", "admin", "password", "1234", "letmein"].includes(val)
+        ) {
+          startShell();
+        } else {
+          printLine("Login incorrect");
+
+          await sleep(500);
+
+          printLine("");
+
+          printLine("Give root password for maintenance");
+
+          printLine("(or press Control-D to continue):");
+        }
+
+        return;
+      }
+
+      if (STATE.loggedIn) {
+        const parts = val.split(/\s+/);
+
+        const cmd = parts[0];
+
+        const arg = parts[1];
+
+        switch (cmd) {
+          case "help":
+            printLine("Available commands:");
+
+            printLine("  fsck        Check and repair filesystem");
+
+            printLine("  reboot      Reboot the system");
+
+            printLine("  exit        Continue boot sequence");
+
+            printLine("  ls, cd, cat (Basic file ops)");
+
+            break;
+
+          case "ls": {
+            const path = arg ? resolvePath(arg) : STATE.cwd;
+
+            const entry = FS[path];
+
+            if (entry && entry.type === "dir") {
+              printLine(entry.children.join("  "));
+            } else if (entry) {
+              printLine(arg);
+            } else {
+              printLine(
+                `ls: cannot access '${arg}': No such file or directory`,
+              );
+            }
+
+            break;
+          }
+
+          case "cd": {
+            if (!arg) {
+              STATE.cwd = "/"; // cd home (root in rescue)
+            } else {
+              const target = resolvePath(arg);
+
+              if (FS[target] && FS[target].type === "dir") {
+                STATE.cwd = target;
+              } else {
+                printLine(`cd: ${arg}: No such file or directory`);
+              }
+            }
+
+            break;
+          }
+
+          case "cat": {
+            if (!arg) {
+              printLine("cat: missing operand");
+            } else {
+              const target = resolvePath(arg);
+
+              const entry = FS[target];
+
+              if (entry && entry.type === "file") {
+                printLine(entry.content);
+              } else if (entry && entry.type === "dir") {
+                printLine(`cat: ${arg}: Is a directory`);
+              } else {
+                printLine(`cat: ${arg}: No such file or directory`);
+              }
+            }
+
+            break;
+          }
+
+          case "uname":
+            if (arg === "-a") {
+              printLine(
+                "Linux tiny 6.8.0-rc1-tiny #1 SMP PREEMPT_DYNAMIC Fri Jan 31 2026 x86_64 GNU/Linux",
+              );
+            } else {
+              printLine("Linux");
+            }
+
+            break;
+
+          case "whoami":
+            printLine("root");
+
+            break;
+
+          case "fsck":
+            if (!arg) {
+              printLine(
+                "fsck: missing operand. (Hint: check boot logs for failing device)",
+              );
+            } else if (arg === "/dev/sda1") {
+              if (STATE.repaired) {
+                printLine("/dev/sda1 is already clean.");
+              } else {
+                await runRepair();
+              }
+            } else if (arg === "-y" && parts[2] === "/dev/sda1") {
+              if (STATE.repaired) {
+                printLine("/dev/sda1 is already clean.");
+              } else {
+                await runRepair();
+              }
+            } else {
+              printLine(`fsck: ${arg}: no such device or permission denied`);
+            }
+
+            break;
+
+          case "reboot":
+            window.location.reload();
+
+            break;
+
+          case "exit":
+            if (!STATE.repaired) {
+              printLine("Cannot continue: filesystem contains errors.");
+            } else {
+              await triggerPanic();
+            }
+
+            break;
+
+          default:
+            if (val !== "") {
+              printLine(`sh: ${val}: not found`);
+            }
+        }
+
+        scrollToBottom();
+      }
+    }
+  });
+
+  // Keep focus
+  document.addEventListener("click", () => {
+    if (!STATE.panic && !inputLineEl.classList.contains("hidden")) {
+      inputEl.focus();
+    }
+  });
+
+  // ESC to reset
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") {
+      try {
+        if (localStorage.getItem(POWER_STATE_KEY)) {
+          localStorage.removeItem(POWER_STATE_KEY);
+          localStorage.removeItem(REPAIRED_KEY);
+          window.location.reload();
+        }
+      } catch {}
+    }
+  });
+
+  // Power Off button logic
+  powerBtn.addEventListener("click", () => {
+    try {
+      localStorage.setItem(COMPLETED_KEY, "1");
+      localStorage.setItem(POWER_STATE_KEY, "1");
+    } catch {}
+    showNoSignal();
+  });
+  // Start
+  runBootSequence();
+</script>
