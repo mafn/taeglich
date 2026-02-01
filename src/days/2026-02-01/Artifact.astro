@@ -1,0 +1,1099 @@
+---
+/**
+ * Ghost Frequency - 2026-02-01
+ * Final Form: High-fidelity walnut receiver with evolving audio narrative.
+ */
+---
+
+<div
+  class="flex min-h-screen w-full flex-col items-center justify-center bg-[#050505] p-4 font-sans text-zinc-100 selection:bg-emerald-500/30"
+>
+  <!-- Strobe Warning Overlay -->
+  <div
+    id="warning-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="warning-title"
+    class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black p-8 text-center transition-opacity duration-1000"
+  >
+    <div class="max-w-md space-y-8">
+      <div class="space-y-4">
+        <h2
+          id="warning-title"
+          class="text-2xl font-black tracking-[0.2em] text-red-500 uppercase"
+        >
+          Warning
+        </h2>
+        <p class="text-sm leading-relaxed text-zinc-400">
+          This artifact contains <span class="text-zinc-200"
+            >flashing lights</span
+          > and <span class="text-zinc-200">unsettling sounds</span>. It may be
+          unsuitable for individuals with photosensitive epilepsy.
+        </p>
+      </div>
+      <button
+        id="enter-btn"
+        class="group relative px-12 py-4 font-mono text-xs font-bold tracking-[0.3em] uppercase transition-all hover:scale-105 active:scale-95"
+      >
+        <div
+          class="absolute inset-0 rounded-full border border-emerald-500/30 bg-emerald-500/5 group-hover:bg-emerald-500/10"
+        >
+        </div>
+        <span class="relative text-emerald-400">Initialize Receiver</span>
+      </button>
+    </div>
+  </div>
+
+  <noscript>
+    <style>
+      #warning-overlay {
+        display: none !important;
+      }
+    </style>
+    <div
+      class="mb-8 max-w-md rounded-lg border border-red-900 bg-red-950/50 p-6 text-sm text-red-200 backdrop-blur-xl"
+    >
+      <h2 class="mb-2 font-bold tracking-widest text-red-400 uppercase">
+        Signal Error
+      </h2>
+      <p class="mb-4 opacity-80">
+        JavaScript is required to operate the tuner.
+      </p>
+      <a
+        href="/archive/"
+        class="font-mono text-xs text-red-400 uppercase underline underline-offset-4 transition-colors hover:text-red-300"
+      >
+        Return to Archive
+      </a>
+    </div>
+  </noscript>
+
+  <!-- TV Chassis -->
+  <div
+    id="tv-chassis"
+    data-state="none"
+    inert
+    class="group relative flex w-full max-w-5xl flex-col overflow-hidden rounded-[4rem] bg-[#3a2212] p-6 shadow-[inset:0_4px_20px_rgba(255,255,255,0.1),0_100px_200px_-40px_rgba(0,0,0,1)] ring-[12px] ring-[#1a1108] md:flex-row md:gap-10 md:p-10"
+  >
+    <!-- Texture Overlays -->
+    <div
+      class="pointer-events-none absolute inset-0 opacity-60 mix-blend-overlay"
+      style="background-image: repeating-linear-gradient(0deg, transparent 0, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 4px), repeating-linear-gradient(90deg, #4a2c1a 0%, #3a2212 100%);"
+    >
+    </div>
+    <div
+      class="pointer-events-none absolute inset-0 opacity-20 mix-blend-soft-light"
+      style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 512 512%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.01%22 numOctaves=%225%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E');"
+    >
+    </div>
+
+    <!-- Screen Column -->
+    <div class="relative flex w-full flex-1 flex-col justify-between">
+      <div
+        class="relative aspect-[4/3] w-full overflow-hidden rounded-[3.5rem] bg-[#020202] shadow-[inset:0_0_150px_rgba(0,0,0,1)] ring-[28px] ring-[#050505] ring-inset group-data-[state=pi]:[box-shadow:inset_0_0_150px_rgba(0,0,0,1),0_0_90px_rgba(239,68,68,0.1)] group-data-[state=pi]:ring-red-500/20 group-data-[state=tau]:[box-shadow:inset_0_0_150px_rgba(0,0,0,1),0_0_90px_rgba(16,185,129,0.14)] group-data-[state=tau]:ring-emerald-500/20"
+      >
+        <!-- Signal Container -->
+        <div
+          id="screen-content"
+          class="absolute inset-0 z-10 flex items-center justify-center overflow-hidden opacity-0 transition-opacity duration-1000"
+        >
+          <div
+            id="signal-layer"
+            class="absolute inset-0"
+            style="filter: blur(var(--blur, 40px));"
+          >
+            <canvas
+              id="signal-canvas"
+              class="h-full w-full opacity-90 drop-shadow-[0_0_30px_rgba(16,185,129,0.45)] group-data-[state=pi]:drop-shadow-[0_0_30px_rgba(239,68,68,0.45)]"
+            ></canvas>
+          </div>
+
+          <div
+            id="status-message"
+            class="pointer-events-none absolute bottom-8 flex flex-col items-center gap-2 text-center"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <div
+              id="tuning-message"
+              class="hidden rounded-full border border-amber-500/20 bg-amber-950/80 px-8 py-3 text-[0.8rem] font-black tracking-[0.35em] text-amber-300 uppercase shadow-[0_0_40px_rgba(245,158,11,0.35)] backdrop-blur-xl"
+            >
+              Acquiring
+            </div>
+            <div
+              id="lock-message"
+              class="hidden rounded-full border border-emerald-500/20 bg-emerald-950/90 px-8 py-3 text-[0.85rem] font-black tracking-[0.35em] text-emerald-300 uppercase shadow-[0_0_70px_rgba(16,185,129,0.6)] backdrop-blur-xl group-data-[state=tau]:scale-[1.02]"
+            >
+              Synchronized
+            </div>
+            <div
+              id="error-message"
+              class="hidden rounded-full border border-red-500/20 bg-red-950/90 px-8 py-3 text-[0.85rem] font-black tracking-[0.35em] text-red-300 uppercase shadow-[0_0_70px_rgba(239,68,68,0.55)] backdrop-blur-xl group-data-[state=pi]:scale-[1.02]"
+            >
+              Corrupted Signal
+            </div>
+          </div>
+        </div>
+
+        <!-- TV Noise Layer -->
+        <canvas
+          id="noise-canvas"
+          width="320"
+          height="240"
+          class="absolute inset-0 z-0 h-full w-full opacity-70 mix-blend-screen [image-rendering:pixelated]"
+        ></canvas>
+
+        <!-- Glass Effects -->
+        <div class="pointer-events-none absolute inset-0 z-40">
+          <div
+            class="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.3)_50%)] bg-[length:100%_8px] opacity-20"
+          >
+          </div>
+          <div
+            class="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_10%,rgba(0,0,0,0.9)_130%)] shadow-[inset:0_0_100px_rgba(0,0,0,1)]"
+          >
+          </div>
+          <div
+            class="absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.1)_0%,transparent_30%,rgba(255,255,255,0.05)_100%)]"
+          >
+          </div>
+        </div>
+      </div>
+
+      <!-- Speaker Grilles (Push to bottom of column) -->
+      <div class="hidden w-full md:flex" aria-hidden="true">
+        <div
+          class="mt-6 w-full rounded-3xl bg-black/25 p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-30px_60px_rgba(0,0,0,0.7),0_20px_40px_-20px_rgba(0,0,0,1)] ring-1 ring-white/5"
+        >
+          <div
+            class="h-20 w-full rounded-2xl bg-black/50 [background-image:repeating-linear-gradient(0deg,rgba(0,0,0,0.85)_0,rgba(0,0,0,0.85)_7px,rgba(255,255,255,0.045)_7px,rgba(255,255,255,0.045)_10px)] opacity-55 shadow-inner"
+          >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div class="flex shrink-0 flex-col gap-6 pt-4 md:w-72 md:pt-0">
+      <!-- Badge (Top) -->
+      <div
+        class="flex flex-col items-center gap-1.5 rounded-2xl border border-white/5 bg-black/60 p-4 shadow-2xl"
+      >
+        <span class="font-serif text-base tracking-tighter text-zinc-300 italic"
+          >Tele-Garden</span
+        >
+        <span
+          class="font-mono text-[0.4rem] font-bold tracking-[0.6em] text-zinc-500 uppercase italic opacity-70"
+          >Super-Heterodyne</span
+        >
+      </div>
+
+      <!-- Audio Toggle -->
+      <div class="flex flex-col items-center gap-2">
+        <label
+          for="mute-btn"
+          class="text-[0.55rem] font-bold tracking-widest text-zinc-200/70 uppercase"
+          >Mute/Unmute</label
+        >
+        <button
+          id="mute-btn"
+          class="group relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-2xl border-[2px] border-black bg-[#1a1a1a] shadow-[0_6px_0_#000,0_12px_24px_rgba(0,0,0,0.8)] transition-all duration-75 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-4 focus-visible:ring-offset-black/30 active:translate-y-1 active:shadow-none"
+          aria-label="Toggle Speaker Audio"
+          title="Toggle Audio"
+        >
+          <div
+            id="power-light"
+            class="h-3 w-3 rounded-full bg-red-950 shadow-inner ring-[2px] ring-black transition-all duration-1000"
+          >
+          </div>
+          <div
+            class="pointer-events-none absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent"
+          >
+          </div>
+          <span
+            class="absolute right-0 -bottom-5 left-0 text-[0.55rem] font-black tracking-widest text-zinc-200/60 uppercase"
+            >AUDIO</span
+          >
+        </button>
+      </div>
+
+      <!-- Main Dial -->
+      <div
+        class="flex min-h-[200px] flex-1 flex-col items-center justify-center"
+      >
+        <div class="relative flex flex-col items-center gap-4">
+          <div
+            id="dial-ring"
+            class="absolute -inset-6 cursor-pointer rounded-full border border-zinc-700/40 opacity-60 select-none"
+            aria-hidden="true"
+          >
+            {
+              Array.from({ length: 55 }).map((_, i) => (
+                <div
+                  class="absolute inset-0"
+                  style={`transform: rotate(${i * 5 - 135}deg)`}
+                >
+                  <div
+                    class={
+                      i % 5 === 0
+                        ? "mx-auto mt-1 h-3 w-[2px] rounded-full bg-zinc-300/60"
+                        : "mx-auto mt-1 h-2 w-px rounded-full bg-zinc-500/50"
+                    }
+                  />
+                </div>
+              ))
+            }
+            {
+              Array.from({ length: 11 }).map((_, i) => (
+                <div
+                  class="absolute inset-0 text-center"
+                  style={`transform: rotate(${i * 27 - 135}deg)`}
+                >
+                  <span class="inline-block pt-0.5 font-mono text-[0.55rem] font-semibold text-zinc-200/80">
+                    {i}
+                  </span>
+                </div>
+              ))
+            }
+          </div>
+
+          <div
+            id="knob-coarse"
+            class="group relative h-40 w-40 cursor-pointer touch-none rounded-full bg-[#111] shadow-[0_30px_60px_-15px_rgba(0,0,0,1),inset_0_2px_4px_rgba(255,255,255,0.1)] ring-[8px] ring-black focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/60 focus-visible:ring-offset-4 focus-visible:ring-offset-black/30"
+            role="slider"
+            aria-label="Frequency Tuner Dial"
+            aria-valuemin="0"
+            aria-valuemax="10"
+            aria-valuenow="1.42"
+            tabindex="0"
+          >
+            <div
+              class="rotator absolute inset-0 rounded-full bg-[conic-gradient(from_0deg,#0a0a0a_0deg,#2a2a2a_180deg,#0a0a0a_360deg)]"
+            >
+              <div
+                class="absolute top-5 left-1/2 h-8 w-2 -translate-x-1/2 rounded-full bg-white shadow-[0_0_20px_white]"
+              >
+              </div>
+              <div
+                class="absolute inset-10 rounded-full border-4 border-black/80 shadow-inner"
+              >
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Readout -->
+      <div
+        class="flex flex-col items-center gap-2 rounded-2xl border border-white/5 bg-black/95 p-6 shadow-2xl"
+        aria-live="polite"
+      >
+        <div
+          id="freq-display"
+          data-state="none"
+          class="font-mono text-4xl tracking-tighter text-emerald-500/90 [text-shadow:0_0_25px_rgba(16,185,129,0.7)] data-[state=pi]:font-black data-[state=pi]:text-red-300 data-[state=pi]:[text-shadow:0_0_30px_rgba(239,68,68,0.7)] data-[state=tau]:font-black data-[state=tau]:text-emerald-300 data-[state=tau]:[text-shadow:0_0_30px_rgba(16,185,129,0.85)]"
+        >
+          0.00
+        </div>
+        <span
+          class="text-[0.55rem] font-bold tracking-[0.55em] text-zinc-300/70 uppercase"
+          >MHz Band</span
+        >
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="mt-8 max-w-xs rounded-full border border-white/5 bg-black/30 px-4 py-2 text-center font-mono text-[0.65rem] tracking-[0.35em] text-zinc-300/80 uppercase shadow-[0_10px_30px_-20px_rgba(0,0,0,1)]"
+  >
+    Dials: Drag • Scroll • Arrows • Shift = Fine
+  </div>
+</div>
+
+<script>
+  const TAU = 6.283185307179586;
+  const PI = 3.14159265359;
+  const LOCK_WINDOW = 0.02;
+
+  let coarseVal = 1.42;
+  let isMuted = true;
+
+  let audioContext: AudioContext | null = null;
+  let masterBus: GainNode | null = null;
+  let masterComp: DynamicsCompressorNode | null = null;
+
+  let noiseNode: AudioBufferSourceNode | null = null;
+  let noiseGain: GainNode | null = null;
+
+  let piOsc: OscillatorNode | null = null;
+  let piGain: GainNode | null = null;
+  let piFilter: BiquadFilterNode | null = null;
+
+  let tauOsc: OscillatorNode | null = null;
+  let tauChordOsc: OscillatorNode | null = null;
+  let tauChordGain: GainNode | null = null;
+  let tauMix: GainNode | null = null;
+  let tauFilter: BiquadFilterNode | null = null;
+  let tauGain: GainNode | null = null;
+
+  let lastTauLocked = false;
+  let hasTuned = false;
+
+  let tauSettleTimer: number | null = null;
+  let chipStopTimer: number | null = null;
+  let chipStartTime = -Infinity;
+  let isChipPlaying = false;
+  let chipOscA: OscillatorNode | null = null;
+  let chipOscB: OscillatorNode | null = null;
+  let chipNoteGain: GainNode | null = null;
+  let chipGain: GainNode | null = null;
+  let chipBassGain: GainNode | null = null;
+  let chipInterval: number | null = null;
+  let chipNextTime = 0;
+  let chipStep = 0;
+  let chipPlayedThisLock = false;
+
+  const signalContainer = document.getElementById("screen-content");
+  const signalCanvas = document.getElementById(
+    "signal-canvas",
+  ) as HTMLCanvasElement;
+  const noiseCanvas = document.getElementById(
+    "noise-canvas",
+  ) as HTMLCanvasElement;
+  const tvChassis = document.getElementById("tv-chassis");
+  const lockMessage = document.getElementById("lock-message");
+  const errorMessage = document.getElementById("error-message");
+  const tuningMessage = document.getElementById("tuning-message");
+  const display = document.getElementById("freq-display");
+  const knobCoarse = document.getElementById("knob-coarse");
+  const muteBtn = document.getElementById("mute-btn");
+  const powerLight = document.getElementById("power-light");
+  const warningOverlay = document.getElementById("warning-overlay");
+  const enterBtn = document.getElementById("enter-btn");
+
+  const WARNING_KEY = "taeglich-2026-02-01-warning";
+  const MUTE_KEY = "taeglich-audio-mute-v2";
+  const COMPLETED_KEY = "taeglich:completed:2026-02-01";
+
+  let isCompleted = false;
+  try {
+    isCompleted = localStorage.getItem(COMPLETED_KEY) === "1";
+  } catch {}
+
+  function checkWarning() {
+    try {
+      const stored = sessionStorage.getItem(WARNING_KEY);
+      if (stored) {
+        if (warningOverlay) warningOverlay.remove();
+        if (tvChassis) tvChassis.removeAttribute("inert");
+        return true;
+      }
+    } catch {}
+    if (tvChassis) tvChassis.setAttribute("inert", "");
+    return false;
+  }
+
+  function acknowledgeWarning() {
+    initAudio();
+    if (audioContext) audioContext.resume();
+    try {
+      sessionStorage.setItem(WARNING_KEY, "true");
+    } catch {}
+    if (tvChassis) tvChassis.removeAttribute("inert");
+    if (warningOverlay) {
+      warningOverlay.style.opacity = "0";
+      setTimeout(() => warningOverlay.remove(), 1000);
+    }
+  }
+
+  enterBtn?.addEventListener("click", acknowledgeWarning);
+
+  function initAudio() {
+    if (audioContext) return;
+    const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!Ctx) return;
+    audioContext = new Ctx();
+
+    masterBus = audioContext.createGain();
+    masterBus.gain.value = 0.9;
+    masterComp = audioContext.createDynamicsCompressor();
+    masterComp.threshold.value = -18;
+    masterComp.knee.value = 18;
+    masterComp.ratio.value = 3.2;
+    masterComp.attack.value = 0.012;
+    masterComp.release.value = 0.22;
+    masterBus.connect(masterComp);
+    masterComp.connect(audioContext.destination);
+
+    try {
+      const savedMute = sessionStorage.getItem(MUTE_KEY);
+      if (savedMute !== null) {
+        isMuted = savedMute === "true";
+      }
+    } catch {}
+
+    const bufferSize = audioContext.sampleRate * 2;
+    const buffer = audioContext.createBuffer(
+      1,
+      bufferSize,
+      audioContext.sampleRate,
+    );
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+    noiseNode = audioContext.createBufferSource();
+    noiseNode.buffer = buffer;
+    noiseNode.loop = true;
+    noiseGain = audioContext.createGain();
+    noiseGain.gain.value = 0;
+    noiseNode.connect(noiseGain);
+    noiseGain.connect(masterBus);
+    noiseNode.start();
+
+    piOsc = audioContext.createOscillator();
+    piOsc.type = "sawtooth";
+    piOsc.frequency.value = 55;
+    piFilter = audioContext.createBiquadFilter();
+    piFilter.type = "bandpass";
+    piFilter.frequency.value = 260;
+    piFilter.Q.value = 0.9;
+    piGain = audioContext.createGain();
+    piGain.gain.value = 0;
+    piOsc.connect(piFilter);
+    piFilter.connect(piGain);
+    piGain.connect(masterBus);
+    piOsc.start();
+
+    tauOsc = audioContext.createOscillator();
+    tauOsc.type = "sine";
+    tauOsc.frequency.value = 110;
+    tauMix = audioContext.createGain();
+    tauMix.gain.value = 0.85;
+    tauFilter = audioContext.createBiquadFilter();
+    tauFilter.type = "lowpass";
+    tauFilter.frequency.value = 1200;
+    tauFilter.Q.value = 0.7;
+    tauGain = audioContext.createGain();
+    tauGain.gain.value = 0;
+    tauMix.connect(tauFilter);
+    tauFilter.connect(tauGain);
+    tauGain.connect(masterBus);
+    tauOsc.connect(tauMix);
+    tauOsc.start();
+
+    tauChordOsc = audioContext.createOscillator();
+    tauChordOsc.type = "sine";
+    tauChordOsc.frequency.value = 165;
+    tauChordOsc.detune.value = 4;
+    tauChordGain = audioContext.createGain();
+    tauChordGain.gain.value = 0;
+    tauChordOsc.connect(tauChordGain);
+    tauChordGain.connect(tauMix);
+    tauChordOsc.start();
+
+    syncMuteUI();
+  }
+
+  function syncMuteUI() {
+    powerLight?.classList.toggle("bg-red-950", isMuted);
+    powerLight?.classList.toggle("bg-emerald-500", !isMuted);
+    powerLight?.classList.toggle(
+      "shadow-[0_0_30px_rgba(16,185,129,1)]",
+      !isMuted,
+    );
+  }
+
+  function toggleMute() {
+    initAudio();
+    if (audioContext) audioContext.resume();
+    isMuted = !isMuted;
+    try {
+      sessionStorage.setItem(MUTE_KEY, isMuted.toString());
+    } catch {}
+    syncMuteUI();
+    if (isMuted) {
+      stopChiptune(0.08);
+      clearTauSettleTimer();
+    } else {
+      lastTauLocked = false;
+      chipPlayedThisLock = false;
+      scheduleTauMusic();
+    }
+    update();
+  }
+  muteBtn?.addEventListener("click", toggleMute);
+
+  function clearTauSettleTimer() {
+    if (tauSettleTimer === null) return;
+    window.clearTimeout(tauSettleTimer);
+    tauSettleTimer = null;
+  }
+
+  function scheduleTauMusic() {
+    if (!audioContext || isMuted) return;
+    clearTauSettleTimer();
+    if (chipPlayedThisLock) return;
+    if (Math.abs(coarseVal - TAU) >= LOCK_WINDOW) return;
+    tauSettleTimer = window.setTimeout(() => {
+      if (!audioContext || isMuted) return;
+      if (chipPlayedThisLock) return;
+      if (Math.abs(coarseVal - TAU) >= LOCK_WINDOW) return;
+      chipPlayedThisLock = true;
+      startChiptune();
+    }, 1000);
+  }
+
+  function stopChiptune(fadeSeconds = 0.12) {
+    if (!audioContext) return;
+    if (chipStopTimer !== null) {
+      window.clearTimeout(chipStopTimer);
+      chipStopTimer = null;
+    }
+    if (chipInterval !== null) {
+      window.clearInterval(chipInterval);
+      chipInterval = null;
+    }
+    if (chipNoteGain) {
+      const now = audioContext.currentTime;
+      chipNoteGain.gain.cancelScheduledValues(now);
+      chipNoteGain.gain.setValueAtTime(chipNoteGain.gain.value, now);
+      chipNoteGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + Math.max(0.02, fadeSeconds),
+      );
+    }
+    if (chipGain) {
+      const now = audioContext.currentTime;
+      chipGain.gain.cancelScheduledValues(now);
+      chipGain.gain.setValueAtTime(chipGain.gain.value, now);
+      chipGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + Math.max(0.02, fadeSeconds),
+      );
+    }
+    if (chipBassGain) {
+      const now = audioContext.currentTime;
+      chipBassGain.gain.cancelScheduledValues(now);
+      chipBassGain.gain.setValueAtTime(chipBassGain.gain.value, now);
+      chipBassGain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        now + Math.max(0.02, fadeSeconds),
+      );
+    }
+    const stopAt =
+      audioContext.currentTime + Math.max(0.02, fadeSeconds) + 0.02;
+    chipOscA?.stop(stopAt);
+    chipOscB?.stop(stopAt);
+    chipOscA = null;
+    chipOscB = null;
+    chipNoteGain = null;
+    chipGain = null;
+    chipBassGain = null;
+    isChipPlaying = false;
+    chipStartTime = -Infinity;
+  }
+
+  function scheduleChiptuneTick() {
+    if (!audioContext || !chipOscA || !chipOscB || !chipNoteGain) return;
+    const now = audioContext.currentTime;
+    const stepSeconds = 0.125;
+    const lookahead = 0.18;
+
+    const melody: number[] = [
+      880, 0, 659.25, 0, 587.33, 0, 659.25, 0, 523.25, 0, 587.33, 0, 659.25, 0,
+      783.99, 0,
+    ];
+    const bass: number[] = [
+      110, 110, 110, 110, 130.81, 130.81, 130.81, 130.81, 98, 98, 98, 98, 110,
+      110, 110, 110,
+    ];
+
+    while (chipNextTime < now + lookahead) {
+      const m = melody[chipStep % melody.length];
+      const b = bass[chipStep % bass.length];
+      if (m === 0) {
+        chipNoteGain.gain.setValueAtTime(0.0001, chipNextTime);
+      } else {
+        chipNoteGain.gain.setValueAtTime(0.9, chipNextTime);
+        chipNoteGain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          chipNextTime + stepSeconds * 0.9,
+        );
+        chipOscA.frequency.setValueAtTime(m, chipNextTime);
+      }
+      chipOscB.frequency.setValueAtTime(b, chipNextTime);
+      chipStep++;
+      chipNextTime += stepSeconds;
+    }
+  }
+
+  function startChiptune() {
+    if (!audioContext || isMuted || !masterBus) return;
+    if (isChipPlaying) return;
+
+    isChipPlaying = true;
+    chipStartTime = audioContext.currentTime;
+    chipStep = 0;
+    chipNextTime = chipStartTime;
+
+    chipGain = audioContext.createGain();
+    chipGain.gain.setValueAtTime(0.0001, chipStartTime);
+    chipGain.connect(masterBus);
+    chipGain.gain.exponentialRampToValueAtTime(0.35, chipStartTime + 0.6);
+
+    chipNoteGain = audioContext.createGain();
+    chipNoteGain.gain.setValueAtTime(0.0001, chipStartTime);
+    chipNoteGain.connect(chipGain);
+
+    chipOscA = audioContext.createOscillator();
+    chipOscA.type = "square";
+    chipOscA.connect(chipNoteGain);
+    chipOscA.start(chipStartTime);
+
+    chipOscB = audioContext.createOscillator();
+    chipOscB.type = "square";
+    chipOscB.detune.value = -8;
+    chipBassGain = audioContext.createGain();
+    chipBassGain.gain.setValueAtTime(0.0001, chipStartTime);
+    chipBassGain.gain.exponentialRampToValueAtTime(0.09, chipStartTime + 0.6);
+    chipOscB.connect(chipBassGain);
+    chipBassGain.connect(masterBus);
+    chipOscB.start(chipStartTime);
+
+    scheduleChiptuneTick();
+    chipInterval = window.setInterval(scheduleChiptuneTick, 50);
+    chipStopTimer = window.setTimeout(() => stopChiptune(0.4), 20000);
+  }
+
+  const abortController = new AbortController();
+  const { signal } = abortController;
+
+  function resize() {
+    if (!signalCanvas || !document.body.contains(signalCanvas)) return;
+    const dpr = window.devicePixelRatio || 1;
+    const rect = signalCanvas.parentElement?.getBoundingClientRect();
+    if (rect && rect.width > 0) {
+      signalCanvas.width = rect.width * dpr;
+      signalCanvas.height = rect.height * dpr;
+    }
+  }
+  window.addEventListener("resize", resize, { signal });
+  setTimeout(resize, 200);
+
+  const nCtx = noiseCanvas?.getContext("2d");
+  let noiseImageData: ImageData | null = null;
+  function renderNoise() {
+    if (!nCtx || !noiseCanvas || !document.body.contains(noiseCanvas)) return;
+    const w = noiseCanvas.width,
+      h = noiseCanvas.height;
+    if (
+      !noiseImageData ||
+      noiseImageData.width !== w ||
+      noiseImageData.height !== h
+    ) {
+      noiseImageData = nCtx.createImageData(w, h);
+    }
+    const buffer = new Uint32Array(noiseImageData.data.buffer);
+    for (let i = 0; i < buffer.length; i++) {
+      buffer[i] = Math.random() > 0.5 ? 0xffffffff : 0xff000000;
+    }
+    nCtx.putImageData(noiseImageData, 0, 0);
+    requestAnimationFrame(renderNoise);
+  }
+  requestAnimationFrame(renderNoise);
+
+  const sCtx = signalCanvas?.getContext("2d");
+  let time = 0;
+
+  function drawBranch(
+    ctx: CanvasRenderingContext2D,
+    x: number,
+    y: number,
+    length: number,
+    angle: number,
+    depth: number,
+  ) {
+    if (depth === 0) return;
+    const x2 = x + Math.cos(angle) * length;
+    const y2 = y + Math.sin(angle) * length;
+    ctx.lineWidth = Math.max(1.25, depth * 1.7);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x2, y2);
+    ctx.stroke();
+    const nextLen = length * 0.72;
+    const spread = 0.45 + Math.sin(time + depth) * 0.05;
+    drawBranch(ctx, x2, y2, nextLen, angle - spread, depth - 1);
+    drawBranch(ctx, x2, y2, nextLen, angle + spread, depth - 1);
+  }
+
+  function loop() {
+    if (!document.body.contains(tvChassis)) {
+      abortController.abort();
+      if (audioContext && audioContext.state !== "closed") {
+        audioContext.close();
+        audioContext = null;
+      }
+      if (chipInterval !== null) {
+        window.clearInterval(chipInterval);
+        chipInterval = null;
+      }
+      if (chipStopTimer !== null) {
+        window.clearTimeout(chipStopTimer);
+        chipStopTimer = null;
+      }
+      return;
+    }
+    requestAnimationFrame(loop);
+
+    time += 0.02;
+
+    if (audioContext && !isMuted) {
+      const now = audioContext.currentTime;
+      if (piOsc && piGain) {
+        const diffPi = Math.abs(coarseVal - PI);
+        if (diffPi < 0.4) {
+          const piStrength = Math.max(0, 1 - diffPi * 2.5);
+          const wobble =
+            1 + Math.sin(now * 18) * 0.02 + Math.sin(now * 7) * 0.01;
+          piOsc.frequency.setTargetAtTime(
+            (50 + piStrength * 25) * wobble,
+            now,
+            0.02,
+          );
+        }
+      }
+    }
+
+    if (!sCtx || !signalCanvas) return;
+    const w = signalCanvas.width,
+      h = signalCanvas.height;
+    if (w === 0) return;
+    sCtx.clearRect(0, 0, w, h);
+
+    const diffTau = Math.abs(coarseVal - TAU);
+    const diffPi = Math.abs(coarseVal - PI);
+    if (diffTau > 1.5 && diffPi > 0.5) return;
+
+    const cx = w / 2,
+      cy = h * 0.82;
+
+    if (diffTau <= 1.5) {
+      sCtx.strokeStyle = "rgba(52, 211, 153, 0.8)";
+      drawBranch(sCtx, cx, cy, h * 0.24, -Math.PI / 2, 6);
+    } else if (diffPi <= 0.5) {
+      sCtx.strokeStyle = "rgba(239, 68, 68, 0.6)";
+      drawBranch(
+        sCtx,
+        cx,
+        cy,
+        h * 0.18,
+        -Math.PI / 2 + Math.sin(time * 10) * 0.1,
+        5,
+      );
+    }
+  }
+  requestAnimationFrame(loop);
+
+  function update() {
+    if (!signalContainer || !display) return;
+    const totalVal = coarseVal;
+    const diffTau = Math.abs(totalVal - TAU);
+    const diffPi = Math.abs(totalVal - PI);
+
+    let strength = 0,
+      state: "tau" | "pi" | "none" = "none";
+    if (diffTau < 1.0) {
+      strength = Math.max(0, 1 - diffTau * 0.95);
+      if (diffTau < LOCK_WINDOW) {
+        state = "tau";
+        strength = 1;
+        if (!isCompleted) {
+          try {
+            localStorage.setItem(COMPLETED_KEY, "1");
+            isCompleted = true;
+          } catch {}
+        }
+      }
+    } else if (diffPi < 0.4) {
+      strength = Math.max(0, 1 - diffPi * 2.5);
+      if (diffPi < LOCK_WINDOW) {
+        state = "pi";
+        strength = 1;
+      }
+    }
+
+    if (audioContext && !isMuted) {
+      const now = audioContext.currentTime;
+      noiseGain?.gain.setTargetAtTime((1 - strength) * 0.4, now, 0.05);
+
+      const tauInRange = diffTau < 1.0;
+      const tauLocked = diffTau < LOCK_WINDOW;
+      const tauStrength = tauInRange ? Math.max(0, 1 - diffTau * 0.95) : 0;
+
+      if (tauLocked) {
+        if (!lastTauLocked) chipPlayedThisLock = false;
+        tauGain?.gain.setTargetAtTime(isChipPlaying ? 0.06 : 0.18, now, 0.12);
+        tauOsc?.frequency.setTargetAtTime(110, now, 0.06);
+        tauChordOsc?.frequency.setTargetAtTime(165, now, 0.06);
+        tauChordGain?.gain.setTargetAtTime(
+          isChipPlaying ? 0.08 : 0.55,
+          now,
+          0.25,
+        );
+        tauFilter?.frequency.setTargetAtTime(950, now, 0.25);
+      } else if (tauInRange) {
+        if (lastTauLocked) stopChiptune(0.12);
+        clearTauSettleTimer();
+        chipPlayedThisLock = false;
+        tauGain?.gain.setTargetAtTime(tauStrength * 0.11, now, 0.05);
+        tauChordGain?.gain.setTargetAtTime(0, now, 0.12);
+        tauOsc?.frequency.setTargetAtTime(170 + tauStrength * 90, now, 0.05);
+        tauFilter?.frequency.setTargetAtTime(1600 - diffTau * 550, now, 0.2);
+      } else {
+        if (lastTauLocked) stopChiptune(0.12);
+        clearTauSettleTimer();
+        chipPlayedThisLock = false;
+        tauGain?.gain.setTargetAtTime(0, now, 0.1);
+        tauChordGain?.gain.setTargetAtTime(0, now, 0.1);
+      }
+
+      const piInRange = diffPi < 0.4;
+      if (piInRange) {
+        const piStrength = Math.max(0, 1 - diffPi * 2.5);
+        piGain?.gain.setTargetAtTime(piStrength * 0.24, now, 0.05);
+        piFilter?.frequency.setTargetAtTime(220 + piStrength * 240, now, 0.05);
+        piFilter?.Q.setTargetAtTime(0.9 + piStrength * 5, now, 0.1);
+      } else {
+        piGain?.gain.setTargetAtTime(0, now, 0.1);
+      }
+
+      lastTauLocked = tauLocked;
+    } else if (audioContext) {
+      const now = audioContext.currentTime;
+      [noiseGain, piGain, tauGain, tauChordGain].forEach((g) =>
+        g?.gain.setTargetAtTime(0, now, 0.05),
+      );
+      stopChiptune(0.06);
+      clearTauSettleTimer();
+    }
+
+    tvChassis?.setAttribute("data-state", state);
+    display.dataset.state = state;
+    display.textContent = totalVal.toFixed(2);
+
+    if (state === "tau") {
+      display.textContent = "τ";
+    } else if (state === "pi") {
+      display.textContent = "π";
+    }
+
+    const showTuning = state === "none" && strength > 0.25;
+    tuningMessage?.classList.toggle("hidden", !showTuning);
+    lockMessage?.classList.toggle("hidden", state !== "tau");
+    errorMessage?.classList.toggle("hidden", state !== "pi");
+    signalContainer.style.setProperty("--blur", `${(1 - strength) * 50}px`);
+    signalContainer.style.opacity = Math.max(0, strength - 0.05).toString();
+    noiseCanvas.style.opacity = Math.max(
+      0.05,
+      (1 - strength) * 0.95,
+    ).toString();
+  }
+
+  function setupKnob(
+    el: HTMLElement,
+    min: number,
+    max: number,
+    startVal: number,
+    onUpdate: (v: number) => void,
+  ) {
+    let currentVal = startVal,
+      isDragging = false,
+      centerX = 0,
+      centerY = 0,
+      prevAngle = 0;
+    const rotator = el.querySelector(".rotator") as HTMLElement;
+
+    function proximityFactor(v: number) {
+      const d = Math.min(Math.abs(v - TAU), Math.abs(v - PI));
+      return d >= 0.25 ? 1 : 0.3 + 0.7 * (d / 0.25);
+    }
+
+    function setFromPoint(x: number, y: number) {
+      const r = el.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      const cy = r.top + r.height / 2;
+      const degRight = (Math.atan2(y - cy, x - cx) * 180) / Math.PI;
+      const degTop = degRight + 90;
+      const clamped = Math.max(-135, Math.min(135, degTop));
+      setVal(min + ((clamped + 135) / 270) * (max - min));
+    }
+
+    function setVal(v: number) {
+      const tauSnap = 0.018,
+        piSnap = 0.018;
+      const snapped =
+        Math.abs(v - TAU) < tauSnap ? TAU : Math.abs(v - PI) < piSnap ? PI : v;
+      currentVal = Math.max(min, Math.min(max, snapped));
+      const p = (currentVal - min) / (max - min);
+      if (rotator) rotator.style.transform = `rotate(${-135 + p * 270}deg)`;
+      el.setAttribute("aria-valuenow", currentVal.toFixed(2));
+      el.setAttribute("aria-valuetext", currentVal.toFixed(2));
+      onUpdate(currentVal);
+      update();
+      scheduleTauMusic();
+    }
+
+    function onStart(x: number, y: number) {
+      initAudio();
+      if (audioContext) audioContext.resume();
+      hasTuned = true;
+      el.focus();
+      isDragging = true;
+      setFromPoint(x, y);
+      const r = el.getBoundingClientRect();
+      centerX = r.left + r.width / 2;
+      centerY = r.top + r.height / 2;
+      prevAngle = Math.atan2(y - centerY, x - centerX);
+      document.body.style.cursor = "move";
+    }
+
+    function onMove(x: number, y: number) {
+      if (!isDragging) return;
+      const angle = Math.atan2(y - centerY, x - centerX);
+      let delta = angle - prevAngle;
+      if (delta > Math.PI) delta -= Math.PI * 2;
+      if (delta < -Math.PI) delta += Math.PI * 2;
+      prevAngle = angle;
+      setVal(
+        currentVal +
+          (delta / ((270 * Math.PI) / 180)) *
+            (max - min) *
+            0.48 *
+            proximityFactor(currentVal),
+      );
+    }
+
+    el.addEventListener(
+      "mousedown",
+      (e) => {
+        e.preventDefault();
+        onStart(e.clientX, e.clientY);
+      },
+      { signal },
+    );
+    window.addEventListener(
+      "mousemove",
+      (e) => {
+        if (isDragging) onMove(e.clientX, e.clientY);
+      },
+      { signal },
+    );
+    window.addEventListener(
+      "mouseup",
+      () => {
+        isDragging = false;
+        document.body.style.cursor = "";
+      },
+      { signal },
+    );
+    el.addEventListener(
+      "touchstart",
+      (e) => {
+        e.preventDefault();
+        onStart(e.touches[0].clientX, e.touches[0].clientY);
+      },
+      { passive: false, signal },
+    );
+    window.addEventListener(
+      "touchmove",
+      (e) => {
+        if (isDragging) onMove(e.touches[0].clientX, e.touches[0].clientY);
+      },
+      { passive: false, signal },
+    );
+    window.addEventListener(
+      "touchend",
+      () => {
+        isDragging = false;
+      },
+      { signal },
+    );
+
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        if (!document.body.contains(el)) return;
+        const t = e.target as HTMLElement | null;
+        if (
+          t &&
+          ((t as any).isContentEditable ||
+            /^(INPUT|TEXTAREA|SELECT)$/i.test(t.tagName))
+        )
+          return;
+
+        const key = e.key;
+        if (!["ArrowUp", "ArrowRight", "ArrowDown", "ArrowLeft"].includes(key))
+          return;
+
+        // ONLY hijack arrow keys if the knob is actually focused
+        if (document.activeElement !== el) return;
+
+        initAudio();
+        if (audioContext) audioContext.resume();
+        e.preventDefault();
+        const base = (max - min) / 300;
+        const step =
+          (e.shiftKey ? base * 0.2 : base) * proximityFactor(currentVal);
+        const dir = key === "ArrowUp" || key === "ArrowRight" ? 1 : -1;
+        setVal(currentVal + dir * step);
+      },
+      { signal },
+    );
+
+    el.addEventListener(
+      "wheel",
+      (e) => {
+        e.preventDefault();
+        initAudio();
+        if (audioContext) audioContext.resume();
+        hasTuned = true;
+        const delta =
+          -e.deltaY *
+          ((max - min) / 15000) *
+          (e.shiftKey ? 0.2 : 1) *
+          proximityFactor(currentVal);
+        setVal(currentVal + delta);
+      },
+      { passive: false, signal },
+    );
+
+    setVal(startVal);
+  }
+
+  if (knobCoarse) {
+    setupKnob(
+      knobCoarse,
+      0,
+      10,
+      isCompleted ? TAU : 1.42,
+      (v) => (coarseVal = v),
+    );
+    const dialRing = document.getElementById("dial-ring");
+    dialRing?.addEventListener(
+      "mousedown",
+      (e) => {
+        e.preventDefault();
+        knobCoarse.dispatchEvent(
+          new MouseEvent("mousedown", {
+            clientX: e.clientX,
+            clientY: e.clientY,
+            bubbles: true,
+          }),
+        );
+      },
+      { signal },
+    );
+  }
+  checkWarning();
+  update();
+</script>

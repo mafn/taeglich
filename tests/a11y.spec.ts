@@ -8,17 +8,25 @@ test.describe("Accessibility & SEO", () => {
 
     // 2026-01-30 Sudoku
     await page.goto("/d/2026-01-30");
-    const sudokuNoscript = await page.locator("noscript").innerHTML();
-    expect(sudokuNoscript).toContain(
-      "JavaScript is required to play the interactive version",
-    );
+    const texts30 = await page.locator("noscript").allTextContents();
+    expect(
+      texts30.some((t) => t.includes("JavaScript is required to play")),
+    ).toBeTruthy();
 
     // 2026-01-31 Terminal
     await page.goto("/d/2026-01-31");
-    const termNoscript = await page.locator("noscript").innerHTML();
-    expect(termNoscript).toContain(
-      "JavaScript is required to run the simulation",
-    );
+    const texts31 = await page.locator("noscript").allTextContents();
+    expect(
+      texts31.some((t) => t.includes("JavaScript is required to run")),
+    ).toBeTruthy();
+
+    // 2026-02-01 Ghost Frequency
+    await page.goto("/d/2026-02-01");
+    const texts01 = await page.locator("noscript").allTextContents();
+    expect(
+      texts01.some((t) => t.includes("JavaScript is required to operate")),
+    ).toBeTruthy();
+    expect(texts01.some((t) => t.includes("Return to Archive"))).toBeTruthy();
 
     await context.close();
   });
