@@ -1,0 +1,720 @@
+---
+import "@fontsource/press-start-2p/latin-400.css";
+import "@fontsource/vt323/latin-400.css";
+
+/**
+ * Assignment Failed - 2026-02-02
+ * 90s retro error dialog with CRT + desktop nostalgia.
+ */
+---
+
+<div
+  class="relative min-h-screen w-full overflow-hidden bg-[#05070f] px-4 py-10 text-[#e9f5ff] sm:px-6 sm:py-12"
+>
+  <div class="retro-sky pointer-events-none absolute inset-0 opacity-90"></div>
+  <div class="scanlines pointer-events-none absolute inset-0"></div>
+  <div class="noise pointer-events-none absolute inset-0 opacity-35"></div>
+
+  <noscript>
+    <div
+      class="font-terminal mx-auto mb-6 w-full max-w-xl rounded-2xl border-2 border-[#7b87b6] bg-[#0c1026] px-5 py-4 text-sm text-[#d5e6ff] shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
+    >
+      <p class="font-arcade text-[0.6rem] tracking-[0.25em] text-[#ff9ceb]">
+        SYSTEM NOTICE
+      </p>
+      <p class="mt-3">
+        JavaScript is required to view the lockout overlay and mission log.
+      </p>
+      <a
+        href="/archive/"
+        class="font-arcade mt-3 inline-block text-[0.6rem] tracking-[0.25em] text-[#9be2ff] underline"
+      >
+        Return to Archive
+      </a>
+    </div>
+  </noscript>
+
+  <div
+    id="artifact-shell"
+    class="relative mx-auto flex w-full max-w-6xl flex-col gap-6 sm:gap-8"
+  >
+    <header
+      class="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-[#2b2f45] bg-[#0b0f1e]/80 px-4 py-4 shadow-[0_0_40px_rgba(36,255,215,0.2)] sm:px-6"
+    >
+      <div class="flex items-center gap-4">
+        <div
+          class="h-12 w-12 rounded-xl border-2 border-[#64b5ff] bg-[radial-gradient(circle_at_30%_30%,#8cf0ff,transparent_55%)] shadow-[0_0_18px_rgba(140,240,255,0.8)]"
+        >
+        </div>
+        <div>
+          <p
+            class="font-terminal text-[0.65rem] tracking-[0.3em] text-[#bfe9ff] sm:text-xs"
+          >
+            UAC INFONET
+          </p>
+          <h1
+            class="font-arcade text-base tracking-[0.25em] uppercase sm:text-lg sm:tracking-[0.3em]"
+          >
+            Assignment Control
+          </h1>
+        </div>
+      </div>
+      <div
+        class="font-arcade inline-flex items-center gap-2 rounded-full border border-[#3d4765] bg-[#121a35] px-3 py-2 text-[0.6rem] tracking-[0.25em] text-[#ff9ceb] sm:px-4 sm:text-xs sm:tracking-[0.3em]"
+      >
+        02 FEB 2026
+      </div>
+    </header>
+
+    <main
+      class="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-[1.2fr_0.8fr] lg:gap-8"
+    >
+      <section
+        class="relative w-full min-w-0 overflow-hidden rounded-[2.25rem] border-[3px] border-[#7b87b6] bg-[linear-gradient(135deg,#0c1128,#0b0f1f_48%,#151c3c_100%)] p-4 shadow-[0_30px_90px_rgba(0,0,0,0.7)] sm:p-6"
+      >
+        <div
+          class="window-frame absolute inset-3 rounded-[2.2rem] border-2 border-[#202841]"
+        >
+        </div>
+        <div
+          class="window-title relative z-10 flex items-center justify-between rounded-2xl border-2 border-[#1b2036] bg-gradient-to-r from-[#1f4dff] via-[#1a2e73] to-[#0a1231] px-3 py-2 sm:px-4"
+        >
+          <div class="flex items-center gap-3">
+            <div class="h-3 w-3 rounded-full bg-[#ffeb3b]"></div>
+            <p
+              class="font-arcade text-[0.6rem] tracking-[0.25em] sm:text-xs sm:tracking-[0.3em]"
+            >
+              DIALOG.BAT
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <span class="h-3 w-12 rounded-sm bg-[#0b0f21]"></span>
+            <span class="h-3 w-6 rounded-sm bg-[#0b0f21]"></span>
+          </div>
+        </div>
+
+        <div
+          class="relative z-10 mt-5 grid min-w-0 gap-5 rounded-2xl border-2 border-[#2e3659] bg-[#0f1430]/90 px-4 py-5 sm:px-6 sm:py-6 lg:mt-6 lg:grid-cols-[1.2fr_0.8fr]"
+        >
+          <div class="min-w-0 space-y-5">
+            <div class="flex items-start gap-4">
+              <div
+                class="flex h-14 w-14 items-center justify-center rounded-xl border-2 border-[#ff7a7a] bg-[#2b0f19] text-3xl shadow-[0_0_15px_rgba(255,122,122,0.8)]"
+              >
+                !
+              </div>
+              <div>
+                <h2
+                  class="font-arcade text-xl tracking-[0.2em] text-[#ff92d8] uppercase sm:text-2xl sm:tracking-[0.25em]"
+                >
+                  Assignment Failed
+                </h2>
+                <p class="font-terminal mt-2 text-sm text-[#c6d5ff]">
+                  The uplink sealed at 23:59. Your payload stalled behind a
+                  breach containment lock.
+                </p>
+              </div>
+            </div>
+
+            <div
+              class="retro-panel rounded-xl border border-[#3a4568] bg-[#0c1024] p-4"
+            >
+              <p
+                class="font-arcade text-[0.6rem] tracking-[0.25em] text-[#bfe9ff] sm:text-xs sm:tracking-[0.28em]"
+              >
+                ERROR TRACE
+              </p>
+              <pre
+                class="font-arcade mt-3 text-[0.6rem] leading-relaxed whitespace-pre-wrap text-[#f7f4ff] sm:text-xs">
+MODULE: UPLINK.DRV
+STATUS: LOCKOUT_PROTOCOL
+STAMP: 2026-02-02 23:59:59
+PACKETS LOST: 04
+CRC MISMATCH: TRUE
+              </pre>
+            </div>
+
+            <div
+              class="flex flex-wrap items-center gap-3 rounded-xl border border-[#2d3552] bg-[#0a0f24] px-4 py-3"
+            >
+              <span
+                class="font-arcade inline-flex items-center gap-2 rounded-full border border-[#3b4a6d] bg-[#121a3a] px-3 py-1 text-[0.6rem] tracking-[0.3em] text-[#9be2ff] sm:text-[0.65rem] sm:tracking-[0.35em]"
+                >DUE TODAY</span
+              >
+              <span
+                class="font-arcade inline-flex items-center gap-2 rounded-full border border-[#4d2b4f] bg-[#231022] px-3 py-1 text-[0.6rem] tracking-[0.3em] text-[#ff9ceb] sm:text-[0.65rem] sm:tracking-[0.35em]"
+                >SUBMISSION CLOSED</span
+              >
+            </div>
+          </div>
+
+          <div class="min-w-0 space-y-4">
+            <div
+              class="rounded-xl border-2 border-[#394465] bg-[#0c1228] p-4 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)]"
+            >
+              <p class="font-arcade text-xs tracking-[0.3em] text-[#ff9ceb]">
+                STATUS MONITOR
+              </p>
+              <div class="font-terminal mt-4 space-y-3 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="text-[#c7d6ff]">Remaining Window</span>
+                  <span class="text-[#ff7a7a]">00:00</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-[#c7d6ff]">Breach Alarm</span>
+                  <span class="text-[#ff7a7a]">ACTIVE</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-[#c7d6ff]">Ammo Cache</span>
+                  <span class="text-[#ffd36b]">LOW</span>
+                </div>
+              </div>
+              <div
+                class="mt-4 h-3 overflow-hidden rounded-full border border-[#2a3354] bg-[#0a0f22]"
+              >
+                <div class="progress-bar h-full w-full"></div>
+              </div>
+            </div>
+
+            <div
+              class="font-arcade rounded-xl border border-[#384368] bg-[#0e1430] p-4 text-[0.6rem] tracking-[0.25em] text-[#9be2ff] sm:text-xs sm:tracking-[0.3em]"
+            >
+              FIELD ORDERS
+              <div
+                class="mt-3 space-y-2 text-[0.6rem] tracking-[0.2em] text-[#d6e5ff] sm:text-[0.65rem]"
+              >
+                <button class="action-item" data-action="attempt" type="button">
+                  01. REQUEST OVERRIDE
+                </button>
+                <button class="action-item" data-action="attempt" type="button">
+                  02. RETRY TRANSMIT
+                </button>
+                <button class="action-item" data-action="attempt" type="button">
+                  03. EXTRACT TO DISK
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          class="relative z-10 mt-6 flex min-w-0 flex-wrap items-center justify-between gap-4"
+        >
+          <div class="font-terminal text-[0.65rem] text-[#bfe9ff] sm:text-xs">
+            F1: mission log. ESC: lockdown.
+          </div>
+          <div class="flex flex-wrap gap-3">
+            <button
+              id="retry-btn"
+              class="retro-button border-[#bfe9ff] bg-[#0c1a3a] text-[#9be2ff]"
+              data-action="attempt"
+              type="button"
+            >
+              Retry
+            </button>
+            <a
+              href="/archive/"
+              class="retro-button border-[#ff9ceb] bg-[#2a1231] text-[#ffd2f0]"
+            >
+              Return to Archive
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <aside class="w-full min-w-0 space-y-6">
+        <div
+          class="rounded-[2rem] border-2 border-[#2e3659] bg-[#0c1026]/90 p-4 shadow-[0_24px_70px_rgba(0,0,0,0.6)] sm:p-6"
+        >
+          <p
+            class="font-arcade text-[0.6rem] tracking-[0.25em] text-[#bfe9ff] sm:text-xs sm:tracking-[0.3em]"
+          >
+            FIELD NOTES
+          </p>
+          <div class="font-terminal mt-4 space-y-4 text-sm text-[#d5e6ff]">
+            <p>
+              The service lift went dark mid-transfer. The uplink sealed and
+              left the payload on the wrong side of the blast door.
+            </p>
+            <p id="recycler-status">
+              Do not power down the station. The recycler is still piecing
+              together your last clean buffer.
+            </p>
+          </div>
+        </div>
+
+        <div
+          class="rounded-[2rem] border-2 border-[#2f3b63] bg-[#0a0f24] p-4 sm:p-5"
+        >
+          <p
+            class="font-arcade text-[0.6rem] tracking-[0.25em] text-[#ff9ceb] sm:text-xs sm:tracking-[0.3em]"
+          >
+            LAST CHECKPOINT
+          </p>
+          <div
+            class="font-arcade mt-4 grid grid-cols-3 gap-3 text-center text-[0.55rem] tracking-[0.2em] text-[#9be2ff] sm:text-[0.6rem] sm:tracking-[0.25em]"
+          >
+            <div
+              class="action-item rounded-lg border border-[#3a4568] bg-[#0e1530] px-2 py-3"
+              data-action="attempt"
+            >
+              22:59
+            </div>
+            <div
+              class="action-item rounded-lg border border-[#3a4568] bg-[#0e1530] px-2 py-3"
+              data-action="attempt"
+            >
+              23:32
+            </div>
+            <div
+              class="action-item rounded-lg border border-[#3a4568] bg-[#0e1530] px-2 py-3"
+              data-action="attempt"
+            >
+              23:58
+            </div>
+          </div>
+          <div
+            class="font-arcade mt-4 flex items-center gap-3 rounded-lg border border-[#3a4568] bg-[#0e1530] px-3 py-2 text-[0.55rem] tracking-[0.2em] text-[#ffd36b] sm:text-[0.6rem] sm:tracking-[0.25em]"
+          >
+            <span class="h-2 w-2 animate-pulse rounded-full bg-[#ffd36b]"
+            ></span>
+            FLOPPY DRIVE READY
+          </div>
+        </div>
+      </aside>
+    </main>
+  </div>
+</div>
+
+<div
+  id="mission-log"
+  class="mission-log font-terminal fixed top-6 left-1/2 z-50 hidden w-[min(26rem,calc(100%-2rem))] -translate-x-1/2 rounded-2xl border-2 border-[#7b87b6] bg-[#0c1026] px-5 py-5 text-sm text-[#d5e6ff] shadow-[0_30px_90px_rgba(0,0,0,0.7)] sm:top-8 sm:w-[min(32rem,calc(100%-3rem))] sm:px-6"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="mission-log-title"
+  aria-describedby="mission-log-body"
+  tabindex="-1"
+>
+  <div class="flex items-start justify-between gap-4">
+    <div
+      id="mission-log-title"
+      class="font-arcade text-xs tracking-[0.3em] text-[#ff9ceb]"
+    >
+      MISSION LOG
+    </div>
+    <button
+      type="button"
+      class="mission-log-close font-arcade rounded-md border border-[#3b4a6d] px-2 py-1 text-[0.55rem] tracking-[0.2em] text-[#bfe9ff]"
+      aria-label="Close mission log"
+      data-close="mission-log"
+    >
+      CLOSE
+    </button>
+  </div>
+  <div id="mission-log-body" class="mt-3 space-y-2">
+    <p>23:47 — Uplink armed. Payload queued for archive.</p>
+    <p>23:55 — Breach alarms. Corridor sealed by protocol.</p>
+    <p>23:59 — Transmission stalled at checkpoint Delta.</p>
+    <p>00:00 — Lockout engaged. Manual override required.</p>
+    <p class="mt-4 text-[#bfe9ff]">ESC closes this log.</p>
+  </div>
+</div>
+
+<script>
+  const retryBtn = document.getElementById("retry-btn");
+  const errorPanel = document.querySelector(".retro-panel");
+  const retryBanner = document.createElement("div");
+  retryBanner.className =
+    "mt-4 rounded-lg border border-[#2b395f] bg-[#0b1430] px-4 py-2 font-terminal text-xs text-[#ffd36b]";
+  retryBanner.textContent = "RETRY QUEUED. AWAITING MANUAL OVERRIDE.";
+
+  const missionLog = document.getElementById("mission-log");
+  const missionClose = missionLog?.querySelector(
+    "[data-close='mission-log']",
+  ) as HTMLElement | null;
+  let lastFocused: HTMLElement | null = null;
+  let lockoutOverlay: HTMLElement | null = null;
+
+  let lockoutTimer: number | null = null;
+  let lockoutStep = 3;
+  let lockoutCount: HTMLElement | null = null;
+  let lockoutMessage: HTMLElement | null = null;
+
+  function lockScroll() {
+    document.documentElement.classList.add("overlay-open");
+    document.body.classList.add("overlay-open");
+  }
+
+  function unlockScroll() {
+    document.documentElement.classList.remove("overlay-open");
+    document.body.classList.remove("overlay-open");
+  }
+
+  function resetLockout() {
+    if (lockoutTimer) window.clearInterval(lockoutTimer);
+    lockoutTimer = null;
+    lockoutStep = 3;
+    if (lockoutCount) lockoutCount.textContent = "03";
+    if (lockoutMessage) lockoutMessage.textContent = "ACCESS CHECK IN PROGRESS";
+  }
+
+  function ensureLockoutOverlay() {
+    if (lockoutOverlay) return;
+    const overlay = document.createElement("div");
+    overlay.id = "lockout-overlay";
+    overlay.className =
+      "lockout-overlay hidden fixed inset-0 z-50 flex items-center justify-center px-6";
+    overlay.innerHTML =
+      "<div class='lockout-panel w-full max-w-xl rounded-3xl border-2 border-[#7b87b6] bg-[#090c1f] px-6 py-6 text-center font-terminal text-sm text-[#d5e6ff] shadow-[0_30px_90px_rgba(0,0,0,0.8)]' role='alertdialog' aria-modal='true' aria-labelledby='lockout-title' aria-describedby='lockout-desc' tabindex='0'><div id='lockout-title' class='font-arcade text-xs tracking-[0.3em] text-[#ff7a7a]'>SECURITY LOCKOUT</div><div class='lockout-count mt-4 text-4xl font-arcade text-[#ffd36b]'>03</div><p id='lockout-desc' class='lockout-message mt-4'>ACCESS CHECK IN PROGRESS</p><p class='mt-3 text-xs text-[#bfe9ff]'>CREDENTIALS UNDER REVIEW</p></div>";
+    document.body.appendChild(overlay);
+    lockoutOverlay = overlay;
+    lockoutCount = overlay.querySelector(
+      ".lockout-count",
+    ) as HTMLElement | null;
+    lockoutMessage = overlay.querySelector(
+      ".lockout-message",
+    ) as HTMLElement | null;
+  }
+
+  function trapFocus(container: HTMLElement, event: KeyboardEvent) {
+    if (event.key !== "Tab") return;
+    const focusable = Array.from(
+      container.querySelectorAll<HTMLElement>(
+        "button, [href], input, select, textarea, [tabindex]:not([tabindex='-1'])",
+      ),
+    ).filter((el) => !el.hasAttribute("disabled"));
+    if (focusable.length === 0) {
+      event.preventDefault();
+      container.focus();
+      return;
+    }
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openMissionLog() {
+    if (!missionLog || document.body.classList.contains("locked")) return;
+    if (!missionLog.classList.contains("hidden")) return;
+    lastFocused = document.activeElement as HTMLElement | null;
+    missionLog.classList.remove("hidden");
+    lockScroll();
+    const focusTarget = missionClose || missionLog;
+    focusTarget?.focus();
+  }
+
+  function closeMissionLog() {
+    if (!missionLog || missionLog.classList.contains("hidden")) return;
+    missionLog.classList.add("hidden");
+    if (!document.body.classList.contains("locked")) {
+      unlockScroll();
+    }
+    if (lastFocused && document.body.contains(lastFocused)) {
+      lastFocused.focus();
+    }
+    lastFocused = null;
+  }
+
+  function showLockout() {
+    try {
+      if (sessionStorage.getItem("taeglich:2026-02-02:locked") === "1") {
+        return;
+      }
+    } catch {}
+    ensureLockoutOverlay();
+    resetLockout();
+    lockoutOverlay?.classList.remove("hidden");
+    document.body.classList.add("locked");
+    lockScroll();
+    const panel = lockoutOverlay?.querySelector(
+      ".lockout-panel",
+    ) as HTMLElement | null;
+    panel?.focus();
+    lockoutTimer = window.setInterval(() => {
+      lockoutStep -= 1;
+      if (lockoutCount) {
+        lockoutCount.textContent = String(lockoutStep).padStart(2, "0");
+      }
+      if (lockoutStep <= 0) {
+        if (lockoutTimer) window.clearInterval(lockoutTimer);
+        lockoutTimer = null;
+        if (lockoutMessage) {
+          lockoutMessage.textContent = "ACCESS DENIED — CREDENTIALS REVOKED";
+        }
+        try {
+          sessionStorage.setItem("taeglich:2026-02-02:locked", "1");
+        } catch {}
+      }
+    }, 650);
+  }
+
+  function enforceLockout() {
+    ensureLockoutOverlay();
+    lockoutOverlay?.classList.remove("hidden");
+    document.body.classList.add("locked");
+    lockScroll();
+    resetLockout();
+    if (lockoutCount) lockoutCount.textContent = "--";
+    if (lockoutMessage) {
+      lockoutMessage.textContent = "ACCESS DENIED — CREDENTIALS REVOKED";
+    }
+    const panel = lockoutOverlay?.querySelector(
+      ".lockout-panel",
+    ) as HTMLElement | null;
+    panel?.focus();
+  }
+
+  const RECYCLER_KEY = "taeglich:2026-02-02:recycler-start";
+  const recyclerStatus = document.getElementById("recycler-status");
+  const failureText =
+    "Recycler stalled after 01:00. No clean buffer recovered.";
+
+  function updateRecyclerStatus() {
+    if (!recyclerStatus) return;
+    const now = Date.now();
+    let start = now;
+    try {
+      const stored = localStorage.getItem(RECYCLER_KEY);
+      if (stored) start = Number(stored) || now;
+      else localStorage.setItem(RECYCLER_KEY, String(now));
+    } catch {}
+    const elapsed = now - start;
+    const hourMs = 60 * 60 * 1000;
+    if (elapsed >= hourMs) {
+      recyclerStatus.textContent = failureText;
+      return;
+    }
+    const remaining = hourMs - elapsed;
+    window.setTimeout(() => {
+      if (recyclerStatus) recyclerStatus.textContent = failureText;
+    }, remaining);
+  }
+
+  updateRecyclerStatus();
+
+  retryBtn?.addEventListener("click", () => {
+    if (errorPanel && !errorPanel.contains(retryBanner)) {
+      errorPanel.appendChild(retryBanner);
+    }
+    showLockout();
+  });
+
+  missionClose?.addEventListener("click", () => {
+    closeMissionLog();
+  });
+
+  document.querySelectorAll("[data-action='attempt']").forEach((el) => {
+    el.addEventListener("click", () => {
+      showLockout();
+    });
+  });
+
+  window.addEventListener("keydown", (event) => {
+    if (lockoutOverlay && !lockoutOverlay.classList.contains("hidden")) {
+      trapFocus(lockoutOverlay, event);
+      if (event.key !== "Tab") {
+        event.preventDefault();
+      }
+      return;
+    }
+    if (missionLog && !missionLog.classList.contains("hidden")) {
+      trapFocus(missionLog, event);
+      if (event.key === "Escape") {
+        event.preventDefault();
+        closeMissionLog();
+      }
+      return;
+    }
+    if (event.key === "F1") {
+      event.preventDefault();
+      openMissionLog();
+    }
+    if (event.key === "Escape") {
+      showLockout();
+    }
+  });
+
+  document.querySelectorAll("a, button").forEach((el) => {
+    el.addEventListener("click", (event) => {
+      if (document.body.classList.contains("locked")) {
+        event.preventDefault();
+      }
+    });
+  });
+
+  try {
+    if (sessionStorage.getItem("taeglich:2026-02-02:locked") === "1") {
+      enforceLockout();
+    }
+  } catch {}
+</script>
+
+<style>
+  .font-arcade {
+    font-family: "Press Start 2P", monospace;
+  }
+
+  .font-terminal {
+    font-family: "VT323", monospace;
+  }
+
+  .retro-sky {
+    background-image:
+      radial-gradient(
+        circle at 20% 20%,
+        rgba(124, 217, 255, 0.18),
+        transparent 45%
+      ),
+      radial-gradient(
+        circle at 80% 0%,
+        rgba(255, 140, 221, 0.15),
+        transparent 40%
+      ),
+      linear-gradient(180deg, #04040c 0%, #0b1126 45%, #1d0f2c 100%);
+  }
+
+  .scanlines {
+    background-image: linear-gradient(
+      rgba(255, 255, 255, 0.12) 1px,
+      rgba(0, 0, 0, 0) 1px
+    );
+    background-size: 100% 4px;
+    opacity: 0.6;
+    animation: scanMove 12s linear infinite;
+  }
+
+  .noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='1' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='0.3'/%3E%3C/svg%3E");
+  }
+
+  .window-frame {
+    box-shadow: inset 0 0 0 2px rgba(8, 12, 28, 0.8);
+  }
+
+  .retro-panel {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+      0 12px 24px rgba(0, 0, 0, 0.45);
+  }
+
+  .action-item {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    padding: 0.3rem 0.4rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .action-item:hover {
+    border-color: rgba(123, 216, 255, 0.4);
+    color: #ffd36b;
+  }
+
+  .lockout-overlay {
+    background:
+      radial-gradient(circle at top, rgba(255, 122, 122, 0.2), transparent 40%),
+      rgba(6, 8, 18, 0.9);
+    backdrop-filter: blur(4px);
+    overflow-y: auto;
+  }
+
+  .lockout-panel {
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.05),
+      0 24px 70px rgba(0, 0, 0, 0.7);
+  }
+
+  .locked #artifact-shell {
+    pointer-events: none;
+    filter: grayscale(0.2) brightness(0.7);
+  }
+
+  .overlay-open {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  .mission-log-close:focus-visible {
+    outline: 2px solid rgba(191, 233, 255, 0.8);
+    outline-offset: 2px;
+  }
+
+  .mission-log {
+    max-height: calc(100svh - 3rem);
+    overflow-y: auto;
+    width: min(100%, 26rem);
+  }
+
+  .lockout-panel {
+    max-height: calc(100svh - 3rem);
+    overflow-y: auto;
+  }
+
+  @media (max-width: 640px) {
+    .retro-panel,
+    .window-title,
+    .action-item,
+    .lockout-panel {
+      max-width: 100%;
+    }
+  }
+
+  .progress-bar {
+    background: linear-gradient(90deg, #ff7a7a 0%, #ffd36b 40%, #7bffbf 100%);
+    animation: progressSweep 3.6s linear infinite;
+  }
+
+  .retro-button {
+    border-width: 2px;
+    border-style: solid;
+    padding: 0.75rem 1.6rem;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 10px 25px rgba(0, 0, 0, 0.4);
+    transition:
+      transform 0.1s ease,
+      box-shadow 0.1s ease;
+  }
+
+  .retro-button:hover {
+    transform: translateY(-2px);
+  }
+
+  .retro-button:active {
+    transform: translateY(1px);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+  }
+
+  @keyframes scanMove {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(12px);
+    }
+  }
+
+  @keyframes progressSweep {
+    0% {
+      transform: translateX(-15%);
+    }
+    100% {
+      transform: translateX(15%);
+    }
+  }
+</style>
