@@ -11,6 +11,8 @@
   "dependencies": {
     "@astrojs/check": "^0.9.6",
     "@astrojs/sitemap": "^3.3.3",
+    "@fontsource/press-start-2p": "^5.2.7",
+    "@fontsource/vt323": "^5.2.7",
     "@tailwindcss/vite": "^4.1.18",
     "astro": "^5.16.15",
     "postcss": "^8.5.6",

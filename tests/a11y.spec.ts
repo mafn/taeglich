@@ -28,6 +28,16 @@ test.describe("Accessibility & SEO", () => {
     ).toBeTruthy();
     expect(texts01.some((t) => t.includes("Return to Archive"))).toBeTruthy();
 
+    // 2026-02-02 Assignment Failed
+    await page.goto("/d/2026-02-02");
+    const texts02 = await page.locator("noscript").allTextContents();
+    expect(
+      texts02.some((t) =>
+        t.includes("JavaScript is required to view the lockout overlay"),
+      ),
+    ).toBeTruthy();
+    expect(texts02.some((t) => t.includes("Return to Archive"))).toBeTruthy();
+
     await context.close();
   });
 
@@ -60,5 +70,14 @@ test.describe("Accessibility & SEO", () => {
     await expect(hiddenH1).toHaveCount(0);
 
     await context.close();
+  });
+
+  test("2026-02-02 lockout overlay appears on action attempt", async ({
+    page,
+  }) => {
+    await page.goto("/d/2026-02-02");
+    await page.click("[data-action='attempt']");
+    const overlay = page.locator("#lockout-overlay");
+    await expect(overlay).toBeVisible();
   });
 });
