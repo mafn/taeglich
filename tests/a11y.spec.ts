@@ -38,6 +38,13 @@ test.describe("Accessibility & SEO", () => {
     ).toBeTruthy();
     expect(texts02.some((t) => t.includes("Return to Archive"))).toBeTruthy();
 
+    // 2026-02-04 Blockfall
+    await page.goto("/d/2026-02-04");
+    const texts04 = await page.locator("noscript").allTextContents();
+    expect(
+      texts04.some((t) => t.includes("This game requires JavaScript to run")),
+    ).toBeTruthy();
+
     await context.close();
   });
 

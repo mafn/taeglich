@@ -1,0 +1,958 @@
+---
+// src/days/2026-02-04/Artifact.astro
+import "@fontsource/press-start-2p";
+---
+
+<>
+  <div class="tetris-game-container">
+    <div class="game-title">BLOCKFALL // VOID SHAPES</div>
+    <div class="game-area">
+      <canvas id="gameCanvas" width="300" height="540"></canvas>
+      <div class="sidebar">
+        <div class="next-piece">
+          <h3>NEXT</h3>
+          <canvas id="nextPieceCanvas" width="120" height="120"></canvas>
+        </div>
+        <div class="score">
+          <h3>SCORE</h3>
+          <p id="score">0</p>
+        </div>
+        <div class="hints">
+          <h3>CONTROLS</h3>
+          <p>&lt; &gt; : Move</p>
+          <p>↓ : Soft Drop</p>
+          <p>↑ / X : Rotate</p>
+          <p>Space : Hard Drop</p>
+          <p>R : Restart</p>
+          <p>M : Mute/Unmute</p>
+        </div>
+      </div>
+    </div>
+    <div class="controls-hint">
+      <p>
+        Use arrow keys to move, Space to hard drop. R to restart, M to mute.
+      </p>
+    </div>
+
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
+
+    <div id="gameOverOverlay" class="overlay" style="display: none;">
+      <div class="overlay-content">
+        <h2>GAME OVER</h2>
+        <p>SCORE: <span id="finalScore">0</span></p>
+        <button id="restartButton">TRY AGAIN</button>
+      </div>
+    </div>
+
+    <div class="mobile-controls">
+      <div class="d-pad">
+        <button id="btnLeft" class="control-btn">&lt;</button>
+        <div class="vertical-btns">
+          <button id="btnRotate" class="control-btn">↑</button>
+          <button id="btnDown" class="control-btn">↓</button>
+        </div>
+        <button id="btnRight" class="control-btn">&gt;</button>
+      </div>
+      <button id="btnDrop" class="control-btn big-btn">DROP</button>
+    </div>
+  </div>
+
+  <noscript>
+    <div class="noscript-fallback">
+      <p>
+        This game requires JavaScript to run. Please enable JavaScript in your
+        browser to play.
+      </p>
+      <p>
+        You can view other artifacts in the <a href="/archive/">archive</a>.
+      </p>
+    </div>
+  </noscript>
+
+  <style>
+    /* Retro-futurist styling for the game */
+    .tetris-game-container {
+      position: relative;
+      overflow: hidden; /* For scanlines and vignette */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background-color: #0d0d1a; /* Deep navy */
+      color: #00ffcc; /* Neon teal */
+      font-family:
+        "Press Start 2P", "Courier New", monospace; /* Example retro font */
+      text-shadow: 0 0 5px #00ffcc;
+      padding: 20px;
+      box-sizing: border-box; /* Ensure padding is included in total width/height */
+    }
+
+    /* Overlay Styles */
+    .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .overlay-content {
+      background: #0d0d1a;
+      border: 2px solid #ff33cc;
+      box-shadow: 0 0 20px #ff33cc;
+      padding: 40px;
+      text-align: center;
+      border-radius: 10px;
+    }
+
+    .overlay-content h2 {
+      color: #ff33cc;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #ff33cc;
+    }
+
+    .overlay-content p {
+      color: #00ffcc;
+      font-size: 1.2em;
+      margin-bottom: 30px;
+    }
+
+    button#restartButton {
+      background: transparent;
+      color: #ffcc00;
+      border: 2px solid #ffcc00;
+      padding: 15px 30px;
+      font-family: "Press Start 2P", monospace;
+      font-size: 1em;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 0 10px #ffcc00;
+    }
+
+    button#restartButton:hover {
+      background: #ffcc00;
+      color: #0d0d1a;
+      box-shadow: 0 0 20px #ffcc00;
+    }
+
+    /* Mobile Controls */
+    .mobile-controls {
+      display: none; /* Hidden by default on desktop */
+      margin-top: 20px;
+      gap: 20px;
+      z-index: 5;
+    }
+
+    .d-pad {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .vertical-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-btn {
+      width: 50px;
+      height: 50px;
+      background: rgba(13, 13, 26, 0.8);
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+      font-family: "Press Start 2P", monospace;
+      font-size: 1.2em;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 5px #00ffcc;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .control-btn:active {
+      background: #00ffcc;
+      color: #0d0d1a;
+    }
+
+    .big-btn {
+      width: 80px;
+      height: 80px;
+      border-color: #ff33cc;
+      color: #ff33cc;
+      box-shadow: 0 0 5px #ff33cc;
+      font-size: 0.8em;
+    }
+
+    .big-btn:active {
+      background: #ff33cc;
+      color: #0d0d1a;
+    }
+
+    .game-title {
+      color: #ff33cc; /* Neon pink */
+      text-shadow: 0 0 8px #ff33cc;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .game-area {
+      display: flex;
+      gap: 20px;
+      border: 2px solid #00ffcc;
+      box-shadow:
+        0 0 15px #00ffcc,
+        inset 0 0 10px #00ffcc;
+      padding: 10px;
+      background-color: #1a1a33;
+      position: relative;
+      z-index: 1; /* Ensure game area is above scanlines/vignette */
+    }
+
+    canvas {
+      background-color: #0a0a1a; /* Darker background for canvas */
+      border: 1px solid #00ffcc;
+      box-shadow: inset 0 0 5px #00ffcc;
+      display: block; /* Remove extra space below canvas */
+    }
+
+    .sidebar {
+      width: 180px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .next-piece,
+    .score,
+    .hints {
+      background-color: #0d0d1a;
+      border: 1px solid #ffcc00; /* Amber */
+      box-shadow:
+        0 0 8px #ffcc00,
+        inset 0 0 5px #ffcc00;
+      padding: 10px;
+      text-align: center;
+    }
+
+    h3 {
+      color: #ffcc00; /* Amber */
+      text-shadow: 0 0 5px #ffcc00;
+      margin-top: 0;
+      margin-bottom: 10px;
+      font-size: 0.9em;
+    }
+
+    p {
+      margin: 5px 0;
+      font-size: 0.7em;
+      line-height: 1.4;
+    }
+
+    .controls-hint {
+      margin-top: 20px;
+      color: #ff33cc;
+      text-shadow: 0 0 5px #ff33cc;
+      font-size: 0.9em;
+      text-align: center;
+    }
+
+    /* CRT Effects */
+    .scanlines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0) 50%,
+        rgba(0, 0, 0, 0.2) 50%
+      );
+      background-size: 100% 4px;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    .vignette {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      box-shadow:
+        inset 0 0 100px rgba(0, 0, 0, 0.5),
+        inset 0 0 100px rgba(0, 0, 0, 0.5); /* Darken corners */
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .game-area {
+        flex-direction: column;
+        align-items: center;
+      }
+      .sidebar {
+        width: 100%;
+        display: none; /* Hide sidebar on mobile to save space */
+      }
+      .controls-hint {
+        display: none; /* Hide text hints on mobile */
+      }
+      .mobile-controls {
+        display: flex;
+      }
+      h1 {
+        font-size: 1em;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+
+  <script is:inline>
+    document.addEventListener("DOMContentLoaded", () => {
+      const gameCanvas = document.getElementById("gameCanvas");
+      const nextPieceCanvas = document.getElementById("nextPieceCanvas");
+      const scoreDisplay = document.getElementById("score");
+
+      if (!gameCanvas || !nextPieceCanvas || !scoreDisplay) {
+        console.error("Missing canvas or score display elements.");
+        return;
+      }
+
+      const gameCtx = gameCanvas.getContext("2d");
+      const nextPieceCtx = nextPieceCanvas.getContext("2d");
+
+      const COLS = 10;
+      const ROWS = 18;
+      const BLOCK_SIZE = gameCanvas.width / COLS;
+
+      const BOARD_WIDTH = COLS * BLOCK_SIZE;
+      const BOARD_HEIGHT = ROWS * BLOCK_SIZE;
+
+      gameCanvas.width = BOARD_WIDTH;
+      gameCanvas.height = BOARD_HEIGHT;
+
+      const NEXT_COLS = 4;
+      const NEXT_ROWS = 4;
+      const NEXT_BLOCK_SIZE = nextPieceCanvas.width / NEXT_COLS;
+
+      // Game state
+      let board = Array(ROWS)
+        .fill(null)
+        .map(() => Array(COLS).fill(0));
+      let currentPiece;
+      let nextPiece;
+      let score = 0;
+      let gameOver = false;
+      let gameInterval;
+      const DROP_INTERVAL = 400; // milliseconds
+
+      // Colors for blocks
+      const BLOCK_COLORS = [
+        "#000000", // 0: empty
+        "#00FFFF", // Cyan
+        "#0000FF", // Blue
+        "#FFA500", // Orange
+        "#FFFF00", // Yellow
+        "#00FF00", // Green
+        "#800080", // Purple
+        "#FF0000", // Red
+        "#FF33CC", // Neon Pink (for weird shapes)
+        "#FFCC00", // Amber (for weird shapes)
+        "#00FFCC", // Neon Teal (for weird shapes)
+      ];
+
+      // Weird Shapes (defined as arrays of coordinates in a 4x4 bounding box)
+      // Each coordinate [x, y] is relative to the piece's origin [0,0]
+      const SHAPES = [
+        // P shape (2x2 block with one extra)
+        [
+          [0, 0],
+          [1, 0],
+          [0, 1],
+          [1, 1],
+          [2, 1],
+        ],
+        // U shape (hollow 3x2 with an open top)
+        [
+          [0, 0],
+          [0, 1],
+          [0, 2],
+          [2, 0],
+          [2, 1],
+          [2, 2],
+          [1, 2],
+        ],
+        // Plus shape (center + 4 arms)
+        [
+          [1, 0],
+          [0, 1],
+          [1, 1],
+          [2, 1],
+          [1, 2],
+        ],
+        // Snake-5 (zigzag of length 5)
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [2, 1],
+          [2, 2],
+        ],
+        // W shape (staggered 3-step)
+        [
+          [0, 0],
+          [0, 1],
+          [1, 1],
+          [1, 2],
+          [2, 2],
+        ],
+        // Long-L (L with a 4-block stem)
+        [
+          [0, 0],
+          [0, 1],
+          [0, 2],
+          [0, 3],
+          [1, 3],
+        ],
+      ];
+
+      // Assign colors to specific shapes (index in SHAPES array)
+      const SHAPE_COLORS = [8, 9, 10, 8, 9, 10]; // Example: assign neon pink, amber, neon teal
+
+      // Piece object constructor
+      function Piece(shapeIndex, colorIndex) {
+        this.shape = SHAPES[shapeIndex];
+        this.color = BLOCK_COLORS[colorIndex];
+        this.x =
+          Math.floor(COLS / 2) -
+          Math.ceil(this.shape.reduce((max, p) => Math.max(max, p[0]), 0) / 2); // Center piece horizontally
+        this.y = 0; // Start at the top
+        this.rotation = 0; // Current rotation state
+      }
+
+      // Draw a single block
+      function drawBlock(ctx, x, y, color, blockSize) {
+        ctx.fillStyle = color;
+        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+        ctx.strokeStyle = "#05050f"; // Block outlines
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x * blockSize, y * blockSize, blockSize, blockSize);
+      }
+
+      // Draw piece on a given context
+      function drawPiece(ctx, piece, blockSize) {
+        piece.shape.forEach((p) => {
+          drawBlock(
+            ctx,
+            piece.x + p[0],
+            piece.y + p[1],
+            piece.color,
+            blockSize,
+          );
+        });
+      }
+
+      // Draw the game board
+      function drawBoard() {
+        gameCtx.clearRect(0, 0, BOARD_WIDTH, BOARD_HEIGHT);
+        // Draw grid
+        gameCtx.strokeStyle = "#05050f";
+        gameCtx.lineWidth = 1;
+        for (let x = 0; x <= COLS; x++) {
+          gameCtx.beginPath();
+          gameCtx.moveTo(x * BLOCK_SIZE, 0);
+          gameCtx.lineTo(x * BLOCK_SIZE, BOARD_HEIGHT);
+          gameCtx.stroke();
+        }
+        for (let y = 0; y <= ROWS; y++) {
+          gameCtx.beginPath();
+          gameCtx.moveTo(0, y * BLOCK_SIZE);
+          gameCtx.lineTo(BOARD_WIDTH, y * BLOCK_SIZE);
+          gameCtx.stroke();
+        }
+
+        // Draw settled blocks
+        for (let row = 0; row < ROWS; row++) {
+          for (let col = 0; col < COLS; col++) {
+            if (board[row][col] !== 0) {
+              drawBlock(
+                gameCtx,
+                col,
+                row,
+                BLOCK_COLORS[board[row][col]],
+                BLOCK_SIZE,
+              );
+            }
+          }
+        }
+
+        // Draw current piece
+        if (currentPiece) {
+          drawPiece(gameCtx, currentPiece, BLOCK_SIZE);
+        }
+      }
+
+      // Draw next piece preview
+      function drawNextPiece() {
+        nextPieceCtx.clearRect(
+          0,
+          0,
+          nextPieceCanvas.width,
+          nextPieceCanvas.height,
+        );
+        // Draw 4x4 grid
+        nextPieceCtx.strokeStyle = "#05050f";
+        nextPieceCtx.lineWidth = 1;
+        for (let x = 0; x <= NEXT_COLS; x++) {
+          nextPieceCtx.beginPath();
+          nextPieceCtx.moveTo(x * NEXT_BLOCK_SIZE, 0);
+          nextPieceCtx.lineTo(x * NEXT_BLOCK_SIZE, nextPieceCanvas.height);
+          nextPieceCtx.stroke();
+        }
+        for (let y = 0; y <= NEXT_ROWS; y++) {
+          nextPieceCtx.beginPath();
+          nextPieceCtx.moveTo(0, y * NEXT_BLOCK_SIZE);
+          nextPieceCtx.lineTo(nextPieceCanvas.width, y * NEXT_BLOCK_SIZE);
+          nextPieceCtx.stroke();
+        }
+
+        if (nextPiece) {
+          // Center the next piece in the preview box
+          const shapeWidth =
+            nextPiece.shape.reduce((max, p) => Math.max(max, p[0]), 0) + 1;
+          const shapeHeight =
+            nextPiece.shape.reduce((max, p) => Math.max(max, p[1]), 0) + 1;
+          const offsetX = Math.floor((NEXT_COLS - shapeWidth) / 2);
+          const offsetY = Math.floor((NEXT_ROWS - shapeHeight) / 2);
+
+          nextPiece.shape.forEach((p) => {
+            drawBlock(
+              nextPieceCtx,
+              p[0] + offsetX,
+              p[1] + offsetY,
+              nextPiece.color,
+              NEXT_BLOCK_SIZE,
+            );
+          });
+        }
+      }
+
+      // Generate a random piece
+      function generatePiece() {
+        const shapeIndex = Math.floor(Math.random() * SHAPES.length);
+        const colorIndex = SHAPE_COLORS[shapeIndex];
+        return new Piece(shapeIndex, colorIndex);
+      }
+
+      // Check for collision
+      function collide(piece, offsetX = 0, offsetY = 0) {
+        for (const p of piece.shape) {
+          const newX = piece.x + p[0] + offsetX;
+          const newY = piece.y + p[1] + offsetY;
+
+          if (newX < 0 || newX >= COLS || newY >= ROWS) {
+            return true; // Out of bounds
+          }
+          if (newY < 0) {
+            // Allow pieces to spawn slightly above the board
+            continue;
+          }
+          if (board[newY] && board[newY][newX] !== 0) {
+            return true; // Collision with existing block
+          }
+        }
+        return false;
+      }
+
+      // Merge piece with board
+      function mergePiece() {
+        currentPiece.shape.forEach((p) => {
+          const boardX = currentPiece.x + p[0];
+          const boardY = currentPiece.y + p[1];
+          if (boardY >= 0 && boardY < ROWS && boardX >= 0 && boardX < COLS) {
+            board[boardY][boardX] = BLOCK_COLORS.indexOf(currentPiece.color);
+          }
+        });
+        score += 10; // Score for placement
+        scoreDisplay.textContent = score;
+      }
+
+      // Clear full lines
+      function clearLines() {
+        let linesCleared = 0;
+        for (let row = ROWS - 1; row >= 0; row--) {
+          if (board[row].every((cell) => cell !== 0)) {
+            // Line is full, clear it
+            for (let r = row; r > 0; r--) {
+              board[r] = [...board[r - 1]];
+            }
+            board[0].fill(0); // Top row is empty
+            linesCleared++;
+            row++; // Recheck the same row as it's now filled with the one above
+          }
+        }
+        if (linesCleared > 0) {
+          score += linesCleared * 100;
+          scoreDisplay.textContent = score;
+        }
+      }
+
+      // Move piece
+      function movePiece(direction) {
+        if (gameOver) return;
+        const newX = currentPiece.x + direction;
+        if (!collide(currentPiece, newX - currentPiece.x, 0)) {
+          currentPiece.x = newX;
+        }
+        drawBoard();
+      }
+
+      // Rotate piece
+      function rotatePiece() {
+        if (gameOver) return;
+        const originalShape = [...currentPiece.shape];
+        const rotatedShape = currentPiece.shape.map(([x, y]) => {
+          // Rotate 90 degrees clockwise around the origin [0,0]
+          // (x, y) -> (-y, x) relative to shape bounding box
+          // For a 4x4 box, usually (x,y) -> (3-y, x) to keep it within the 4x4
+          // Simplified for 0,0 origin within a 4x4:
+          return [3 - y, x]; // Rotate around a 4x4 top-left origin
+        });
+
+        const testPiece = { ...currentPiece, shape: rotatedShape };
+
+        // Simple collision check for rotation (no wall kicks)
+        if (!collide(testPiece)) {
+          currentPiece.shape = rotatedShape;
+        } else {
+          // If collision, try to nudge it left/right (minimal wall kick for weird shapes)
+          let moved = false;
+          for (let i = 1; i <= 2; i++) {
+            if (!collide(testPiece, i, 0)) {
+              currentPiece.x += i;
+              currentPiece.shape = rotatedShape;
+              moved = true;
+              break;
+            }
+            if (!collide(testPiece, -i, 0)) {
+              currentPiece.x -= i;
+              currentPiece.shape = rotatedShape;
+              moved = true;
+              break;
+            }
+          }
+          if (!moved) {
+            currentPiece.shape = originalShape; // Revert if cannot rotate
+          }
+        }
+        drawBoard();
+      }
+
+      // Soft drop
+      function softDrop() {
+        if (gameOver) return;
+        if (!collide(currentPiece, 0, 1)) {
+          currentPiece.y++;
+          drawBoard();
+        } else {
+          lockPiece();
+        }
+      }
+
+      // Hard drop
+      function hardDrop() {
+        if (gameOver) return;
+        while (!collide(currentPiece, 0, 1)) {
+          currentPiece.y++;
+          score += 1; // Small score for hard drop
+        }
+        lockPiece();
+      }
+
+      // Lock piece in place
+      function lockPiece() {
+        mergePiece();
+        clearLines();
+        spawnNewPiece();
+      }
+
+      // Spawn new piece
+      function spawnNewPiece() {
+        if (!nextPiece) {
+          nextPiece = generatePiece();
+        }
+        currentPiece = nextPiece;
+        nextPiece = generatePiece();
+
+        drawNextPiece();
+
+        if (collide(currentPiece, 0, 0)) {
+          gameOver = true;
+          clearInterval(gameInterval);
+          if (oscillator) {
+            oscillator.stop();
+            oscillator = null;
+          }
+          document.getElementById("finalScore").textContent = score;
+          document.getElementById("gameOverOverlay").style.display = "flex";
+        }
+      }
+
+      // Game tick
+      function gameTick() {
+        if (gameOver) return;
+        if (!collide(currentPiece, 0, 1)) {
+          currentPiece.y++;
+        } else {
+          lockPiece();
+        }
+        drawBoard();
+      }
+
+      // Web Audio chiptune
+      let audioContext;
+      let oscillator;
+      let gainNode;
+      // Initialize mute state from session storage, default to false
+      let isMuted = sessionStorage.getItem("tetrisMuted") === "true";
+
+      const NOTES = {
+        C4: 261.63,
+        D4: 293.66,
+        E4: 329.63,
+        F4: 349.23,
+        G4: 392.0,
+        A4: 440.0,
+        B4: 493.88,
+        C5: 523.25,
+        R: 0, // Rest
+      };
+      const MELODY = [
+        NOTES.C4,
+        NOTES.R,
+        NOTES.E4,
+        NOTES.R,
+        NOTES.G4,
+        NOTES.R,
+        NOTES.C5,
+        NOTES.R,
+        NOTES.G4,
+        NOTES.R,
+        NOTES.E4,
+        NOTES.R,
+        NOTES.C4,
+        NOTES.R,
+        NOTES.G4,
+        NOTES.R,
+      ];
+      const NOTE_DURATION = 0.15; // seconds per note
+
+      function initAudio() {
+        if (!audioContext) {
+          audioContext = new (
+            window.AudioContext || window.webkitAudioContext
+          )();
+          gainNode = audioContext.createGain();
+          gainNode.connect(audioContext.destination);
+          gainNode.gain.value = 0.1; // Low volume
+        }
+      }
+
+      function playChiptune() {
+        if (isMuted || !audioContext) return;
+
+        let noteIndex = 0;
+        function playNote() {
+          if (isMuted || gameOver) {
+            if (oscillator) {
+              oscillator.stop();
+              oscillator = null;
+            }
+            return;
+          }
+
+          const frequency = MELODY[noteIndex];
+          if (frequency === 0) {
+            // Rest
+            noteIndex = (noteIndex + 1) % MELODY.length;
+            setTimeout(playNote, NOTE_DURATION * 1000);
+            return;
+          }
+
+          if (oscillator) {
+            oscillator.stop();
+            oscillator = null;
+          }
+
+          oscillator = audioContext.createOscillator();
+          oscillator.type = "square"; // Chiptune square wave
+          oscillator.frequency.setValueAtTime(
+            frequency,
+            audioContext.currentTime,
+          );
+          oscillator.connect(gainNode);
+          oscillator.start();
+          oscillator.stop(audioContext.currentTime + NOTE_DURATION * 0.9); // Play note for 90% of duration
+
+          noteIndex = (noteIndex + 1) % MELODY.length;
+          setTimeout(playNote, NOTE_DURATION * 1000);
+        }
+        playNote();
+      }
+
+      function toggleMute() {
+        isMuted = !isMuted;
+        sessionStorage.setItem("tetrisMuted", isMuted);
+        if (isMuted) {
+          if (oscillator) {
+            oscillator.stop();
+            oscillator = null;
+          }
+          console.log("Music muted");
+        } else {
+          console.log("Music unmuted");
+          if (audioContext && audioContext.state === "suspended") {
+            audioContext.resume();
+          }
+          playChiptune();
+        }
+      }
+
+      // Initialize game
+      function initGame() {
+        document.getElementById("gameOverOverlay").style.display = "none";
+        board = Array(ROWS)
+          .fill(null)
+          .map(() => Array(COLS).fill(0));
+        score = 0;
+        gameOver = false;
+        scoreDisplay.textContent = score;
+        currentPiece = null;
+        nextPiece = null; // Ensure nextPiece is regenerated
+
+        spawnNewPiece(); // Spawns first currentPiece and nextPiece
+        if (gameInterval) {
+          clearInterval(gameInterval);
+        }
+        gameInterval = setInterval(gameTick, DROP_INTERVAL);
+        drawBoard(); // Initial draw
+        drawNextPiece();
+        initAudio(); // Initialize audio context
+        if (!isMuted) {
+          playChiptune(); // Start music if not muted
+        }
+      }
+
+      // Keyboard input handler
+      document.addEventListener("keydown", (e) => {
+        if (gameOver && e.key.toLowerCase() !== "r") return; // Only allow restart if game over
+
+        const key = e.key.toLowerCase();
+        if (
+          [
+            "arrowup",
+            "arrowdown",
+            "arrowleft",
+            "arrowright",
+            " ",
+            "x",
+            "m",
+            "r",
+          ].includes(key)
+        ) {
+          if (key === " " || key.startsWith("arrow")) e.preventDefault();
+        }
+
+        switch (key) {
+          case "arrowleft":
+            movePiece(-1);
+            break;
+          case "arrowright":
+            movePiece(1);
+            break;
+          case "arrowdown":
+            softDrop();
+            break;
+          case "arrowup":
+          case "x": // X key for rotation
+            rotatePiece();
+            break;
+          case " ": // Space for hard drop
+            hardDrop();
+            break;
+          case "r": // R for restart
+            initGame();
+            break;
+          case "m": // M for mute/unmute
+            toggleMute();
+            break;
+        }
+      });
+
+      // Mobile Controls
+      const btnLeft = document.getElementById("btnLeft");
+      const btnRight = document.getElementById("btnRight");
+      const btnRotate = document.getElementById("btnRotate");
+      const btnDown = document.getElementById("btnDown");
+      const btnDrop = document.getElementById("btnDrop");
+      const restartButton = document.getElementById("restartButton");
+
+      function addTouchHandler(element, action) {
+        if (!element) return;
+        element.addEventListener("touchstart", (e) => {
+          e.preventDefault(); // Prevent double firing or scrolling
+          if (!gameOver) action();
+        });
+        element.addEventListener("mousedown", (e) => {
+          e.preventDefault();
+          if (!gameOver) action();
+        });
+      }
+
+      addTouchHandler(btnLeft, () => movePiece(-1));
+      addTouchHandler(btnRight, () => movePiece(1));
+      addTouchHandler(btnRotate, () => rotatePiece());
+      addTouchHandler(btnDown, () => softDrop());
+      addTouchHandler(btnDrop, () => hardDrop());
+
+      if (restartButton) {
+        restartButton.addEventListener("click", initGame);
+        restartButton.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          initGame();
+        });
+      }
+
+      // User gesture to resume audio context
+      document.addEventListener(
+        "click",
+        () => {
+          if (audioContext && audioContext.state === "suspended") {
+            audioContext.resume();
+          }
+          if (!isMuted && !oscillator) {
+            // If unmuted and music not playing (e.g., after initial load before user interaction)
+            playChiptune();
+          }
+        },
+        { once: true },
+      );
+
+      initGame(); // Start the game when the page loads
+    });
+  </script>
+</>
