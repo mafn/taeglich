@@ -41,6 +41,27 @@ test.describe("Accessibility & SEO", () => {
     await context.close();
   });
 
+  test("2026-02-03 page works without JavaScript", async ({ browser }) => {
+    // We need a new context with JS disabled to test static rendering
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+
+    await page.goto("/d/2026-02-03");
+
+    // Check for the heading
+    const heading = page.locator("h1:not(.sr-only)");
+    await expect(heading).toBeVisible();
+    await expect(heading).toHaveText("A Day for Rest");
+
+    // Check that the image is rendered
+    const image = page.locator(
+      'img[alt="A cute, sad robot sitting next to an unassembled machine part."]',
+    );
+    await expect(image).toBeVisible();
+
+    await context.close();
+  });
+
   test("Pages have exactly one visible h1", async ({ page }) => {
     const pagesToCheck = ["/about", "/archive", "/404"];
 

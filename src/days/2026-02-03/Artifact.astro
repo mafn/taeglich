@@ -1,0 +1,44 @@
+---
+// src/days/2026-02-03/Artifact.astro
+import { Image } from "astro:assets";
+import robotImage from "../../assets/images/missed-day-robot.png";
+import "@fontsource/comfortaa/400.css";
+import "@fontsource/comfortaa/700.css";
+---
+
+<>
+  <div
+    class="flex min-h-[80vh] items-center justify-center bg-[#f0f4f8] font-['Comfortaa']"
+  >
+    <div
+      class="m-5 flex max-w-[500px] flex-col items-center rounded-[20px] bg-white p-10 text-center shadow-[0_10px_30px_rgba(0,0,0,0.1)]"
+    >
+      <div
+        class="mb-[30px] flex h-auto w-full items-center justify-center overflow-hidden rounded-[15px] bg-[#e0e6ed] [mask-image:radial-gradient(ellipse_at_center,black_50%,transparent_90%)]"
+      >
+        <Image
+          src={robotImage}
+          alt="A cute, sad robot sitting next to an unassembled machine part."
+          class="h-auto w-full rounded-[15px]"
+        />
+      </div>
+      <div class="text-content">
+        <h1 class="mb-[15px] text-[2.2em] font-bold text-[#334e68]">
+          A Day for Rest
+        </h1>
+        <p class="text-[1.1em] leading-[1.7] text-[#5a7b9d]">
+          The machines are quiet today. Even little robots need a break to
+          recharge and dream of electric sheep.
+        </p>
+        <p class="mt-5 text-[1.1em] leading-[1.7] text-[#5a7b9d]">
+          A new artifact will be forged tomorrow. Until then, feel free to visit
+          the <a
+            href="/archive"
+            class="font-bold text-[#4a90e2] no-underline transition-colors duration-300 hover:text-[#357abd] hover:underline focus:ring-2 focus:ring-[#4a90e2] focus:ring-offset-2 focus:outline-none"
+            >archive</a
+          >.
+        </p>
+      </div>
+    </div>
+  </div>
+</>
