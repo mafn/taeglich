@@ -11,6 +11,7 @@
   "dependencies": {
     "@astrojs/check": "^0.9.6",
     "@astrojs/sitemap": "^3.3.3",
+    "@fontsource/comfortaa": "^5.2.8",
     "@fontsource/press-start-2p": "^5.2.7",
     "@fontsource/vt323": "^5.2.7",
     "@tailwindcss/vite": "^4.1.18",
@@ -24,8 +25,8 @@
     "eslint": "^9.17.0",
     "eslint-plugin-package-json": "^0.23.0",
     "jsonc-eslint-parser": "^2.4.0",
-    "prettier": "^3.8.1",
-    "prettier-plugin-astro": "^0.14.1",
+    "prettier": "3.8.1",
+    "prettier-plugin-astro": "0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2"
   }
 }
