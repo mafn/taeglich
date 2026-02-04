@@ -1,0 +1,342 @@
+---
+// src/days/2026-02-05/Artifact.astro
+import { getSeed, mulberry32 } from "../../lib/rng";
+
+const date = "2026-02-05";
+const seed = getSeed(date, "content");
+const rng = mulberry32(seed);
+
+// Deterministic parameters
+const hue = Math.floor(rng() * 360);
+const pulseDuration = 4 + rng() * 4; // 4s to 8s
+const strokeWidth = 1 + rng() * 2; // 1px to 3px
+const circleSize = 40 + rng() * 20; // 40% to 60% of viewport min
+
+const color = `hsl(${hue}, 40%, 70%)`;
+const glowColor = `hsl(${hue}, 50%, 50%)`;
+const bgColor = `hsl(${hue}, 30%, 6%)`;
+const bgGlow = `hsl(${hue}, 35%, 12%)`;
+---
+
+<div
+  class="zen-container"
+  data-pulse={pulseDuration.toFixed(2)}
+  style={`--pulse-duration: ${pulseDuration}s; --circle-color: ${color}; --glow-color: ${glowColor}; --stroke-width: ${strokeWidth}; --circle-size: ${circleSize}vmin; --bg-color: ${bgColor}; --bg-glow: ${bgGlow};`}
+>
+  <div class="circle-wrapper">
+    <svg viewBox="0 0 100 100" class="zen-svg" aria-hidden="true">
+      <circle cx="50" cy="50" r="40" class="zen-circle"></circle>
+    </svg>
+  </div>
+
+  <div class="instructions">
+    <p>Breathe in.</p>
+    <p class="out">Breathe out.</p>
+  </div>
+
+  <div class="audio-toggle">
+    <button id="audioToggle" type="button" aria-pressed="false">
+      Sound: off
+    </button>
+  </div>
+</div>
+
+<script is:inline>
+  const btn = document.getElementById("audioToggle");
+  const container = document.querySelector(".zen-container");
+  let ctx = null;
+  let oscillators = [];
+  let lfo = null;
+  let lfoGain = null;
+  let ampLfo = null;
+  let ampGain = null;
+  let filter = null;
+  let master = null;
+  let noise = null;
+  let noiseGain = null;
+
+  function startAudio() {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    ctx = new AudioCtx();
+
+    master = ctx.createGain();
+    master.gain.value = 0.018;
+    master.connect(ctx.destination);
+
+    filter = ctx.createBiquadFilter();
+    filter.type = "lowpass";
+    filter.frequency.value = 700;
+    filter.Q.value = 0.5;
+    filter.connect(master);
+
+    const pulse = parseFloat(container?.dataset?.pulse || "6");
+    const breathHz = 1 / Math.max(3, pulse);
+
+    lfo = ctx.createOscillator();
+    lfo.type = "sine";
+    lfo.frequency.value = breathHz;
+    lfoGain = ctx.createGain();
+    lfoGain.gain.value = 180;
+    lfo.connect(lfoGain);
+    lfoGain.connect(filter.frequency);
+    lfo.start();
+
+    ampLfo = ctx.createOscillator();
+    ampLfo.type = "sine";
+    ampLfo.frequency.value = breathHz;
+    ampGain = ctx.createGain();
+    ampGain.gain.value = 0.006;
+    ampLfo.connect(ampGain);
+    ampGain.connect(master.gain);
+    ampLfo.start();
+
+    const freqs = [174, 261, 348];
+    oscillators = [];
+    freqs.forEach((f) => {
+      const sine = ctx.createOscillator();
+      const sineGain = ctx.createGain();
+      sine.type = "sine";
+      sine.detune.value = (Math.random() - 0.5) * 6;
+      sine.frequency.value = f;
+      sineGain.gain.value = 0.6;
+      sine.connect(sineGain);
+      sineGain.connect(filter);
+      sine.start();
+      oscillators.push(sine);
+
+      const tri = ctx.createOscillator();
+      const triGain = ctx.createGain();
+      tri.type = "triangle";
+      tri.detune.value = (Math.random() - 0.5) * 8;
+      tri.frequency.value = f * 2;
+      triGain.gain.value = 0.12;
+      tri.connect(triGain);
+      triGain.connect(filter);
+      tri.start();
+      oscillators.push(tri);
+    });
+
+    const noiseBuffer = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const noiseData = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noiseData.length; i += 1) {
+      noiseData[i] = (Math.random() * 2 - 1) * 0.2;
+    }
+    noise = ctx.createBufferSource();
+    noise.buffer = noiseBuffer;
+    noise.loop = true;
+    noiseGain = ctx.createGain();
+    noiseGain.gain.value = 0.002;
+    noise.connect(noiseGain);
+    noiseGain.connect(filter);
+    noise.start();
+
+    btn.textContent = "Sound: on";
+    btn.setAttribute("aria-pressed", "true");
+  }
+
+  function stopAudio() {
+    oscillators.forEach((o) => o.stop());
+    oscillators = [];
+    if (noise) noise.stop();
+    noise = null;
+    noiseGain = null;
+    if (lfo) lfo.stop();
+    lfo = null;
+    lfoGain = null;
+    if (ampLfo) ampLfo.stop();
+    ampLfo = null;
+    ampGain = null;
+    filter = null;
+    master = null;
+    if (ctx) ctx.close();
+    ctx = null;
+    btn.textContent = "Sound: off";
+    btn.setAttribute("aria-pressed", "false");
+  }
+
+  btn?.addEventListener("click", async () => {
+    if (!ctx) {
+      startAudio();
+      if (ctx.state === "suspended") await ctx.resume();
+    } else {
+      stopAudio();
+    }
+  });
+</script>
+
+<style>
+  .zen-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background: radial-gradient(
+      circle at 50% 40%,
+      var(--bg-glow) 0%,
+      var(--bg-color) 55%,
+      #050505 100%
+    );
+    color: #ffffff;
+    overflow: hidden;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+  }
+
+  :global(body) {
+    background-color: var(--bg-color);
+    color: #ffffff;
+  }
+
+  :global(header),
+  :global(footer) {
+    background-color: var(--bg-color);
+  }
+
+  :global(header a),
+  :global(footer p) {
+    color: #c9c9c9;
+  }
+
+  :global(header a:hover) {
+    color: #ffffff;
+  }
+
+  .circle-wrapper {
+    position: relative;
+    width: var(--circle-size);
+    height: var(--circle-size);
+  }
+
+  .zen-svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 0 15px var(--glow-color));
+  }
+
+  .zen-circle {
+    fill: none;
+    stroke: var(--circle-color);
+    stroke-width: var(--stroke-width);
+    stroke-linecap: round;
+    transform-origin: center;
+    animation: breathe var(--pulse-duration, 6s) ease-in-out infinite;
+  }
+
+  .instructions {
+    margin-top: 3rem;
+    position: relative;
+    height: 1.4rem;
+    width: 100%;
+    text-align: center;
+    font-weight: 300;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    pointer-events: none;
+  }
+
+  .instructions p {
+    margin: 0;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    opacity: 0;
+    color: rgba(255, 255, 255, 0.7);
+    animation-duration: var(--pulse-duration, 6s);
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
+  }
+
+  .instructions p:first-child {
+    animation-name: text-fade-in;
+  }
+
+  .instructions p.out {
+    animation-name: text-fade-out;
+  }
+
+  @keyframes breathe {
+    0%,
+    100% {
+      transform: scale(0.8);
+      opacity: 0.3;
+      stroke-width: calc(var(--stroke-width) * 1.5);
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+      stroke-width: var(--stroke-width);
+    }
+  }
+
+  @keyframes text-fade-in {
+    0%,
+    12%,
+    50%,
+    100% {
+      opacity: 0;
+    }
+    18%,
+    45% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes text-fade-out {
+    0%,
+    50%,
+    58%,
+    100% {
+      opacity: 0;
+    }
+    62%,
+    92% {
+      opacity: 1;
+    }
+  }
+
+  .audio-toggle {
+    margin-top: 2rem;
+  }
+
+  .audio-toggle button {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.7);
+    padding: 0.5rem 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    border-radius: 999px;
+    transition:
+      border-color 200ms ease,
+      color 200ms ease;
+  }
+
+  .audio-toggle button:hover {
+    border-color: rgba(255, 255, 255, 0.6);
+    color: #ffffff;
+  }
+
+  .audio-toggle button:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 3px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .zen-circle,
+    .instructions p {
+      animation: none;
+    }
+    .instructions p {
+      opacity: 1;
+    }
+    .instructions p.out {
+      display: none;
+    }
+  }
+</style>
