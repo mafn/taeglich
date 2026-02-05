@@ -59,5 +59,7 @@ const latestDay = days[0]?.date;
     : latestDay
       ? `/d/${latestDay}`
       : "/archive";
+
+  // Use replace to keep history clean
   window.location.replace(target);
 </script>

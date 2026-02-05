@@ -35,12 +35,15 @@ if (!ArtifactLoader) {
 }
 
 const { default: Artifact } = (await ArtifactLoader()) as any;
+
+const canonicalURL = new URL(`/d/${date}`, Astro.site);
 ---
 
 <BaseLayout
   title={meta.title || `Artifact ${date}`}
   description={meta.description}
   image={meta.ogImage}
+  canonicalURL={canonicalURL}
 >
   <Artifact />
 </BaseLayout>

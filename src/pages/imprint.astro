@@ -1,0 +1,88 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  PUBLIC_IMPRINT_NAME,
+  PUBLIC_IMPRINT_ADDRESS_LINE1,
+  PUBLIC_IMPRINT_ADDRESS_LINE2,
+  PUBLIC_IMPRINT_ADDRESS_LINE3,
+  PUBLIC_IMPRINT_EMAIL,
+} from "astro:env/client";
+
+const providerName = PUBLIC_IMPRINT_NAME;
+const addressLines = [
+  PUBLIC_IMPRINT_ADDRESS_LINE1,
+  PUBLIC_IMPRINT_ADDRESS_LINE2,
+  PUBLIC_IMPRINT_ADDRESS_LINE3,
+].filter(Boolean);
+const contactEmail = PUBLIC_IMPRINT_EMAIL;
+---
+
+<BaseLayout
+  title="Imprint"
+  description="Provider information for taeglich."
+  renderH1={false}
+  noindex={true}
+>
+  <div class="mx-auto max-w-2xl px-6 py-16">
+    <header class="mb-10">
+      <p
+        class="mb-2 font-mono text-[10px] tracking-[0.3em] text-gray-400 uppercase"
+      >
+        Legal Notice
+      </p>
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
+        Imprint
+      </h1>
+      <p class="mt-2 text-sm text-gray-500">Project website: taegli.ch</p>
+    </header>
+
+    <div class="space-y-12 text-base leading-relaxed text-gray-600">
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Responsible Party
+        </h2>
+        <p class="mb-4">taeglich is a personal, non-commercial project by:</p>
+        <address class="text-gray-700 not-italic">
+          <span class="block font-medium text-gray-900">{providerName}</span>
+          {addressLines.map((line) => <span class="block">{line}</span>)}
+          <a
+            class="mt-2 block text-gray-900 underline underline-offset-4 hover:text-gray-600"
+            href={`mailto:${contactEmail}`}
+          >
+            {contactEmail}
+          </a>
+        </address>
+        <p class="mt-4 text-sm italic">
+          If you believe your intellectual property rights have been infringed,
+          please contact me via the email above and I will review the matter
+          promptly.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Copyright & Usage
+        </h2>
+        <p>
+          Unless otherwise stated, the content on this site is created under my
+          responsibility, including content generated with AI assistance.
+          Third-party names and brands are the property of their respective
+          owners and are used only for descriptive/reference purposes. No
+          affiliation or endorsement is implied.
+        </p>
+        <p class="mt-4">
+          Detailed information about homages and trademark references can be
+          found on my
+          <a
+            class="text-gray-900 underline underline-offset-4 hover:text-gray-600"
+            href="/acknowledgements">Acknowledgements</a
+          > page.
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

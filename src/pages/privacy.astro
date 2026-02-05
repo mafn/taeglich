@@ -1,0 +1,161 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import {
+  PUBLIC_IMPRINT_NAME,
+  PUBLIC_IMPRINT_ADDRESS_LINE1,
+  PUBLIC_IMPRINT_ADDRESS_LINE2,
+  PUBLIC_IMPRINT_ADDRESS_LINE3,
+  PUBLIC_IMPRINT_EMAIL,
+} from "astro:env/client";
+
+const providerName = PUBLIC_IMPRINT_NAME;
+const addressLines = [
+  PUBLIC_IMPRINT_ADDRESS_LINE1,
+  PUBLIC_IMPRINT_ADDRESS_LINE2,
+  PUBLIC_IMPRINT_ADDRESS_LINE3,
+].filter(Boolean);
+const contactEmail = PUBLIC_IMPRINT_EMAIL;
+const privacyLastUpdated = "2026-02-05";
+---
+
+<BaseLayout
+  title="Privacy"
+  description="Privacy policy for taeglich."
+  renderH1={false}
+  noindex={true}
+>
+  <div class="mx-auto max-w-2xl px-6 py-16">
+    <header class="mb-10">
+      <p
+        class="mb-2 font-mono text-[10px] tracking-[0.3em] text-gray-400 uppercase"
+      >
+        Data Protection
+      </p>
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
+        Privacy Policy
+      </h1>
+      <p class="mt-2 text-xs text-gray-400">
+        Last updated: {privacyLastUpdated}
+      </p>
+    </header>
+
+    <div class="space-y-12 text-base leading-relaxed text-gray-600">
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Responsible Party
+        </h2>
+        <p class="mb-4">
+          The responsible party for data processing on this website is:
+        </p>
+        <address class="text-gray-700 not-italic">
+          <span class="block font-medium text-gray-900">{providerName}</span>
+          {addressLines.map((line) => <span class="block">{line}</span>)}
+          <a
+            class="mt-2 block text-gray-900 underline underline-offset-4 hover:text-gray-600"
+            href={`mailto:${contactEmail}`}
+          >
+            {contactEmail}
+          </a>
+        </address>
+        <p class="mt-4 text-sm">
+          To exercise your rights, please email me at the address above.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Hosting & data processing
+        </h2>
+        <p class="mb-4">
+          This site runs on a VPS hosted in Germany. The hosting provider acts
+          as a processor and processes technical connection data (server logs)
+          as part of operating the service. All assets are served directly from
+          this infrastructure. No third-party tracking, analytics, or
+          advertising services are used.
+        </p>
+
+        <h3 class="mb-2 text-sm font-semibold text-gray-900">
+          Server log files
+        </h3>
+        <p>
+          When you access this website, the server may log technical access data
+          (e.g., IP address, date/time, requested URL, referrer, and user
+          agent). This is processed to deliver the website, ensure security, and
+          troubleshoot issues. Log files are deleted after a <strong
+            >maximum of 30 days</strong
+          >, unless needed longer to investigate security incidents.
+        </p>
+        <p class="mt-4 text-sm italic">
+          Legal basis: Art. 6(1)(f) GDPR (legitimate interest in secure and
+          reliable operation).
+        </p>
+        <p class="mt-4 text-xs text-gray-400">
+          If operational monitoring is added later, this policy will be updated.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Local storage / session storage
+        </h2>
+        <p>
+          The site uses localStorage and/or sessionStorage to provide functions
+          you request (e.g., game completion/progress state and whether a safety
+          warning was acknowledged; and, if enabled, sound state). This
+          information remains on your device and is not transmitted to me or
+          third parties. You can clear this data at any time via your browser
+          settings.
+        </p>
+        <p class="mt-4 text-sm italic">Legal basis: § 25(2) No. 2 TDDDG.</p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Your Rights
+        </h2>
+        <p class="mb-6">
+          Although this site avoids collecting personal data beyond server log
+          files (stored up to 30 days), your legal rights under the GDPR remain
+          unaltered. These include the right to access, rectification, erasure,
+          restriction of processing, and data portability, as well as the right
+          to object to processing.
+        </p>
+        <p class="mb-4">
+          You also have the right to lodge a complaint with the competent
+          supervisory authority:
+        </p>
+        <address class="text-sm text-gray-700 not-italic">
+          <span class="block text-base font-medium text-gray-900"
+            >Sächsische Datenschutz- und Transparenzbeauftragte</span
+          >
+          Maternistraße 17<br />
+          01067 Dresden<br />
+          <span class="mt-2 block">
+            Telefon: +49 351 85471-101<br />
+            Telefax: +49 351 85471-109<br />
+            E-Mail: <a
+              class="underline underline-offset-4 hover:text-gray-600"
+              href="mailto:post@sdtb.sachsen.de">post@sdtb.sachsen.de</a
+            >
+          </span>
+          <a
+            class="mt-1 block underline underline-offset-4 hover:text-gray-600"
+            href="https://www.datenschutz.sachsen.de/"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            www.datenschutz.sachsen.de
+          </a>
+        </address>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
