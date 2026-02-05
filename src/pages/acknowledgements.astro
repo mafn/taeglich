@@ -1,0 +1,102 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+---
+
+<BaseLayout
+  title="Acknowledgements"
+  description="Homages and references used in taeglich."
+  renderH1={false}
+  noindex={true}
+>
+  <div class="mx-auto max-w-2xl px-6 py-16">
+    <header class="mb-10">
+      <p
+        class="mb-2 font-mono text-[10px] tracking-[0.3em] text-gray-400 uppercase"
+      >
+        Acknowledgements
+      </p>
+      <h1 class="text-2xl font-semibold tracking-tight text-gray-900">
+        Acknowledgements & References
+      </h1>
+    </header>
+
+    <div class="space-y-12 text-base leading-relaxed text-gray-600">
+      <section>
+        <p>
+          taeglich is a project built on inspiration from decades of digital
+          culture, games, and software. This page acknowledges the works and
+          brands that have inspired the artifacts found here.
+        </p>
+      </section>
+
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Trademarks & Brands
+        </h2>
+        <p class="mb-4 text-sm">
+          All referenced names and brands are the property of their respective
+          owners. Their mention here is for descriptive/reference purposes and
+          does not imply any affiliation or endorsement.
+        </p>
+        <ul class="list-disc space-y-4 pl-5 text-sm text-gray-700">
+          <li>
+            <strong>Tetris</strong>: Tetris is a trademark of Tetris Holding,
+            LLC. The "BLOCKFALL" artifact is a homage to the classic
+            falling-block puzzle genre popularized by Tetris.
+          </li>
+          <li>
+            <strong>DOOM</strong>: DOOM is a trademark of id Software LLC, a
+            ZeniMax Media company. References to the FPS genre are inspired by
+            the technical and artistic legacy of the Doom series.
+          </li>
+          <li>
+            <strong>Microsoft Office Assistant</strong> ("paperclip helper"): The
+            Office Assistant is a trademark of Microsoft Corporation. Future homages
+            to desktop assistants are inspired by early office help systems.
+          </li>
+        </ul>
+      </section>
+
+      <section>
+        <h2
+          class="mb-3 text-sm font-bold tracking-wider text-gray-900 uppercase"
+        >
+          Open Source & Type
+        </h2>
+        <p>
+          This project is made possible by the open-source community. Special
+          thanks to the creators of:
+        </p>
+        <ul class="mt-4 list-disc space-y-1 pl-5 text-sm">
+          <li>
+            <a
+              class="text-gray-900 underline underline-offset-4 hover:text-gray-600"
+              href="https://astro.build/"
+              target="_blank">Astro</a
+            >
+          </li>
+          <li>
+            <a
+              class="text-gray-900 underline underline-offset-4 hover:text-gray-600"
+              href="https://tailwindcss.com/"
+              target="_blank">Tailwind CSS</a
+            >
+          </li>
+          <li>
+            The various retro and modern typefaces provided via <a
+              class="text-gray-900 underline underline-offset-4 hover:text-gray-600"
+              href="https://fontsource.org/"
+              target="_blank">Fontsource</a
+            >.
+          </li>
+        </ul>
+        <p class="mt-4 text-xs text-gray-400">
+          License notices for included open-source software and fonts are
+          provided where required.
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>
