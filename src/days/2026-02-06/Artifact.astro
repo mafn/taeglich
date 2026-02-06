@@ -1,0 +1,512 @@
+---
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/jetbrains-mono";
+
+const date = "2026-02-06";
+
+const GRID_PAIRS = 8;
+
+const pairPool = [
+  {
+    id: "nodepool_pdb",
+    signal: "Node pool upgrade stuck (drain blocked).",
+    action: "Check PodDisruptionBudgets (PDBs).",
+  },
+  {
+    id: "istio_vs",
+    signal: "VirtualService applied, still 404s.",
+    action: "Check hosts/gateways + endpoints.",
+  },
+  {
+    id: "slack_ticket",
+    signal: "User DM: “can you quickly take a look?”",
+    action: "Ask them to create a ticket.",
+  },
+  {
+    id: "unauth_np",
+    signal: "Unauthorized endpoint appears in-cluster.",
+    action: "Deploy a NetworkPolicy.",
+  },
+  { id: "quiet", signal: "No message all day.", action: "Be suspicious." },
+  {
+    id: "deploy_failed",
+    signal: "Production deploy fails.",
+    action: "Hold the release.",
+  },
+  {
+    id: "latency_spike",
+    signal: "Latency spikes after a deploy.",
+    action: "Inspect traces; consider rollback.",
+  },
+  {
+    id: "queue_backlog",
+    signal: "Queue backlog keeps growing.",
+    action: "Add workers / scale consumers.",
+  },
+  {
+    id: "cert_expiring",
+    signal: "TLS cert expiring soon.",
+    action: "Renew cert; add auto-renewal.",
+  },
+  {
+    id: "no_endpoints",
+    signal: "Service has 0 endpoints.",
+    action: "Check selector labels / readiness.",
+  },
+  {
+    id: "disk_pressure",
+    signal: "Node under DiskPressure.",
+    action: "Find top disk users; fix retention.",
+  },
+  {
+    id: "rate_limit",
+    signal: "Image pulls rate-limited.",
+    action: "Use registry creds or a mirror.",
+  },
+  {
+    id: "pods_pending",
+    signal: "Pods stuck Pending (no nodes).",
+    action: "Check autoscaler and quotas.",
+  },
+  {
+    id: "oom",
+    signal: "Pods restart: OOMKilled.",
+    action: "Check limits + memory usage/leak.",
+  },
+  {
+    id: "hotspot",
+    signal: "Database hotspot / lock contention.",
+    action: "Find the hot query; add an index.",
+  },
+  {
+    id: "metrics_missing",
+    signal: "Dashboards go blank (no metrics).",
+    action: "Check scraping and auth.",
+  },
+  {
+    id: "all_green",
+    signal: "Everything is green.",
+    action: "Verify it's not broken.",
+  },
+];
+---
+
+<div class="match-root" data-date={date}>
+  <header class="match-header">
+    <div>
+      <p class="match-kicker">taeglich / {date}</p>
+      <h1>DevOps Match</h1>
+      <p class="match-subtitle">Match the signal to the action.</p>
+    </div>
+    <div class="match-hud" aria-live="polite">
+      <span id="moves">0 moves</span>
+      <span id="matches">0 / {GRID_PAIRS}</span>
+      <span id="savedBadge" class="saved" hidden>won before</span>
+    </div>
+  </header>
+
+  <div class="match-grid" id="cardGrid" aria-label="Card grid">
+    {
+      Array.from({ length: GRID_PAIRS * 2 }).map((_, idx) => (
+        <button
+          class="card"
+          type="button"
+          data-index={idx}
+          data-pair=""
+          aria-pressed="false"
+          aria-label={`Card ${idx + 1}`}
+        >
+          <span class="card-face card-back">
+            <span class="card-back-label">signal -&gt; action</span>
+          </span>
+          <span class="card-face card-front" />
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="match-actions">
+    <button id="resetBtn" type="button">new deck</button>
+  </div>
+</div>
+
+<noscript>
+  <div class="noscript">
+    This game requires JavaScript to run. Please enable JavaScript.
+  </div>
+</noscript>
+
+<script is:inline define:vars={{ pairPool, gridPairs: GRID_PAIRS }}>
+  const COMPLETED_KEY = "taeglich:completed:2026-02-06";
+  const grid = document.getElementById("cardGrid");
+  const movesEl = document.getElementById("moves");
+  const matchesEl = document.getElementById("matches");
+  const resetBtn = document.getElementById("resetBtn");
+  const savedBadge = document.getElementById("savedBadge");
+  const cards = Array.from(grid?.querySelectorAll(".card") || []);
+
+  const totalPairs = Number(gridPairs) || 8;
+
+  let first = null;
+  let second = null;
+  let lock = false;
+  let moves = 0;
+  let matches = 0;
+
+  function randInt(maxExclusive) {
+    if (maxExclusive <= 0) return 0;
+    const c = globalThis.crypto;
+    if (!c?.getRandomValues) return Math.floor(Math.random() * maxExclusive);
+    const buf = new Uint32Array(1);
+    c.getRandomValues(buf);
+    return buf[0] % maxExclusive;
+  }
+
+  function shuffleInPlace(arr) {
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = randInt(i + 1);
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }
+
+  function updateHud() {
+    if (movesEl) movesEl.textContent = `${moves} moves`;
+    if (matchesEl) matchesEl.textContent = `${matches} / ${totalPairs}`;
+  }
+
+  function setCompleted() {
+    try {
+      localStorage.setItem(COMPLETED_KEY, "1");
+    } catch {}
+    if (savedBadge) savedBadge.hidden = false;
+  }
+
+  function checkCompleted() {
+    try {
+      if (localStorage.getItem(COMPLETED_KEY) === "1") {
+        if (savedBadge) savedBadge.hidden = false;
+      }
+    } catch {}
+  }
+
+  function pickPairs() {
+    const pool = Array.isArray(pairPool) ? [...pairPool] : [];
+    shuffleInPlace(pool);
+    return pool.slice(0, totalPairs);
+  }
+
+  function buildDeck(pairs) {
+    if (!grid) return;
+
+    const deck = pairs.flatMap((p) => [
+      { id: p.id, label: p.signal },
+      { id: p.id, label: p.action },
+    ]);
+    shuffleInPlace(deck);
+
+    cards.forEach((btn, idx) => {
+      const item = deck[idx];
+      const front = btn.querySelector(".card-front");
+      if (!item || !front) return;
+
+      btn.dataset.pair = item.id;
+      btn.classList.remove("is-flipped", "is-matched");
+      btn.removeAttribute("disabled");
+      btn.setAttribute("aria-pressed", "false");
+      front.textContent = item.label;
+    });
+  }
+
+  function flip(card) {
+    card.classList.add("is-flipped");
+    card.setAttribute("aria-pressed", "true");
+  }
+
+  function unflip(card) {
+    card.classList.remove("is-flipped");
+    card.setAttribute("aria-pressed", "false");
+  }
+
+  function markMatched(a, b) {
+    a.classList.add("is-matched");
+    b.classList.add("is-matched");
+    a.setAttribute("disabled", "true");
+    b.setAttribute("disabled", "true");
+  }
+
+  function resetRound() {
+    first = null;
+    second = null;
+    lock = false;
+    moves = 0;
+    matches = 0;
+    updateHud();
+    buildDeck(pickPairs());
+    grid?.querySelector(".card")?.focus();
+  }
+
+  function handleClick(card) {
+    if (lock) return;
+    if (card === first) return;
+    if (card.classList.contains("is-matched")) return;
+
+    flip(card);
+
+    if (!first) {
+      first = card;
+      return;
+    }
+
+    second = card;
+    lock = true;
+    moves += 1;
+    updateHud();
+
+    const match = first.dataset.pair === second.dataset.pair;
+    if (match) {
+      markMatched(first, second);
+      matches += 1;
+      updateHud();
+      first = null;
+      second = null;
+      lock = false;
+      if (matches === totalPairs) setCompleted();
+      return;
+    }
+
+    window.setTimeout(() => {
+      if (first) unflip(first);
+      if (second) unflip(second);
+      first = null;
+      second = null;
+      lock = false;
+    }, 700);
+  }
+
+  cards.forEach((card) => {
+    card.addEventListener("click", () => handleClick(card));
+  });
+
+  resetBtn?.addEventListener("click", resetRound);
+
+  checkCompleted();
+  updateHud();
+  resetRound();
+</script>
+
+<style is:global>
+  body {
+    background: #0b0f14;
+    color: #e8eef7;
+  }
+
+  .match-root {
+    min-height: 100vh;
+    padding: 3.5rem 1.5rem 4rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+    font-family: "Space Grotesk", system-ui, sans-serif;
+    background: radial-gradient(circle at top, #1b2434 0%, #0b0f14 55%);
+  }
+
+  .match-header {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 980px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .match-kicker {
+    font-size: 0.85rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: #7f91ab;
+    margin: 0 0 0.35rem;
+  }
+
+  .match-header h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin: 0;
+  }
+
+  .match-subtitle {
+    margin: 0.5rem 0 0;
+    color: #c0ccd9;
+  }
+
+  .match-hud {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    color: #9fb0c7;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .match-hud span {
+    padding: 0.4rem 0.75rem;
+    border: 1px solid #22304a;
+    border-radius: 999px;
+    background: rgba(13, 18, 28, 0.6);
+  }
+
+  .match-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.8rem;
+    max-width: 980px;
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .card {
+    position: relative;
+    min-height: 5.4rem;
+    border-radius: 18px;
+    border: 1px solid #24334c;
+    background: transparent;
+    perspective: 900px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    color: #e8eef7;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.7rem;
+    backface-visibility: hidden;
+    border-radius: 16px;
+    transition:
+      transform 450ms ease,
+      opacity 450ms ease;
+  }
+
+  .card-back {
+    background: linear-gradient(150deg, #121a2a, #0f1523);
+    color: #6b7a93;
+  }
+
+  .card-back-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .card-front {
+    transform: rotateY(180deg);
+    background: linear-gradient(150deg, #1a263b, #141d2d);
+    color: #f5f8ff;
+    font-size: 0.72rem;
+    text-transform: none;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+    text-wrap: balance;
+  }
+
+  .card.is-flipped .card-back {
+    transform: rotateY(180deg);
+    opacity: 0;
+  }
+
+  .card.is-flipped .card-front {
+    transform: rotateY(0deg);
+    opacity: 1;
+  }
+
+  .card.is-matched {
+    border-color: rgba(142, 230, 183, 0.6);
+    box-shadow: 0 0 0 1px rgba(142, 230, 183, 0.2);
+  }
+
+  .card.is-matched .card-front {
+    background: linear-gradient(150deg, #163126, #1d3a2f);
+    color: #b6f5cf;
+  }
+
+  .card:focus-visible {
+    outline: 2px solid #7bb5ff;
+    outline-offset: 2px;
+  }
+
+  .card:disabled {
+    cursor: default;
+  }
+
+  .match-actions {
+    display: flex;
+    justify-content: center;
+  }
+
+  .match-actions button {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 0.75rem;
+    color: #c9d6e6;
+    background: transparent;
+    border: 1px solid #2a3b57;
+    border-radius: 999px;
+    padding: 0.6rem 1.4rem;
+  }
+
+  .match-actions button:hover {
+    border-color: #6c83a8;
+    color: #ffffff;
+  }
+
+  .match-actions button:focus-visible {
+    outline: 2px solid #7bb5ff;
+    outline-offset: 3px;
+  }
+
+  .noscript {
+    max-width: 600px;
+    margin: 0 auto 2rem;
+    color: #9fb0c7;
+    text-align: center;
+  }
+
+  @media (min-width: 520px) {
+    .match-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 780px) {
+    .match-header {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: flex-end;
+    }
+
+    .match-grid {
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1.1rem;
+    }
+
+    .card {
+      min-height: 6.6rem;
+    }
+
+    .card-front {
+      font-size: 0.78rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card-face {
+      transition: none;
+    }
+  }
+</style>
