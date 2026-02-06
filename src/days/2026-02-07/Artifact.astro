@@ -1,0 +1,327 @@
+---
+import "@fontsource-variable/jetbrains-mono";
+
+const date = "2026-02-07";
+---
+
+<div class="probe-root" data-date={date}>
+  <div class="dashboard">
+    <header class="dash-header">
+      <div class="pod-info">
+        <span class="label">POD_NAME:</span>
+        <span id="podName">taeglich-web-7bc4d2</span>
+      </div>
+      <div class="pod-info">
+        <span class="label">STATUS:</span>
+        <span id="status" class="status-starting">STARTING</span>
+      </div>
+      <div class="pod-info">
+        <span class="label">RESTARTS:</span>
+        <span id="restarts">0</span>
+      </div>
+    </header>
+
+    <div class="log-window" id="logWindow"></div>
+
+    <div class="probe-ui">
+      <div class="timer-container">
+        <div class="timer-bar" id="timerBar"></div>
+      </div>
+      <div class="action-area">
+        <div class="probe-request">
+          <span id="probeType" class="probe-type">STARTUP</span>
+          <span class="method">GET</span>
+          <span class="path" id="probePath">/healthz</span>
+          <span id="timeoutLabel" class="timeout-label"></span>
+        </div>
+        <button id="okBtn" type="button" class="ok-button" disabled>
+          200 OK
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script is:inline>
+  const logWindow = document.getElementById("logWindow");
+  const statusEl = document.getElementById("status");
+  const restartsEl = document.getElementById("restarts");
+  const timerBar = document.getElementById("timerBar");
+  const okBtn = document.getElementById("okBtn");
+  const timeoutLabel = document.getElementById("timeoutLabel");
+  const probeTypeEl = document.getElementById("probeType");
+  const probePathEl = document.getElementById("probePath");
+
+  let restarts = 0;
+  let timeLeft = 0;
+  let probeTimerInterval = null;
+  let schedulerInterval = null;
+  let isAlive = true;
+  let isStarted = false;
+  let startupFailures = 0;
+  let activeProbe = false;
+  
+  const CONFIG = {
+    STARTUP_FAILURE_THRESHOLD: 3,
+    LIVENESS_FAILURE_THRESHOLD: 1,
+    LIVENESS_PERIOD_MS: 10000,
+    STARTUP_PERIOD_MS: 2000, // Faster for startup simulation
+    TIMEOUT_MS: 3000,
+    RESTART_DELAY_MS: 2000,
+    TICK_MS: 50
+  };
+
+  function addLog(msg, type = "") {
+    const entry = document.createElement("div");
+    entry.className = `log-entry ${type}`;
+    const time = new Date().toLocaleTimeString("en-GB", { hour12: false });
+    entry.textContent = `[${time}] ${msg}`;
+    logWindow.appendChild(entry);
+    logWindow.scrollTop = logWindow.scrollHeight;
+  }
+
+  function restart(reason) {
+    isAlive = false;
+    isStarted = false;
+    startupFailures = 0;
+    activeProbe = false;
+    clearInterval(probeTimerInterval);
+    clearInterval(schedulerInterval);
+    
+    statusEl.textContent = "KILLED";
+    statusEl.className = "status-killed";
+    okBtn.disabled = true;
+    timeoutLabel.textContent = "";
+    timerBar.style.width = "0%";
+    
+    addLog(`Container failed: ${reason}`, "error");
+    addLog("Killing container...", "error");
+
+    setTimeout(() => {
+      restarts++;
+      restartsEl.textContent = restarts;
+      // Pod name stays the same on container restart
+      initPod();
+    }, CONFIG.RESTART_DELAY_MS);
+  }
+
+  function triggerProbe() {
+    if (!isAlive || activeProbe) return;
+
+    activeProbe = true;
+    const type = isStarted ? "LIVENESS" : "STARTUP";
+    const path = "/healthz";
+
+    timeLeft = 100;
+    timerBar.style.width = "100%";
+    timerBar.style.backgroundColor = "#f87171";
+    okBtn.disabled = false;
+    probeTypeEl.textContent = type;
+    probePathEl.textContent = path;
+    
+    addLog(`${type} PROBE: GET ${path}`, "probe");
+
+    const decrement = (CONFIG.TICK_MS / CONFIG.TIMEOUT_MS) * 100;
+
+    probeTimerInterval = setInterval(() => {
+      timeLeft -= decrement;
+      timerBar.style.width = `${Math.max(0, timeLeft)}%`;
+      timeoutLabel.textContent = `(${((timeLeft * CONFIG.TIMEOUT_MS) / 100000).toFixed(1)}s)`;
+
+      if (timeLeft <= 0) {
+        clearInterval(probeTimerInterval);
+        activeProbe = false;
+        okBtn.disabled = true;
+        
+        if (!isStarted) {
+          startupFailures++;
+          if (startupFailures >= CONFIG.STARTUP_FAILURE_THRESHOLD) {
+            restart("Startup failure threshold reached");
+          } else {
+            addLog(`Startup probe failed (${startupFailures}/${CONFIG.STARTUP_FAILURE_THRESHOLD})`, "error");
+          }
+        } else {
+          // Liveness failure threshold is 1
+          restart("Liveness timeout");
+        }
+      }
+    }, CONFIG.TICK_MS);
+  }
+
+  okBtn.addEventListener("click", () => {
+    if (!activeProbe || okBtn.disabled) return;
+    
+    addLog("HTTP/1.1 200 OK", "success");
+    clearInterval(probeTimerInterval);
+    activeProbe = false;
+    okBtn.disabled = true;
+    timeoutLabel.textContent = "";
+    timerBar.style.width = "0%";
+
+    if (!isStarted) {
+      isStarted = true;
+      addLog("Startup probe successful. Transitioning to Running.", "system");
+      statusEl.textContent = "RUNNING";
+      statusEl.className = "status-running";
+      
+      // Reschedule for Liveness
+      clearInterval(schedulerInterval);
+      schedulerInterval = setInterval(triggerProbe, CONFIG.LIVENESS_PERIOD_MS);
+    }
+  });
+
+  function initPod() {
+    isAlive = true;
+    statusEl.textContent = "STARTING";
+    statusEl.className = "status-starting";
+    addLog("Initialising container...", "system");
+    addLog(`Probes: Startup(threshold=${CONFIG.STARTUP_FAILURE_THRESHOLD}), Liveness(period=${CONFIG.LIVENESS_PERIOD_MS / 1000}s, threshold=${CONFIG.LIVENESS_FAILURE_THRESHOLD})`, "system");
+    
+    // Start periodic probes
+    triggerProbe(); // First one immediate
+    schedulerInterval = setInterval(triggerProbe, isStarted ? CONFIG.LIVENESS_PERIOD_MS : CONFIG.STARTUP_PERIOD_MS);
+  }
+
+  initPod();
+</script>
+
+<style>
+  .probe-root {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #0a0a0a;
+    color: #d1d5db;
+    font-family: "JetBrains Mono", monospace;
+    padding: 1rem;
+  }
+
+  .dashboard {
+    width: 100%;
+    max-width: 620px;
+    background: #111;
+    border: 1px solid #333;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  }
+
+  .dash-header {
+    padding: 1rem;
+    border-bottom: 1px solid #333;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .pod-info {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .label {
+    color: #666;
+  }
+
+  .status-starting { color: #60a5fa; }
+  .status-running { color: #4ade80; }
+  .status-killed { color: #f87171; }
+
+  .log-window {
+    height: 240px;
+    overflow-y: auto;
+    padding: 1rem;
+    font-size: 0.75rem;
+    background: #050505;
+    color: #888;
+    line-height: 1.4;
+    border-bottom: 1px solid #333;
+  }
+
+  .log-entry.system { color: #60a5fa; }
+  .log-entry.probe { color: #d1d5db; font-weight: bold; }
+  .log-entry.success { color: #4ade80; }
+  .log-entry.error { color: #f87171; }
+
+  .probe-ui {
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .timer-container {
+    height: 4px;
+    background: #222;
+    width: 100%;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .timer-bar {
+    height: 100%;
+    width: 0%;
+    transition: width 100ms linear;
+  }
+
+  .action-area {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .probe-request {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 1rem;
+    align-items: center;
+  }
+
+  .probe-type {
+    font-size: 0.65rem;
+    background: #333;
+    padding: 0.1rem 0.4rem;
+    border-radius: 2px;
+    color: #fff;
+  }
+
+  .method { color: #fbbf24; font-weight: bold; }
+  .path { color: #d1d5db; }
+
+  .timeout-label {
+    color: #f87171;
+    font-size: 0.8rem;
+  }
+
+  .ok-button {
+    background: transparent;
+    border: 1px solid #4ade80;
+    color: #4ade80;
+    padding: 0.6rem 1.5rem;
+    font-family: inherit;
+    font-size: 0.9rem;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 150ms ease;
+  }
+
+  .ok-button:hover:not(:disabled) {
+    background: rgba(74, 222, 128, 0.1);
+  }
+
+  .ok-button:disabled {
+    opacity: 0.2;
+    cursor: not-allowed;
+    border-color: #444;
+    color: #444;
+  }
+
+  @media (max-width: 480px) {
+    .dash-header { grid-template-columns: 1fr; }
+    .action-area { flex-direction: column; gap: 1rem; align-items: flex-start; }
+    .ok-button { width: 100%; }
+  }
+</style>
