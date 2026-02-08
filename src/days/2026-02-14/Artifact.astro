@@ -1,0 +1,605 @@
+---
+import ShellTheme from "../../components/ShellTheme.astro";
+import valentineCat from "../../assets/images/valentine-cat.png";
+import sadCat from "../../assets/images/sad-cat.png";
+---
+
+<ShellTheme
+  bg="#ffe6e6"
+  text="#d32f2f"
+  muted="#ff9999"
+  border="#ffb3b3"
+  link="#d32f2f"
+  linkHover="#b71c1c"
+  pillBg="rgba(255, 230, 230, 0.9)"
+/>
+
+<div class="valentine-root">
+  <h1 id="mainText">Will you be my Valentine?</h1>
+
+  <div class="buttons">
+    <button id="yesBtn" class="btn btn--yes">Yes</button>
+    <button id="noBtn" class="btn btn--no">No</button>
+  </div>
+
+  <!-- Modal: Sensory Warning -->
+  <div id="strobeOverlay" class="modal-wrapper" style="display: none;">
+    <div class="modal-box strobe-box">
+      <h2 class="warning-title">SENSORY WARNING</h2>
+      <p class="warning-text">
+        The intensity is increasing. This artifact contains flashes, screen
+        shaking, and persistent romantic imperatives.
+      </p>
+      <div class="warning-actions">
+        <button id="strobeYes" class="btn btn--yes btn--small">
+          I already love you (Yes)
+        </button>
+        <button id="strobeSafe" class="btn btn--small btn--outline">
+          Proceed (Safe Mode)
+        </button>
+        <button id="strobeFull" class="btn btn--no btn--small">
+          I can take it (Chaos)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Cat Popup -->
+  <div id="catOverlay" class="modal-wrapper" style="display: none;">
+    <div class="modal-box">
+      <div class="visual-container">
+        <img
+          id="popupImg"
+          src={valentineCat.src}
+          data-valentine={valentineCat.src}
+          data-sad={sadCat.src}
+          alt="Cat"
+          class="cat-img"
+        />
+      </div>
+      <p id="popupNote" class="overlay-note">Don't you dare!</p>
+      <button id="closeOverlay" class="btn btn--no btn--small">CLOSE</button>
+    </div>
+  </div>
+
+  <canvas id="canvas"></canvas>
+</div>
+
+<script is:inline>
+  (() => {
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const closeOverlay = document.getElementById("closeOverlay");
+    const mainText = document.getElementById("mainText");
+    const catOverlay = document.getElementById("catOverlay");
+    const strobeOverlay = document.getElementById("strobeOverlay");
+    const popupImg = document.getElementById("popupImg");
+    const popupNote = document.getElementById("popupNote");
+    const strobeYes = document.getElementById("strobeYes");
+    const strobeSafe = document.getElementById("strobeSafe");
+    const strobeFull = document.getElementById("strobeFull");
+    const buttonsContainer = document.querySelector(".buttons");
+    const canvas = document.getElementById("canvas");
+
+    if (
+      !yesBtn ||
+      !noBtn ||
+      !mainText ||
+      !catOverlay ||
+      !buttonsContainer ||
+      !canvas ||
+      !closeOverlay ||
+      !strobeOverlay ||
+      !strobeYes ||
+      !strobeSafe ||
+      !strobeFull ||
+      !popupImg ||
+      !popupNote
+    )
+      return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // --- State ---
+    let noHoverCount = 0;
+    let currentFontSize = 1.5;
+    let isInteracting = false;
+    let fireworksActive = false;
+    let fireworksStartTime = 0;
+    let strobeEnabled = true;
+    let strobeDecisionMade = false;
+    let catPopupShown = false;
+    let finalState = false;
+
+    const STROBE_THRESHOLD = 15;
+    const clamp = (val, min, max) => Math.min(Math.max(val, min), max);
+    const isModalOpen = () =>
+      strobeOverlay.style.display === "flex" ||
+      catOverlay.style.display === "flex";
+
+    function triggerYes() {
+      if (strobeOverlay.style.display === "flex") return;
+      mainText.innerText = "YAY! Happy Valentine's Day! ❤️";
+      buttonsContainer.classList.add("hidden");
+      catOverlay.style.display = "none";
+      strobeOverlay.style.display = "none";
+      mainText.style.fontSize = "3rem";
+      mainText.style.transform = "";
+      mainText.style.pointerEvents = "auto";
+      document.querySelector(".valentine-root").style.backgroundColor =
+        "#ffe6e6";
+
+      if (!fireworksActive) {
+        fireworksActive = true;
+        fireworksStartTime = Date.now();
+        requestAnimationFrame(animateFireworks);
+      }
+    }
+
+    // --- Event Listeners ---
+    strobeYes.addEventListener("click", triggerYes);
+    strobeSafe.addEventListener("click", () => {
+      strobeEnabled = false;
+      strobeDecisionMade = true;
+      strobeOverlay.style.display = "none";
+    });
+    strobeFull.addEventListener("click", () => {
+      strobeEnabled = true;
+      strobeDecisionMade = true;
+      strobeOverlay.style.display = "none";
+    });
+
+    const closeCatOverlay = () => {
+      if (finalState) {
+        mainText.innerText = "Fine. Have it your way. 💔";
+        buttonsContainer.classList.add("hidden");
+        catOverlay.style.display = "none";
+      } else {
+        catOverlay.style.display = "none";
+      }
+    };
+
+    closeOverlay.addEventListener("click", closeCatOverlay);
+    catOverlay.addEventListener("click", (e) => {
+      if (e.target === catOverlay && !finalState) closeCatOverlay();
+    });
+
+    function runAway(el) {
+      el.style.position = "fixed";
+      el.style.zIndex = "1000";
+      const randomX = Math.random() * (window.innerWidth - el.offsetWidth);
+      const randomY = Math.random() * (window.innerHeight - el.offsetHeight);
+      el.style.left = randomX + "px";
+      el.style.top = randomY + "px";
+    }
+
+    function handleNoInteraction(event) {
+      if (isInteracting || finalState || isModalOpen()) return;
+      isInteracting = true;
+      setTimeout(() => {
+        isInteracting = false;
+      }, 100);
+
+      if (event && event.type === "touchstart") event.preventDefault();
+
+      noHoverCount++;
+
+      // 1. First time: Grumpy Cat
+      if (noHoverCount === 1 && !catPopupShown) {
+        popupImg.src = popupImg.dataset.valentine;
+        popupNote.innerText = "Don't you dare!";
+        closeOverlay.innerText = "CLOSE";
+        catOverlay.style.display = "flex";
+        catPopupShown = true;
+      }
+
+      // 2. Sensory warning threshold
+      if (noHoverCount >= STROBE_THRESHOLD && !strobeDecisionMade) {
+        strobeOverlay.style.display = "flex";
+      }
+
+      // 3. Final State Threshold
+      const phases = [
+        "Yes",
+        "Please?",
+        "YES!",
+        "CLICK ME!",
+        "YOU HAVE TO!",
+        "STOP TRYING!",
+        "JUST CLICK YES!",
+        "Resistance is futile!",
+        "I am inevitable!",
+        "CLICK IT NOW!!!",
+        "DO IT.",
+        "THE HEART COMMANDS YOU.",
+        "ACCEPT YOUR FATE.",
+        "LOVE IS MANDATORY.",
+        "WHY ARE YOU LIKE THIS?",
+        "JUST ONE CLICK.",
+        "I AM BEGGING YOU.",
+        "PLEASE.",
+        "OKAY FINE.",
+        "MAYBE...",
+        "ALMOST THERE.",
+        "LAST CHANCE.",
+        "REALLY?",
+        "SERIOUSLY?",
+        "OKAY...",
+        "I can wait all day.",
+        "Is this a game to you?",
+        "My mouse is tired.",
+        "Your finger must hurt.",
+        "Giving up yet?",
+        "Still no?",
+        "Unbelievable.",
+        "The audacity.",
+        "The tenacity.",
+        "I'm impressed, actually.",
+        "But also annoyed.",
+        "CLICK YES.",
+        "YES YES YES.",
+        "Y. E. S.",
+        "Error: Rejection not found.",
+        "Please reboot and click Yes.",
+        "System update required: Click Yes.",
+        "I'm running out of ink.",
+        "Heart.exe has encountered a problem.",
+        "Love.dll is missing.",
+        "Redirecting to Happiness... Click Yes.",
+        "Validation failed: Rejection is invalid.",
+        "Okay, let's try reverse psychology: Click No.",
+        "Wait, don't do that.",
+        "JUST CLICK YES.",
+      ];
+
+      if (noHoverCount >= phases.length + 5) {
+        finalState = true;
+        popupImg.src = popupImg.dataset.sad;
+        popupNote.innerText = "Is this really what you want? 💔";
+        closeOverlay.innerText = "YES, I AM HEARTLESS. (No)";
+        catOverlay.style.display = "flex";
+        mainText.innerText = "Final choice.";
+        noBtn.style.display = "none";
+        document.body.style.transform = "";
+        mainText.style.transform = "";
+        mainText.style.pointerEvents = "auto";
+        return;
+      }
+
+      // --- Escalation Visuals ---
+      yesBtn.innerText = phases[Math.min(noHoverCount, phases.length - 1)];
+      currentFontSize = clamp(1.5 + noHoverCount * 0.4, 1.5, 12);
+      yesBtn.style.fontSize = `${currentFontSize}rem`;
+      mainText.style.fontSize = `${clamp(2 + noHoverCount * 0.25, 2, 6)}rem`;
+      mainText.style.pointerEvents = "none";
+
+      runAway(noBtn);
+
+      if (strobeDecisionMade && strobeEnabled) {
+        const shake = Math.min(noHoverCount * 2, 30);
+        document.body.style.transform = `translate(${(Math.random() - 0.5) * shake}px, ${(Math.random() - 0.5) * shake}px)`;
+        mainText.style.transform = `translate(${(Math.random() - 0.5) * shake}px, ${(Math.random() - 0.5) * shake}px)`;
+        setTimeout(() => {
+          document.body.style.transform = "";
+        }, 50);
+        if (noHoverCount > 4) yesBtn.classList.add("rainbow-pulse");
+      }
+    }
+
+    noBtn.addEventListener("mouseover", handleNoInteraction);
+    noBtn.addEventListener("touchstart", handleNoInteraction, {
+      passive: false,
+    });
+    noBtn.addEventListener("click", handleNoInteraction);
+    yesBtn.addEventListener("click", triggerYes);
+
+    // --- Particles & Animation ---
+    let particles = [];
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function createParticle(x, y, color, isHeart = false) {
+      const particleCount = isHeart ? 3 : 15;
+      for (let i = 0; i < particleCount; i++) {
+        particles.push({
+          x,
+          y,
+          color,
+          radius: isHeart ? Math.random() * 15 + 10 : Math.random() * 4 + 2,
+          velocity: {
+            x: (Math.random() - 0.5) * (isHeart ? 15 : 10),
+            y: (Math.random() - 0.5) * (isHeart ? 15 : 10),
+          },
+          alpha: 1,
+          decay: Math.random() * 0.02 + 0.01,
+          isHeart,
+          rotation: Math.random() * Math.PI * 2,
+        });
+      }
+    }
+
+    function drawHeart(ctx, x, y, size) {
+      ctx.beginPath();
+      const topCurve = size * 0.3;
+      ctx.moveTo(x, y + topCurve);
+      ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + topCurve);
+      ctx.bezierCurveTo(
+        x - size / 2,
+        y + (size + topCurve) / 2,
+        x,
+        y + (size + topCurve) / 2,
+        x,
+        y + size,
+      );
+      ctx.bezierCurveTo(
+        x,
+        y + (size + topCurve) / 2,
+        x + size / 2,
+        y + (size + topCurve) / 2,
+        x + size / 2,
+        y + topCurve,
+      );
+      ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + topCurve);
+      ctx.fill();
+    }
+
+    function animateFireworks() {
+      const now = Date.now();
+      const hasWon = mainText.innerText.indexOf("YAY") !== -1;
+      const shouldContinue = hasWon && now - fireworksStartTime < 10000;
+
+      if (!shouldContinue && particles.length === 0) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        fireworksActive = false;
+        return;
+      }
+      requestAnimationFrame(animateFireworks);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      if (shouldContinue && Math.random() < 0.1) {
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const colors = [
+          "#ff0000",
+          "#ff69b4",
+          "#ff1493",
+          "#db7093",
+          "#c71585",
+          "#ff00ff",
+        ];
+        createParticle(
+          x,
+          y,
+          colors[Math.floor(Math.random() * colors.length)],
+          Math.random() > 0.5,
+        );
+      }
+
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        if (p.alpha <= 0) {
+          particles.splice(i, 1);
+        } else {
+          p.velocity.y += 0.1;
+          p.x += p.velocity.x;
+          p.y += p.velocity.y;
+          p.alpha -= p.decay;
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          if (p.isHeart) {
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            drawHeart(ctx, 0, 0, p.radius);
+          } else {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          ctx.restore();
+        }
+      }
+    }
+  })();
+</script>
+
+<style>
+  .valentine-root {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family:
+      system-ui,
+      -apple-system,
+      sans-serif;
+    text-align: center;
+    padding: 1rem;
+    overflow: hidden;
+    transition: background-color 300ms ease;
+  }
+
+  h1 {
+    color: #d32f2f;
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    margin-bottom: 2rem;
+    z-index: 30;
+    position: relative;
+    font-weight: 800;
+  }
+
+  .buttons {
+    position: relative;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+  }
+
+  .btn {
+    padding: 15px 30px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition:
+      transform 0.2s ease,
+      background-color 0.2s;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    color: white;
+  }
+
+  .btn--yes {
+    background-color: #4caf50;
+  }
+  .btn--yes:hover {
+    background-color: #45a049;
+    transform: scale(1.05);
+  }
+  .btn--no {
+    background-color: #f44336;
+  }
+  .btn--small {
+    padding: 8px 16px;
+    font-size: 0.9rem;
+    margin-top: 15px;
+  }
+  .btn--outline {
+    background-color: white;
+    border: 2px solid #d32f2f;
+    color: #d32f2f;
+    margin-top: 15px;
+  }
+  .btn--outline:hover {
+    background-color: #fffafa;
+  }
+
+  .rainbow-pulse {
+    animation:
+      rainbow 0.5s linear infinite,
+      pulse 0.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes rainbow {
+    0% {
+      background-color: #ff0000;
+    }
+    20% {
+      background-color: #ff8800;
+    }
+    40% {
+      background-color: #ffff00;
+    }
+    60% {
+      background-color: #00ff00;
+    }
+    80% {
+      background-color: #0000ff;
+    }
+    100% {
+      background-color: #ff00ff;
+    }
+  }
+
+  @keyframes pulse {
+    from {
+      transform: scale(1);
+    }
+    to {
+      transform: scale(1.1);
+    }
+  }
+
+  .modal-wrapper {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-blur: 4px;
+  }
+
+  .modal-box {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: min(500px, 90vw);
+    border: 2px solid #ffb3b3;
+  }
+
+  .strobe-box {
+    background: #fffafa;
+    border-color: #d32f2f;
+  }
+
+  .warning-title {
+    color: #d32f2f;
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+  }
+  .warning-text {
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+  .warning-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .visual-container {
+    width: min(300px, 70vw);
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f0f0;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .cat-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .overlay-note {
+    margin-top: 10px;
+    color: #333;
+    font-weight: bold;
+    font-size: 0.9rem;
+  }
+
+  #canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .hidden {
+    display: none !important;
+  }
+</style>

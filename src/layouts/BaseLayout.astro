@@ -88,14 +88,7 @@ const mainClass =
 
       body[data-shell="compact"] > header,
       body[data-shell="compact"] > footer {
-        display: none;
-      }
-
-      @media (min-width: 640px) {
-        body[data-shell="compact"] > header,
-        body[data-shell="compact"] > footer {
-          display: flex;
-        }
+        display: none !important;
       }
 
       body[data-shell="compact"] > nav[aria-label="Site"] {

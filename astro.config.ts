@@ -6,6 +6,9 @@ import tailwindcss from "@tailwindcss/vite";
 // https://astro.build/config
 export default defineConfig({
   site: "https://taegli.ch",
+  redirects: {
+    "/valentine": "/d/2026-02-14",
+  },
   integrations: [
     sitemap({
       filter: (page) =>

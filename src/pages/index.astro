@@ -4,6 +4,7 @@ import type { DayMeta } from "../types";
 
 // 1. Find all days
 const metas = import.meta.glob("../days/*/meta.ts", { eager: true });
+const artifacts = import.meta.glob("../days/*/Artifact.astro");
 
 const days = Object.keys(metas)
   .map((path) => {
@@ -14,6 +15,7 @@ const days = Object.keys(metas)
       ...metaModule.default,
     };
   })
+  .filter((day) => artifacts[`../days/${day.date}/Artifact.astro`])
   .filter((day) => !day.draft)
   .sort((a, b) => b.date.localeCompare(a.date));
 
@@ -31,7 +33,6 @@ if (!featuredDay) {
 }
 
 // 3. Load the featured artifact
-const artifacts = import.meta.glob("../days/*/Artifact.astro");
 const artifactPath = `../days/${featuredDay.date}/Artifact.astro`;
 const ArtifactLoader = artifacts[artifactPath];
 

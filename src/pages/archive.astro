@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import type { DayMeta } from "../types";
 
 const metas = import.meta.glob("../days/*/meta.ts", { eager: true });
+const artifacts = import.meta.glob("../days/*/Artifact.astro");
 
 const days = Object.keys(metas)
   .map((path) => {
@@ -13,6 +14,7 @@ const days = Object.keys(metas)
       ...metaModule.default,
     };
   })
+  .filter((day) => artifacts[`../days/${day.date}/Artifact.astro`])
   .filter((day) => !day.draft)
   .sort((a, b) => b.date.localeCompare(a.date));
 
