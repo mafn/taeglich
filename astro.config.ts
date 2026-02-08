@@ -7,6 +7,7 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   site: "https://taegli.ch",
   redirects: {
+    "/status": "/d/2026-02-09",
     "/valentine": "/d/2026-02-14",
   },
   integrations: [

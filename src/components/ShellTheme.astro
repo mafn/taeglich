@@ -22,6 +22,18 @@ const entries = [
 ].filter(([, value]) => Boolean(value));
 
 const css = entries.map(([key, value]) => `${key}: ${value};`).join(" ");
+
+// ShellTheme is used inside individual day artifacts. Because Astro may bundle day CSS
+// into shared chunks for `/d/*`, we scope the variable overrides to the current page
+// via `body[data-path]` (set by BaseLayout) to avoid leaking into other days.
+const dataPath =
+  Astro.url.pathname.endsWith("/") && Astro.url.pathname !== "/"
+    ? Astro.url.pathname.slice(0, -1)
+    : Astro.url.pathname;
 ---
 
-{css && <style is:global set:html={`:root { ${css} }`} />}
+{
+  css && (
+    <style is:global set:html={`body[data-path="${dataPath}"] { ${css} }`} />
+  )
+}

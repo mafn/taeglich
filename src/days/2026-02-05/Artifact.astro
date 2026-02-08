@@ -20,7 +20,7 @@ const bgGlow = `hsl(${hue}, 40%, 14%)`;
 ---
 
 <ShellTheme
-  bg="rgba(7, 10, 16, 0.94)"
+  bg={bgColor}
   text="#e2e8f0"
   muted="#94a3b8"
   border="#1f2937"
@@ -29,10 +29,21 @@ const bgGlow = `hsl(${hue}, 40%, 14%)`;
   pillBg="rgba(15, 23, 42, 0.92)"
 />
 
+<style is:global define:vars={{ bgColor, bgGlow }}>
+  body[data-path="/d/2026-02-05"] {
+    background: radial-gradient(
+      circle at 50% 40%,
+      var(--bgGlow) 0%,
+      var(--bgColor) 55%,
+      #050505 100%
+    ) !important;
+  }
+</style>
+
 <div
   class="zen-container"
   data-pulse={pulseDuration.toFixed(2)}
-  style={`--pulse-duration: ${pulseDuration}s; --circle-color: ${color}; --glow-color: ${glowColor}; --stroke-width: ${strokeWidth}px; --circle-size: ${circleSize}vmin; --bg-color: ${bgColor}; --bg-glow: ${bgGlow};`}
+  style={`--pulse-duration: ${pulseDuration}s; --circle-color: ${color}; --glow-color: ${glowColor}; --stroke-width: ${strokeWidth}px; --circle-size: ${circleSize}vmin;`}
 >
   <div class="circle-wrapper">
     <svg viewBox="0 0 100 100" class="zen-svg" aria-hidden="true">
@@ -183,23 +194,12 @@ const bgGlow = `hsl(${hue}, 40%, 14%)`;
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    background: radial-gradient(
-      circle at 50% 40%,
-      var(--bg-glow) 0%,
-      var(--bg-color) 55%,
-      #050505 100%
-    );
     color: #ffffff;
     overflow: hidden;
     font-family:
       system-ui,
       -apple-system,
       sans-serif;
-  }
-
-  :global(body) {
-    background-color: var(--bg-color);
-    color: #ffffff;
   }
 
   .circle-wrapper {
