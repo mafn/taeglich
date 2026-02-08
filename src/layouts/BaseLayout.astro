@@ -26,6 +26,12 @@ const canonicalURL =
   propCanonicalURL ||
   (Astro.site ? new URL(Astro.url.pathname, Astro.site) : undefined);
 
+// Normalize to no trailing slash (except "/") so CSS can target reliably.
+const dataPath =
+  Astro.url.pathname.endsWith("/") && Astro.url.pathname !== "/"
+    ? Astro.url.pathname.slice(0, -1)
+    : Astro.url.pathname;
+
 const mainClass =
   shellMode === "immersive"
     ? "flex-1"
@@ -106,6 +112,7 @@ const mainClass =
   </head>
   <body
     data-shell={shellMode}
+    data-path={dataPath}
     class="flex min-h-screen flex-col bg-[var(--shell-bg)] text-[var(--shell-text)] antialiased"
   >
     <header
