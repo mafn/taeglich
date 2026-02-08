@@ -1,6 +1,7 @@
 ---
 // src/days/2026-02-05/Artifact.astro
 import { getSeed, mulberry32 } from "../../lib/rng";
+import ShellTheme from "../../components/ShellTheme.astro";
 
 const date = "2026-02-05";
 const seed = getSeed(date, "content");
@@ -9,19 +10,29 @@ const rng = mulberry32(seed);
 // Deterministic parameters
 const hue = Math.floor(rng() * 360);
 const pulseDuration = 4 + rng() * 4; // 4s to 8s
-const strokeWidth = 1 + rng() * 2; // 1px to 3px
+const strokeWidth = 2 + rng() * 2; // 2px to 4px
 const circleSize = 40 + rng() * 20; // 40% to 60% of viewport min
 
-const color = `hsl(${hue}, 40%, 70%)`;
-const glowColor = `hsl(${hue}, 50%, 50%)`;
-const bgColor = `hsl(${hue}, 30%, 6%)`;
-const bgGlow = `hsl(${hue}, 35%, 12%)`;
+const color = `hsl(${hue}, 55%, 78%)`;
+const glowColor = `hsl(${hue}, 65%, 60%)`;
+const bgColor = `hsl(${hue}, 30%, 7%)`;
+const bgGlow = `hsl(${hue}, 40%, 14%)`;
 ---
+
+<ShellTheme
+  bg="rgba(7, 10, 16, 0.94)"
+  text="#e2e8f0"
+  muted="#94a3b8"
+  border="#1f2937"
+  link="#cbd5e1"
+  linkHover="#f8fafc"
+  pillBg="rgba(15, 23, 42, 0.92)"
+/>
 
 <div
   class="zen-container"
   data-pulse={pulseDuration.toFixed(2)}
-  style={`--pulse-duration: ${pulseDuration}s; --circle-color: ${color}; --glow-color: ${glowColor}; --stroke-width: ${strokeWidth}; --circle-size: ${circleSize}vmin; --bg-color: ${bgColor}; --bg-glow: ${bgGlow};`}
+  style={`--pulse-duration: ${pulseDuration}s; --circle-color: ${color}; --glow-color: ${glowColor}; --stroke-width: ${strokeWidth}px; --circle-size: ${circleSize}vmin; --bg-color: ${bgColor}; --bg-glow: ${bgGlow};`}
 >
   <div class="circle-wrapper">
     <svg viewBox="0 0 100 100" class="zen-svg" aria-hidden="true">
@@ -56,7 +67,8 @@ const bgGlow = `hsl(${hue}, 35%, 12%)`;
   let noiseGain = null;
 
   function startAudio() {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    const AudioCtx = window.AudioContext;
+    if (!AudioCtx) return;
     ctx = new AudioCtx();
 
     master = ctx.createGain();
@@ -190,20 +202,6 @@ const bgGlow = `hsl(${hue}, 35%, 12%)`;
     color: #ffffff;
   }
 
-  :global(header),
-  :global(footer) {
-    background-color: var(--bg-color);
-  }
-
-  :global(header a),
-  :global(footer p) {
-    color: #c9c9c9;
-  }
-
-  :global(header a:hover) {
-    color: #ffffff;
-  }
-
   .circle-wrapper {
     position: relative;
     width: var(--circle-size);
@@ -213,7 +211,7 @@ const bgGlow = `hsl(${hue}, 35%, 12%)`;
   .zen-svg {
     width: 100%;
     height: 100%;
-    filter: drop-shadow(0 0 15px var(--glow-color));
+    filter: drop-shadow(0 0 24px var(--glow-color));
   }
 
   .zen-circle {
@@ -221,6 +219,7 @@ const bgGlow = `hsl(${hue}, 35%, 12%)`;
     stroke: var(--circle-color);
     stroke-width: var(--stroke-width);
     stroke-linecap: round;
+    stroke-opacity: 0.95;
     transform-origin: center;
     animation: breathe var(--pulse-duration, 6s) ease-in-out infinite;
   }

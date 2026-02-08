@@ -5,7 +5,18 @@
  * - Requires user to log in and run fsck.
  * - Ends in a kernel panic regardless.
  */
+import ShellTheme from "../../components/ShellTheme.astro";
 ---
+
+<ShellTheme
+  bg="rgba(6, 8, 12, 0.94)"
+  text="#e2e8f0"
+  muted="#94a3b8"
+  border="#1f2937"
+  link="#cbd5e1"
+  linkHover="#f8fafc"
+  pillBg="rgba(15, 23, 42, 0.92)"
+/>
 
 <div
   class="flex min-h-screen w-full flex-col items-center justify-center bg-black p-4 font-mono text-sm text-gray-300 md:text-base"
@@ -160,7 +171,11 @@
   ];
 
   // --- File System ---
-  const FS = {
+  type FsEntry =
+    | { type: "dir"; children: string[] }
+    | { type: "file"; content: string };
+
+  const FS: Record<string, FsEntry> = {
     "/": { type: "dir", children: ["bin", "etc", "home", "var", "tmp"] },
     "/bin": { type: "dir", children: ["fsck", "ls", "cat", "reboot", "sh"] },
     "/etc": { type: "dir", children: ["passwd", "shadow", "fstab"] },
@@ -204,7 +219,19 @@
   };
 
   // --- State ---
-  const STATE = {
+  type State = {
+    booting: boolean;
+    needsLogin: boolean;
+    loggedIn: boolean;
+    repaired: boolean;
+    panic: boolean;
+    currentPrompt: string;
+    history: string[];
+    historyIndex: number;
+    cwd: string;
+  };
+
+  const STATE: State = {
     booting: true,
     needsLogin: false,
     loggedIn: false,
@@ -216,20 +243,24 @@
     cwd: "/",
   };
 
-  const outputEl = document.getElementById("output");
-  const inputLineEl = document.getElementById("input-line");
-  const promptEl = document.getElementById("prompt");
-  const inputEl = document.getElementById("cmd-input");
-  const terminalEl = document.getElementById("terminal");
-  const safeShutdownEl = document.getElementById("safe-shutdown");
-  const noSignalEl = document.getElementById("no-signal-overlay");
-  const powerBtn = document.getElementById("power-btn");
+  const outputEl = document.getElementById("output") as HTMLElement;
+  const inputLineEl = document.getElementById("input-line") as HTMLElement;
+  const promptEl = document.getElementById("prompt") as HTMLElement;
+  const inputEl = document.getElementById("cmd-input") as HTMLInputElement;
+  const terminalEl = document.getElementById("terminal") as HTMLElement;
+  const safeShutdownEl = document.getElementById(
+    "safe-shutdown",
+  ) as HTMLElement;
+  const noSignalEl = document.getElementById(
+    "no-signal-overlay",
+  ) as HTMLElement;
+  const powerBtn = document.getElementById("power-btn") as HTMLButtonElement;
   const COMPLETED_KEY = "taeglich:completed:2026-01-31";
   const POWER_STATE_KEY = "taeglich:power:2026-01-31";
   const REPAIRED_KEY = "taeglich:repaired:2026-01-31";
 
   // --- Utils ---
-  function sleep(ms) {
+  function sleep(ms: number) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
@@ -239,7 +270,7 @@
     }
   }
 
-  function printLine(text, className = "") {
+  function printLine(text: string, className = "") {
     const line = document.createElement("div");
     line.textContent = text;
     if (className) line.className = className;
@@ -247,7 +278,7 @@
     scrollToBottom();
   }
 
-  function resolvePath(path) {
+  function resolvePath(path: string) {
     // 1. Determine absolute starting point
     let absolute = path.startsWith("/")
       ? path
@@ -280,7 +311,8 @@
     if (!raw.trim()) return;
 
     // Keep track of leading spaces
-    const leadingSpaces = raw.match(/^\s*/)[0];
+    const leadingMatch = raw.match(/^\s*/);
+    const leadingSpaces = leadingMatch ? leadingMatch[0] : "";
     const trimmed = raw.trim();
     const parts = trimmed.split(/\s+/);
 
@@ -307,14 +339,14 @@
     }
 
     // Case 2: File/Path Completion
-    if (raw.endsWith(" ")) return;
-
-    const partial = parts.pop();
+    const partial = parts.pop() || "";
     const cmdBase =
-      leadingSpaces + parts.join(" ") + (parts.length > 0 ? " " : "");
+      leadingSpaces +
+      parts.join(" ") +
+      (parts.length > 0 || leadingSpaces ? " " : "");
 
-    let searchDir;
-    let filePrefix;
+    let searchDir = "";
+    let filePrefix = "";
     let dirPartOriginal = "";
 
     if (partial.includes("/")) {
@@ -493,11 +525,11 @@
 
   // --- Event Handling ---
 
-  inputEl.addEventListener("keydown", async (e) => {
+  inputEl.addEventListener("keydown", async (event: KeyboardEvent) => {
     // Tab Completion
 
-    if (e.key === "Tab") {
-      e.preventDefault();
+    if (event.key === "Tab") {
+      event.preventDefault();
 
       if (STATE.loggedIn) {
         handleTabCompletion();
@@ -508,8 +540,8 @@
 
     // History Navigation
 
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
+    if (event.key === "ArrowUp") {
+      event.preventDefault();
 
       if (STATE.historyIndex < STATE.history.length - 1) {
         STATE.historyIndex++;
@@ -523,8 +555,8 @@
       return;
     }
 
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
 
       if (STATE.historyIndex > 0) {
         STATE.historyIndex--;
@@ -544,8 +576,8 @@
 
     // Handle Ctrl+D
 
-    if (e.ctrlKey && e.key === "d") {
-      e.preventDefault();
+    if (event.ctrlKey && event.key === "d") {
+      event.preventDefault();
 
       printLine(STATE.currentPrompt + "^D");
 
@@ -566,8 +598,8 @@
       }
     }
 
-    if (e.key === "Enter") {
-      e.preventDefault();
+    if (event.key === "Enter") {
+      event.preventDefault();
 
       const raw = inputEl.value;
 
@@ -756,8 +788,8 @@
   });
 
   // ESC to reset
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") {
+  document.addEventListener("keydown", (event: KeyboardEvent) => {
+    if (event.key === "Escape") {
       try {
         if (localStorage.getItem(POWER_STATE_KEY)) {
           localStorage.removeItem(POWER_STATE_KEY);

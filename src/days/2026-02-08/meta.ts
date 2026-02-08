@@ -5,4 +5,5 @@ export default defineDay({
   description:
     "In case of lack of motivation: break glass and call it a night.",
   tags: ["daily", "curated", "sleep", "interaction"],
+  shellMode: "default",
 });

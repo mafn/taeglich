@@ -7,7 +7,10 @@
  */
 ---
 
-<div class="flex w-full flex-col items-center overflow-x-hidden px-4 py-12">
+<div
+  class="flex min-h-screen w-full flex-col items-center justify-center px-4 py-6 sm:px-6 sm:py-10"
+  style="background: radial-gradient(900px 420px at 12% 8%, rgba(255, 214, 231, 0.75), transparent 60%), radial-gradient(780px 480px at 88% 6%, rgba(186, 230, 253, 0.75), transparent 55%), radial-gradient(900px 700px at 50% 95%, rgba(254, 240, 138, 0.45), transparent 60%), linear-gradient(180deg, #fff7f0 0%, #fdf2f8 45%, #eff6ff 100%);"
+>
   <noscript>
     <div
       class="mb-8 max-w-md rounded-lg border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-800"
@@ -19,85 +22,91 @@
       </p>
     </div>
   </noscript>
-  <div class="relative inline-block sm:[--cell:3rem]" style="--cell: 2.5rem">
-    <div id="grid" class="grid grid-cols-9 border-2 border-gray-900 bg-white">
-      {
-        Array.from({ length: 81 }).map((_, i) => {
-          const r = Math.floor(i / 9);
-          const c = i % 9;
-          return (
-            <div
-              data-index={i}
-              class:list={[
-                "cell relative flex h-10 w-10 items-center justify-center border-t border-l border-gray-200 font-mono text-lg transition-colors duration-150 sm:h-12 sm:w-12",
-                r === 0 && "border-t-0",
-                c === 0 && "border-l-0",
-                r > 0 && r % 3 === 0 && "border-t-2 border-t-gray-900",
-                c > 0 && c % 3 === 0 && "border-l-2 border-l-gray-900",
-              ]}
-            >
-              <input
-                type="text"
-                inputmode="numeric"
-                maxlength="1"
-                aria-label={`Row ${r + 1}, Column ${c + 1}`}
-                data-index={i}
-                class="absolute inset-0 h-full w-full cursor-pointer bg-transparent text-center font-semibold text-gray-900 caret-transparent outline-none selection:bg-transparent hover:bg-gray-50 focus:bg-blue-100"
-              />
-              {r === 0 && (
-                <span
-                  class="pi-skip absolute top-1 right-1 text-[9px] leading-none text-gray-400"
-                  data-col={c}
-                />
-              )}
-              {r > 0 && c === 0 && (
-                <span
-                  class="row-start-label absolute top-1/2 -left-[calc(7rem+5px)] w-28 -translate-y-1/2 text-right font-mono text-[9px] leading-none text-gray-400 opacity-0 transition-opacity duration-300"
-                  data-row={r}
-                />
-              )}
-              {i === 0 && (
-                <span
-                  id="pi-dot"
-                  class="absolute -right-1 bottom-1 z-10 text-2xl leading-none font-bold text-gray-400 opacity-0 transition-opacity duration-500"
-                >
-                  .
-                </span>
-              )}
-            </div>
-          );
-        })
-      }
-    </div>
-
+  <div class="flex w-full overflow-x-auto px-3 py-2 sm:px-4">
     <div
-      class="pointer-events-none absolute top-0 left-full ml-1 hidden sm:block"
+      class="relative mx-auto inline-flex items-start gap-2 sm:gap-3 sm:[--cell:clamp(1.6rem,min(6.8vw,9vh),4.8rem)]"
+      style="--cell: clamp(1.8rem, 9.5vw, 3rem)"
     >
       <div
-        class="relative overflow-hidden border-2 border-gray-200 bg-white/50"
-        style="width: calc((var(--cell) * 5) + 4px); mask-image: linear-gradient(90deg, #000 0%, #000 70%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 70%, transparent 100%);"
+        id="grid"
+        class="grid shrink-0 grid-cols-9 border-2 border-gray-900 bg-white"
       >
-        <div
-          id="row-skips"
-          class="flex flex-col text-gray-400"
-          aria-live="polite"
-        >
-          {
-            Array.from({ length: 9 }).map((_, r) => (
+        {
+          Array.from({ length: 81 }).map((_, i) => {
+            const r = Math.floor(i / 9);
+            const c = i % 9;
+            return (
               <div
+                data-index={i}
                 class:list={[
-                  "flex h-10 items-center border-t border-gray-100 sm:h-12",
+                  "cell relative flex h-[var(--cell)] w-[var(--cell)] items-center justify-center border-t border-l border-gray-200 font-mono text-base transition-colors duration-150 sm:text-xl",
                   r === 0 && "border-t-0",
-                  r > 0 && r % 3 === 0 && "border-t-2 border-t-gray-200",
+                  c === 0 && "border-l-0",
+                  r > 0 && r % 3 === 0 && "border-t-2 border-t-gray-900",
+                  c > 0 && c % 3 === 0 && "border-l-2 border-l-gray-900",
                 ]}
-                data-row-container={r}
-              />
-            ))
-          }
-        </div>
+              >
+                <input
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="1"
+                  aria-label={`Row ${r + 1}, Column ${c + 1}`}
+                  data-index={i}
+                  class="absolute inset-0 h-full w-full cursor-pointer bg-transparent text-center font-semibold text-gray-900 caret-transparent outline-none selection:bg-transparent hover:bg-gray-50 focus:bg-blue-100"
+                />
+                {r === 0 && (
+                  <span
+                    class="pi-skip absolute top-1 right-1 text-[8px] leading-none text-gray-400"
+                    data-col={c}
+                  />
+                )}
+                {r > 0 && c === 0 && (
+                  <span
+                    class="row-start-label absolute top-1/2 -left-[calc(1.2rem+4px)] hidden w-6 -translate-y-1/2 text-right font-mono text-[6px] leading-none text-gray-400 opacity-0 transition-opacity duration-300 sm:-left-[calc(7rem+5px)] sm:block sm:w-28 sm:text-[10px]"
+                    data-row={r}
+                  />
+                )}
+                {i === 0 && (
+                  <span
+                    id="pi-dot"
+                    class="absolute -right-1 bottom-1 z-10 text-2xl leading-none font-bold text-gray-400 opacity-0 transition-opacity duration-500"
+                  >
+                    .
+                  </span>
+                )}
+              </div>
+            );
+          })
+        }
+      </div>
+
+      <div class="pointer-events-none hidden shrink-0 sm:block">
         <div
-          class="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-r from-transparent to-white"
+          class="relative overflow-hidden border-2 border-gray-200 bg-white/50"
+          style="width: calc((var(--cell) * 5) + 4px); mask-image: linear-gradient(90deg, #000 0%, #000 70%, transparent 100%); -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 70%, transparent 100%);"
         >
+          <div
+            id="row-skips"
+            class="flex flex-col text-gray-400"
+            aria-live="polite"
+          >
+            {
+              Array.from({ length: 9 }).map((_, r) => (
+                <div
+                  class:list={[
+                    "flex h-[var(--cell)] items-center border-t border-gray-100",
+                    r === 0 && "border-t-0",
+                    r > 0 && r % 3 === 0 && "border-t-2 border-t-gray-200",
+                  ]}
+                  data-row-container={r}
+                />
+              ))
+            }
+          </div>
+          <div
+            class="pointer-events-none absolute inset-y-0 right-0 w-16 bg-gradient-to-r from-transparent to-white"
+          >
+          </div>
         </div>
       </div>
     </div>
@@ -148,13 +157,15 @@
   };
 
   const { solution, row0Skips, rowSkips, rowStartIndex } = PI_SUDOKU;
-  const inputs = document.querySelectorAll("#grid input");
+  const inputs = document.querySelectorAll<HTMLInputElement>("#grid input");
   const rowSkipsEl = document.getElementById("row-skips");
   const explanationEl = document.getElementById("explanation");
   const piDot = document.getElementById("pi-dot");
-  const row0SkipEls = Array.from(document.querySelectorAll("#grid .pi-skip"));
+  const row0SkipEls = Array.from(
+    document.querySelectorAll<HTMLSpanElement>("#grid .pi-skip"),
+  );
   const rowStartEls = Array.from(
-    document.querySelectorAll("#grid .row-start-label"),
+    document.querySelectorAll<HTMLSpanElement>("#grid .row-start-label"),
   );
   const STORAGE_KEY = "taeglich-2026-01-30-sudoku";
   const COMPLETED_KEY = "taeglich:completed:2026-01-30";
@@ -180,7 +191,7 @@
     });
   }
 
-  function isRowComplete(r) {
+  function isRowComplete(r: number) {
     for (let c = 0; c < 9; c++) {
       const input = inputs[r * 9 + c];
       if (!input || input.disabled !== true) return false;
@@ -188,7 +199,7 @@
     return true;
   }
 
-  function revealRowSkip(rowIndex) {
+  function revealRowSkip(rowIndex: number) {
     if (!rowSkipsEl) return;
     if (!rowSkips[rowIndex]) return;
 
@@ -208,7 +219,7 @@
       const cell = document.createElement("div");
       // Use exact sizing and subtle borders to match main grid style
       cell.className =
-        "flex h-full w-10 sm:w-12 items-center justify-center border-r border-gray-100 text-gray-400 font-mono text-2xl leading-none";
+        "flex h-full w-[var(--cell)] items-center justify-center border-r border-gray-100 text-gray-400 font-mono text-xs leading-none sm:text-3xl";
 
       if (i === GHOST_COUNT - 1) cell.classList.remove("border-r");
 
@@ -291,7 +302,7 @@
     }
   }
 
-  function focusNext(startIdx) {
+  function focusNext(startIdx: number) {
     for (let i = startIdx + 1; i < inputs.length; i++) {
       const input = inputs[i];
       if (input.disabled !== true) {
@@ -301,29 +312,30 @@
     }
   }
 
-  function flashInvalid(input) {
+  function flashInvalid(input: HTMLInputElement) {
     input.classList.add("text-red-500", "bg-red-50");
     setTimeout(() => {
       input.classList.remove("text-red-500", "bg-red-50");
     }, 300);
   }
 
-  function updateHighlights(focusedIdx) {
+  function updateHighlights(focusedIdx: number) {
     const r = Math.floor(focusedIdx / 9);
     const c = focusedIdx % 9;
     const bR = Math.floor(r / 3) * 3;
     const bC = Math.floor(c / 3) * 3;
-    const val = inputs[focusedIdx].value;
+    const val = inputs[focusedIdx]?.value;
 
     inputs.forEach((input, i) => {
       const cell = input.parentElement;
+      if (!cell) return;
       const ir = Math.floor(i / 9);
       const ic = i % 9;
       const ibR = Math.floor(ir / 3) * 3;
       const ibC = Math.floor(ic / 3) * 3;
 
       const isPeer = ir === r || ic === c || (ibR === bR && ibC === bC);
-      const isSameValue = val && input.value === val;
+      const isSameValue = Boolean(val) && input.value === val;
 
       cell.classList.toggle("bg-blue-50/30", isPeer && i !== focusedIdx);
       cell.classList.toggle("bg-blue-100/50", isSameValue && i !== focusedIdx);
@@ -332,7 +344,9 @@
 
   function clearHighlights() {
     inputs.forEach((input) => {
-      input.parentElement.classList.remove("bg-blue-50/30", "bg-blue-100/50");
+      const cell = input.parentElement;
+      if (!cell) return;
+      cell.classList.remove("bg-blue-50/30", "bg-blue-100/50");
     });
   }
 
@@ -344,8 +358,9 @@
     input.addEventListener("focus", () => updateHighlights(idx));
     input.addEventListener("blur", clearHighlights);
 
-    input.addEventListener("input", (e) => {
-      const target = e.target;
+    input.addEventListener("input", (event) => {
+      const target = event.target;
+      if (!(target instanceof HTMLInputElement)) return;
       const raw = target.value.trim();
 
       if (raw === "") return;
@@ -377,18 +392,20 @@
       focusNext(idx);
     });
 
-    input.addEventListener("keydown", (e) => {
+    input.addEventListener("keydown", (event) => {
+      if (!(event instanceof KeyboardEvent)) return;
       const NAV_KEYS = {
         ArrowUp: -9,
         ArrowDown: 9,
         ArrowLeft: -1,
         ArrowRight: 1,
-      };
+      } as const;
 
-      if (e.key in NAV_KEYS) {
-        e.preventDefault();
+      if (event.key in NAV_KEYS) {
+        event.preventDefault();
         const currentIdx = idx;
-        const offset = NAV_KEYS[e.key];
+        const key = event.key as keyof typeof NAV_KEYS;
+        const offset = NAV_KEYS[key];
         let nextIdx = currentIdx + offset;
 
         // Simple boundary checks to prevent wrapping weirdly if desired,
@@ -401,10 +418,10 @@
       }
 
       if (
-        !/^[1-9]$/.test(e.key) &&
-        !["Backspace", "Delete", "Tab"].includes(e.key)
+        !/^[1-9]$/.test(event.key) &&
+        !["Backspace", "Delete", "Tab"].includes(event.key)
       ) {
-        e.preventDefault();
+        event.preventDefault();
       }
     });
   });

@@ -153,6 +153,11 @@ const pairPool = [
   let moves = 0;
   let matches = 0;
 
+  const reducedMotion =
+    window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+  const MATCH_DELAY = reducedMotion ? 0 : 720;
+  const MISMATCH_DELAY = reducedMotion ? 0 : 1000;
+
   function randInt(maxExclusive) {
     if (maxExclusive <= 0) return 0;
     const c = globalThis.crypto;
@@ -265,23 +270,29 @@ const pairPool = [
 
     const match = first.dataset.pair === second.dataset.pair;
     if (match) {
-      markMatched(first, second);
-      matches += 1;
-      updateHud();
-      first = null;
-      second = null;
-      lock = false;
-      if (matches === totalPairs) setCompleted();
+      const firstCard = first;
+      const secondCard = second;
+      window.setTimeout(() => {
+        if (firstCard && secondCard) markMatched(firstCard, secondCard);
+        matches += 1;
+        updateHud();
+        first = null;
+        second = null;
+        lock = false;
+        if (matches === totalPairs) setCompleted();
+      }, MATCH_DELAY);
       return;
     }
 
+    const firstCard = first;
+    const secondCard = second;
     window.setTimeout(() => {
-      if (first) unflip(first);
-      if (second) unflip(second);
+      if (firstCard) unflip(firstCard);
+      if (secondCard) unflip(secondCard);
       first = null;
       second = null;
       lock = false;
-    }, 700);
+    }, MISMATCH_DELAY);
   }
 
   cards.forEach((card) => {
@@ -296,11 +307,6 @@ const pairPool = [
 </script>
 
 <style is:global>
-  body {
-    background: #0b0f14;
-    color: #e8eef7;
-  }
-
   .match-root {
     min-height: 100vh;
     padding: 3.5rem 1.5rem 4rem;
@@ -309,6 +315,7 @@ const pairPool = [
     gap: 2.5rem;
     font-family: "Space Grotesk", system-ui, sans-serif;
     background: radial-gradient(circle at top, #1b2434 0%, #0b0f14 55%);
+    color: #e8eef7;
   }
 
   .match-header {
@@ -367,7 +374,7 @@ const pairPool = [
 
   .card {
     position: relative;
-    min-height: 5.4rem;
+    min-height: 6.2rem;
     border-radius: 18px;
     border: 1px solid #24334c;
     background: transparent;
@@ -385,7 +392,7 @@ const pairPool = [
     align-items: center;
     justify-content: center;
     text-align: center;
-    padding: 0.7rem;
+    padding: 0.9rem;
     backface-visibility: hidden;
     border-radius: 16px;
     transition:
@@ -399,7 +406,7 @@ const pairPool = [
   }
 
   .card-back-label {
-    font-size: 0.65rem;
+    font-size: 0.7rem;
     letter-spacing: 0.18em;
     text-transform: uppercase;
   }
@@ -408,10 +415,10 @@ const pairPool = [
     transform: rotateY(180deg);
     background: linear-gradient(150deg, #1a263b, #141d2d);
     color: #f5f8ff;
-    font-size: 0.72rem;
+    font-size: 0.92rem;
     text-transform: none;
     letter-spacing: 0.02em;
-    line-height: 1.2;
+    line-height: 1.35;
     overflow-wrap: anywhere;
     text-wrap: balance;
   }
@@ -496,11 +503,11 @@ const pairPool = [
     }
 
     .card {
-      min-height: 6.6rem;
+      min-height: 7rem;
     }
 
     .card-front {
-      font-size: 0.78rem;
+      font-size: 1.05rem;
     }
   }
 

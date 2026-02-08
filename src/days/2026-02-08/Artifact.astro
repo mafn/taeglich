@@ -7,7 +7,7 @@ const signMid = "BREAK GLASS. PUSH BUTTON.";
 const signBottom = "RETURN TO BED";
 ---
 
-<main class="sleep" aria-labelledby="sleep-title">
+<section class="sleep" aria-labelledby="sleep-title">
   <input
     id="glass-toggle"
     class="sleep__toggle"
@@ -23,8 +23,6 @@ const signBottom = "RETURN TO BED";
   />
 
   <div class="sleep__stage" role="group" aria-labelledby="sleep-title">
-    <a class="exit" href="/archive">[ history ]</a>
-
     <div class="sleep__row">
       <h1 id="sleep-title" class="sign">
         <span class="sign__line sign__line--top">{signTop}</span>
@@ -396,11 +394,6 @@ const signBottom = "RETURN TO BED";
     </div>
 
     <p id="sleep-note" class="srOnly">Break the glass, then push the button.</p>
-
-    <nav class="legal" aria-label="Legal">
-      <a class="legal__link" href="/imprint">Imprint</a>
-      <a class="legal__link" href="/privacy">Privacy</a>
-    </nav>
   </div>
 
   <div class="sleep__dim"></div>
@@ -414,7 +407,7 @@ const signBottom = "RETURN TO BED";
   >
     Good night.
   </div>
-</main>
+</section>
 
 <script is:inline>
   (() => {
@@ -423,6 +416,12 @@ const signBottom = "RETURN TO BED";
     const sleepToggle = document.getElementById("sleep-toggle");
     if (!(glassToggle instanceof HTMLInputElement)) return;
     if (!(sleepToggle instanceof HTMLInputElement)) return;
+
+    // Intentional: always start asleep; completion is recorded for later use.
+    glassToggle.checked = false;
+    sleepToggle.checked = false;
+    glassToggle.disabled = false;
+    sleepToggle.disabled = true;
 
     const syncSleepEnabled = () => {
       sleepToggle.disabled = !glassToggle.checked;
@@ -498,13 +497,11 @@ const signBottom = "RETURN TO BED";
     font-family: var(--font-sans);
   }
 
-  :global(body > header),
-  :global(body > footer) {
-    display: none;
-  }
-
-  :global(body > main) {
-    flex: 1;
+  @media (max-width: 639px) {
+    :global(body > header),
+    :global(body > footer) {
+      display: none;
+    }
   }
 
   .sleep__toggle {
@@ -536,27 +533,6 @@ const signBottom = "RETURN TO BED";
 
   #sleep-toggle:checked ~ .sleep__stage {
     pointer-events: none;
-  }
-
-  .exit {
-    position: fixed;
-    top: 16px;
-    right: 16px;
-    font-family: var(--font-mono);
-    font-size: 0.85rem;
-    color: rgba(74, 27, 23, 0.72);
-    text-decoration: none;
-    z-index: 2;
-  }
-
-  .exit:hover {
-    text-decoration: underline;
-  }
-
-  .exit:focus-visible {
-    outline: 2px solid rgba(74, 27, 23, 0.55);
-    outline-offset: 3px;
-    border-radius: 4px;
   }
 
   .sign {
@@ -902,27 +878,5 @@ const signBottom = "RETURN TO BED";
       grid-area: alarm;
       justify-self: start;
     }
-  }
-
-  .legal {
-    display: flex;
-    gap: 12px;
-    font-size: 0.82rem;
-    font-family: var(--font-mono);
-  }
-
-  .legal__link {
-    color: rgba(74, 27, 23, 0.72);
-    text-decoration: none;
-  }
-
-  .legal__link:hover {
-    text-decoration: underline;
-  }
-
-  .legal__link:focus-visible {
-    outline: 2px solid rgba(74, 27, 23, 0.55);
-    outline-offset: 3px;
-    border-radius: 4px;
   }
 </style>
