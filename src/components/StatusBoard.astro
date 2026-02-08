@@ -347,10 +347,12 @@ const phases = generateTimeline(date);
       return;
     }
 
-    // Postmortem appears day after the artifact date
-    const dObj = new Date(artifactDate);
-    dObj.setDate(dObj.getDate() + 1);
-    const POSTMORTEM_FROM = `${dObj.getFullYear()}-${String(dObj.getMonth() + 1).padStart(2, "0")}-${String(dObj.getDate()).padStart(2, "0")}`;
+    // Postmortem appears day after the artifact date.
+    // `new Date("YYYY-MM-DD")` is parsed as UTC; use UTC getters/setters to avoid TZ drift.
+    let dObj = new Date(artifactDate);
+    if (Number.isNaN(dObj.getTime())) dObj = new Date();
+    dObj.setUTCDate(dObj.getUTCDate() + 1);
+    const POSTMORTEM_FROM = `${dObj.getUTCFullYear()}-${String(dObj.getUTCMonth() + 1).padStart(2, "0")}-${String(dObj.getUTCDate()).padStart(2, "0")}`;
 
     function pad2(n) {
       return String(n).padStart(2, "0");
