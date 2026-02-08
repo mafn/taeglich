@@ -5,10 +5,15 @@ import type { DayMeta } from "../../types";
 
 export async function getStaticPaths() {
   const metas = import.meta.glob("../../days/*/meta.ts", { eager: true });
+  const artifacts = import.meta.glob("../../days/*/Artifact.astro");
 
-  return Object.keys(metas).map((path) => {
+  return Object.keys(metas).flatMap((path) => {
     const date = path.split("/").at(-2);
     if (!date) throw new Error(`Could not parse date from path: ${path}`);
+
+    const artifactPath = `../../days/${date}/Artifact.astro`;
+    // Allow future/incomplete days to exist (meta only) without breaking build.
+    if (!artifacts[artifactPath]) return [];
 
     // Cast the module default export to DayMeta
     const metaModule = metas[path] as { default: DayMeta };

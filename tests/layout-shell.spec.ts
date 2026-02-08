@@ -6,6 +6,9 @@ const daysDir = path.join(process.cwd(), "src", "days");
 const daySlugs = fs
   .readdirSync(daysDir)
   .filter((entry) => /^\d{4}-\d{2}-\d{2}$/.test(entry));
+const publishedSlugs = daySlugs.filter((slug) =>
+  fs.existsSync(path.join(daysDir, slug, "Artifact.astro")),
+);
 
 const MOBILE = { width: 390, height: 844 };
 const DESKTOP = { width: 1280, height: 720 };
@@ -43,7 +46,7 @@ test.describe("layout shell", () => {
   test.describe("mobile", () => {
     test.use({ viewport: MOBILE });
 
-    for (const day of daySlugs) {
+    for (const day of publishedSlugs) {
       test(`${day} uses layout once (mobile)`, async ({ page }) => {
         await page.goto(`/d/${day}`);
 
@@ -61,7 +64,7 @@ test.describe("layout shell", () => {
   test.describe("desktop", () => {
     test.use({ viewport: DESKTOP });
 
-    for (const day of daySlugs) {
+    for (const day of publishedSlugs) {
       test(`${day} uses layout once (desktop)`, async ({ page }) => {
         await page.goto(`/d/${day}`);
 
