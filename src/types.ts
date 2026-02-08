@@ -3,6 +3,7 @@ export interface DayMeta {
   description?: string;
   tags?: string[];
   ogImage?: string;
+  shellMode?: "default" | "compact" | "immersive";
   /**
    * If true, this day is excluded from the main index.
    */

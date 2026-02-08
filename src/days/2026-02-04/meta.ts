@@ -5,4 +5,5 @@ export default defineDay({
   description:
     "Descend into the void. Guide anomalous geometric constructs through endless, shifting planes.",
   tags: ["game", "arcade", "retro", "interactive", "minimal"],
+  shellMode: "immersive",
 });

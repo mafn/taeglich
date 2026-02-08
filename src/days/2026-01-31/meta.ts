@@ -5,4 +5,5 @@ export default defineDay({
   description:
     "A tiny boot console. Fix the filesystem. Or don’t. The end is the same.",
   tags: ["terminal", "boot", "panic", "toy"],
+  shellMode: "compact",
 });

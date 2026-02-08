@@ -1,0 +1,27 @@
+---
+interface Props {
+  bg?: string;
+  text?: string;
+  muted?: string;
+  border?: string;
+  link?: string;
+  linkHover?: string;
+  pillBg?: string;
+}
+
+const { bg, text, muted, border, link, linkHover, pillBg } = Astro.props;
+
+const entries = [
+  ["--shell-bg", bg],
+  ["--shell-text", text],
+  ["--shell-muted", muted],
+  ["--shell-border", border],
+  ["--shell-link", link],
+  ["--shell-link-hover", linkHover],
+  ["--shell-pill-bg", pillBg],
+].filter(([, value]) => Boolean(value));
+
+const css = entries.map(([key, value]) => `${key}: ${value};`).join(" ");
+---
+
+{css && <style is:global set:html={`:root { ${css} }`} />}

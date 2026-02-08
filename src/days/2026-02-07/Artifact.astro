@@ -1,8 +1,19 @@
 ---
 import "@fontsource-variable/jetbrains-mono";
+import ShellTheme from "../../components/ShellTheme.astro";
 
 const date = "2026-02-07";
 ---
+
+<ShellTheme
+  bg="rgba(6, 8, 12, 0.94)"
+  text="#e2e8f0"
+  muted="#94a3b8"
+  border="#1f2937"
+  link="#cbd5e1"
+  linkHover="#f8fafc"
+  pillBg="rgba(15, 23, 42, 0.92)"
+/>
 
 <div class="probe-root" data-date={date}>
   <div class="dashboard">
@@ -60,7 +71,7 @@ const date = "2026-02-07";
   let isStarted = false;
   let startupFailures = 0;
   let activeProbe = false;
-  
+
   const CONFIG = {
     STARTUP_FAILURE_THRESHOLD: 3,
     LIVENESS_FAILURE_THRESHOLD: 1,
@@ -68,7 +79,7 @@ const date = "2026-02-07";
     STARTUP_PERIOD_MS: 2000, // Faster for startup simulation
     TIMEOUT_MS: 3000,
     RESTART_DELAY_MS: 2000,
-    TICK_MS: 50
+    TICK_MS: 50,
   };
 
   function addLog(msg, type = "") {
@@ -87,13 +98,13 @@ const date = "2026-02-07";
     activeProbe = false;
     clearInterval(probeTimerInterval);
     clearInterval(schedulerInterval);
-    
+
     statusEl.textContent = "KILLED";
     statusEl.className = "status-killed";
     okBtn.disabled = true;
     timeoutLabel.textContent = "";
     timerBar.style.width = "0%";
-    
+
     addLog(`Container failed: ${reason}`, "error");
     addLog("Killing container...", "error");
 
@@ -118,7 +129,7 @@ const date = "2026-02-07";
     okBtn.disabled = false;
     probeTypeEl.textContent = type;
     probePathEl.textContent = path;
-    
+
     addLog(`${type} PROBE: GET ${path}`, "probe");
 
     const decrement = (CONFIG.TICK_MS / CONFIG.TIMEOUT_MS) * 100;
@@ -132,13 +143,16 @@ const date = "2026-02-07";
         clearInterval(probeTimerInterval);
         activeProbe = false;
         okBtn.disabled = true;
-        
+
         if (!isStarted) {
           startupFailures++;
           if (startupFailures >= CONFIG.STARTUP_FAILURE_THRESHOLD) {
             restart("Startup failure threshold reached");
           } else {
-            addLog(`Startup probe failed (${startupFailures}/${CONFIG.STARTUP_FAILURE_THRESHOLD})`, "error");
+            addLog(
+              `Startup probe failed (${startupFailures}/${CONFIG.STARTUP_FAILURE_THRESHOLD})`,
+              "error",
+            );
           }
         } else {
           // Liveness failure threshold is 1
@@ -150,7 +164,7 @@ const date = "2026-02-07";
 
   okBtn.addEventListener("click", () => {
     if (!activeProbe || okBtn.disabled) return;
-    
+
     addLog("HTTP/1.1 200 OK", "success");
     clearInterval(probeTimerInterval);
     activeProbe = false;
@@ -163,7 +177,7 @@ const date = "2026-02-07";
       addLog("Startup probe successful. Transitioning to Running.", "system");
       statusEl.textContent = "RUNNING";
       statusEl.className = "status-running";
-      
+
       // Reschedule for Liveness
       clearInterval(schedulerInterval);
       schedulerInterval = setInterval(triggerProbe, CONFIG.LIVENESS_PERIOD_MS);
@@ -175,11 +189,17 @@ const date = "2026-02-07";
     statusEl.textContent = "STARTING";
     statusEl.className = "status-starting";
     addLog("Initialising container...", "system");
-    addLog(`Probes: Startup(threshold=${CONFIG.STARTUP_FAILURE_THRESHOLD}), Liveness(period=${CONFIG.LIVENESS_PERIOD_MS / 1000}s, threshold=${CONFIG.LIVENESS_FAILURE_THRESHOLD})`, "system");
-    
+    addLog(
+      `Probes: Startup(threshold=${CONFIG.STARTUP_FAILURE_THRESHOLD}), Liveness(period=${CONFIG.LIVENESS_PERIOD_MS / 1000}s, threshold=${CONFIG.LIVENESS_FAILURE_THRESHOLD})`,
+      "system",
+    );
+
     // Start periodic probes
     triggerProbe(); // First one immediate
-    schedulerInterval = setInterval(triggerProbe, isStarted ? CONFIG.LIVENESS_PERIOD_MS : CONFIG.STARTUP_PERIOD_MS);
+    schedulerInterval = setInterval(
+      triggerProbe,
+      isStarted ? CONFIG.LIVENESS_PERIOD_MS : CONFIG.STARTUP_PERIOD_MS,
+    );
   }
 
   initPod();
@@ -226,9 +246,15 @@ const date = "2026-02-07";
     color: #666;
   }
 
-  .status-starting { color: #60a5fa; }
-  .status-running { color: #4ade80; }
-  .status-killed { color: #f87171; }
+  .status-starting {
+    color: #60a5fa;
+  }
+  .status-running {
+    color: #4ade80;
+  }
+  .status-killed {
+    color: #f87171;
+  }
 
   .log-window {
     height: 240px;
@@ -241,10 +267,19 @@ const date = "2026-02-07";
     border-bottom: 1px solid #333;
   }
 
-  .log-entry.system { color: #60a5fa; }
-  .log-entry.probe { color: #d1d5db; font-weight: bold; }
-  .log-entry.success { color: #4ade80; }
-  .log-entry.error { color: #f87171; }
+  .log-entry.system {
+    color: #60a5fa;
+  }
+  .log-entry.probe {
+    color: #d1d5db;
+    font-weight: bold;
+  }
+  .log-entry.success {
+    color: #4ade80;
+  }
+  .log-entry.error {
+    color: #f87171;
+  }
 
   .probe-ui {
     padding: 1.5rem;
@@ -288,8 +323,13 @@ const date = "2026-02-07";
     color: #fff;
   }
 
-  .method { color: #fbbf24; font-weight: bold; }
-  .path { color: #d1d5db; }
+  .method {
+    color: #fbbf24;
+    font-weight: bold;
+  }
+  .path {
+    color: #d1d5db;
+  }
 
   .timeout-label {
     color: #f87171;
@@ -320,8 +360,16 @@ const date = "2026-02-07";
   }
 
   @media (max-width: 480px) {
-    .dash-header { grid-template-columns: 1fr; }
-    .action-area { flex-direction: column; gap: 1rem; align-items: flex-start; }
-    .ok-button { width: 100%; }
+    .dash-header {
+      grid-template-columns: 1fr;
+    }
+    .action-area {
+      flex-direction: column;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    .ok-button {
+      width: 100%;
+    }
   }
 </style>

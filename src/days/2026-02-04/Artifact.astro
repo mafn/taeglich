@@ -1,9 +1,21 @@
 ---
 // src/days/2026-02-04/Artifact.astro
 import "@fontsource/press-start-2p";
+import SiteLinks from "../../components/SiteLinks.astro";
+import ShellTheme from "../../components/ShellTheme.astro";
 ---
 
 <>
+  <ShellTheme
+    bg="#000"
+    text="#e2e8f0"
+    muted="#94a3b8"
+    border="#1f2937"
+    link="#cbd5e1"
+    linkHover="#f8fafc"
+    pillBg="#000"
+  />
+
   <div class="tetris-game-container">
     <div class="game-title">BLOCKFALL // VOID SHAPES</div>
     <div class="game-area">
@@ -42,6 +54,25 @@ import "@fontsource/press-start-2p";
         <h2>GAME OVER</h2>
         <p>SCORE: <span id="finalScore">0</span></p>
         <button id="restartButton">TRY AGAIN</button>
+        <nav aria-label="Site" class="overlay-links overlay-links--center">
+          <SiteLinks linkClass="overlay-link" showSeparators={false} />
+        </nav>
+      </div>
+    </div>
+
+    <div id="soundOverlay" class="overlay sound-gate" style="display: none;">
+      <div class="overlay-content sound-content">
+        <h2>SOUND CHECK</h2>
+        <p class="sound-note">
+          BLOCKFALL uses chiptune audio. Start with sound on or muted?
+        </p>
+        <div class="sound-actions">
+          <button id="soundOn">SOUND ON</button>
+          <button id="soundOff">START MUTED</button>
+        </div>
+        <nav aria-label="Site" class="overlay-links overlay-links--center">
+          <SiteLinks linkClass="overlay-link" showSeparators={false} />
+        </nav>
       </div>
     </div>
 
@@ -56,6 +87,10 @@ import "@fontsource/press-start-2p";
       </div>
       <button id="btnDrop" class="control-btn big-btn">DROP</button>
     </div>
+
+    <nav aria-label="Site" class="overlay-links">
+      <SiteLinks linkClass="overlay-link" showSeparators={false} />
+    </nav>
   </div>
 
   <noscript>
@@ -80,7 +115,8 @@ import "@fontsource/press-start-2p";
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      background-color: #0d0d1a; /* Deep navy */
+      min-height: 100svh;
+      background-color: #000000; /* Pure black */
       color: #00ffcc; /* Neon teal */
       font-family:
         "Press Start 2P", "Courier New", monospace; /* Example retro font */
@@ -116,6 +152,71 @@ import "@fontsource/press-start-2p";
       color: #ff33cc;
       margin-bottom: 20px;
       text-shadow: 0 0 10px #ff33cc;
+    }
+
+    .sound-content {
+      max-width: 420px;
+    }
+
+    .sound-note {
+      color: #00ffcc;
+      font-size: 0.6rem;
+      line-height: 1.6;
+      margin: 0 0 1.5rem;
+      text-shadow: none;
+    }
+
+    .sound-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: center;
+    }
+
+    .sound-actions button {
+      background: transparent;
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+      padding: 10px 16px;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+    }
+
+    .sound-actions button:hover {
+      border-color: #ff33cc;
+      color: #ff33cc;
+    }
+
+    .overlay-links {
+      margin-top: 1.4rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      justify-content: flex-start;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      font-size: 0.55rem;
+    }
+
+    .overlay-links--center {
+      justify-content: center;
+    }
+
+    .overlay-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #00ffcc;
+      color: #00ffcc;
+      padding: 8px 14px;
+      text-decoration: none;
+    }
+
+    .overlay-link:hover {
+      border-color: #ff33cc;
+      color: #ff33cc;
     }
 
     .overlay-content p {
@@ -434,14 +535,18 @@ import "@fontsource/press-start-2p";
       const SHAPE_COLORS = [8, 9, 10, 8, 9, 10]; // Example: assign neon pink, amber, neon teal
 
       // Piece object constructor
-      function Piece(shapeIndex, colorIndex) {
-        this.shape = SHAPES[shapeIndex];
-        this.color = BLOCK_COLORS[colorIndex];
-        this.x =
-          Math.floor(COLS / 2) -
-          Math.ceil(this.shape.reduce((max, p) => Math.max(max, p[0]), 0) / 2); // Center piece horizontally
-        this.y = 0; // Start at the top
-        this.rotation = 0; // Current rotation state
+      class Piece {
+        constructor(shapeIndex, colorIndex) {
+          this.shape = SHAPES[shapeIndex];
+          this.color = BLOCK_COLORS[colorIndex];
+          this.x =
+            Math.floor(COLS / 2) -
+            Math.ceil(
+              this.shape.reduce((max, p) => Math.max(max, p[0]), 0) / 2,
+            ); // Center piece horizontally
+          this.y = 0; // Start at the top
+          this.rotation = 0; // Current rotation state
+        }
       }
 
       // Draw a single block
@@ -727,8 +832,12 @@ import "@fontsource/press-start-2p";
       let audioContext;
       let oscillator;
       let gainNode;
-      // Initialize mute state from session storage, default to false
-      let isMuted = sessionStorage.getItem("tetrisMuted") === "true";
+      const SOUND_KEY = "tetrisMuted";
+      const soundOverlay = document.getElementById("soundOverlay");
+      const soundOnBtn = document.getElementById("soundOn");
+      const soundOffBtn = document.getElementById("soundOff");
+      const storedSound = sessionStorage.getItem(SOUND_KEY);
+      let isMuted = storedSound === "true";
 
       const NOTES = {
         C4: 261.63,
@@ -763,9 +872,9 @@ import "@fontsource/press-start-2p";
 
       function initAudio() {
         if (!audioContext) {
-          audioContext = new (
-            window.AudioContext || window.webkitAudioContext
-          )();
+          const AudioCtx = window.AudioContext;
+          if (!AudioCtx) return;
+          audioContext = new AudioCtx();
           gainNode = audioContext.createGain();
           gainNode.connect(audioContext.destination);
           gainNode.gain.value = 0.1; // Low volume
@@ -816,7 +925,7 @@ import "@fontsource/press-start-2p";
 
       function toggleMute() {
         isMuted = !isMuted;
-        sessionStorage.setItem("tetrisMuted", isMuted);
+        sessionStorage.setItem(SOUND_KEY, isMuted ? "true" : "false");
         if (isMuted) {
           if (oscillator) {
             oscillator.stop();
@@ -937,6 +1046,22 @@ import "@fontsource/press-start-2p";
         });
       }
 
+      function applySoundChoice(muted) {
+        isMuted = muted;
+        sessionStorage.setItem(SOUND_KEY, muted ? "true" : "false");
+        if (soundOverlay) soundOverlay.style.display = "none";
+        initGame();
+      }
+
+      if (storedSound !== null) {
+        if (soundOverlay) soundOverlay.style.display = "none";
+        initGame();
+      } else {
+        if (soundOverlay) soundOverlay.style.display = "flex";
+        soundOnBtn?.addEventListener("click", () => applySoundChoice(false));
+        soundOffBtn?.addEventListener("click", () => applySoundChoice(true));
+      }
+
       // User gesture to resume audio context
       document.addEventListener(
         "click",
@@ -944,15 +1069,9 @@ import "@fontsource/press-start-2p";
           if (audioContext && audioContext.state === "suspended") {
             audioContext.resume();
           }
-          if (!isMuted && !oscillator) {
-            // If unmuted and music not playing (e.g., after initial load before user interaction)
-            playChiptune();
-          }
         },
         { once: true },
       );
-
-      initGame(); // Start the game when the page loads
     });
   </script>
 </>

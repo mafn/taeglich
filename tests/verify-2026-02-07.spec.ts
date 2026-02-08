@@ -23,9 +23,11 @@ test("2026-02-07 Liveness probe artifact works", async ({ page }) => {
   await expect(status).toHaveText("RUNNING");
 });
 
-test("2026-02-07 Startup failure threshold triggers restart", async ({ page }) => {
+test("2026-02-07 Startup failure threshold triggers restart", async ({
+  page,
+}) => {
   await page.goto("/d/2026-02-07");
-  
+
   test.setTimeout(25000);
 
   const restarts = page.locator("#restarts");

@@ -3,7 +3,19 @@
  * Ghost Frequency - 2026-02-01
  * Final Form: High-fidelity walnut receiver with evolving audio narrative.
  */
+import SiteLinks from "../../components/SiteLinks.astro";
+import ShellTheme from "../../components/ShellTheme.astro";
 ---
+
+<ShellTheme
+  bg="rgba(6, 8, 10, 0.92)"
+  text="#e5e7eb"
+  muted="#9ca3af"
+  border="#1f2937"
+  link="#cbd5e1"
+  linkHover="#f8fafc"
+  pillBg="rgba(12, 16, 22, 0.9)"
+/>
 
 <div
   class="flex min-h-screen w-full flex-col items-center justify-center bg-[#050505] p-4 font-sans text-zinc-100 selection:bg-emerald-500/30"
@@ -41,6 +53,15 @@
         </div>
         <span class="relative text-emerald-400">Initialize Receiver</span>
       </button>
+      <nav
+        aria-label="Site"
+        class="flex flex-wrap items-center justify-center gap-3 pt-2 font-mono text-[0.55rem] tracking-[0.22em] text-zinc-500 uppercase"
+      >
+        <SiteLinks
+          linkClass="underline underline-offset-4 hover:text-zinc-200"
+          separatorClass="text-zinc-600"
+        />
+      </nav>
     </div>
   </div>
 
@@ -337,7 +358,6 @@
   let tauGain: GainNode | null = null;
 
   let lastTauLocked = false;
-  let hasTuned = false;
 
   let tauSettleTimer: number | null = null;
   let chipStopTimer: number | null = null;
@@ -946,7 +966,6 @@
     function onStart(x: number, y: number) {
       initAudio();
       if (audioContext) audioContext.resume();
-      hasTuned = true;
       el.focus();
       isDragging = true;
       setFromPoint(x, y);
@@ -1056,7 +1075,6 @@
         e.preventDefault();
         initAudio();
         if (audioContext) audioContext.resume();
-        hasTuned = true;
         const delta =
           -e.deltaY *
           ((max - min) / 15000) *

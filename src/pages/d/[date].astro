@@ -44,6 +44,7 @@ const canonicalURL = new URL(`/d/${date}`, Astro.site);
   description={meta.description}
   image={meta.ogImage}
   canonicalURL={canonicalURL}
+  shellMode={meta.shellMode}
 >
   <Artifact />
 </BaseLayout>
