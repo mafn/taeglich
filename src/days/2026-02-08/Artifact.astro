@@ -1,0 +1,928 @@
+---
+import "@fontsource-variable/space-grotesk";
+import "@fontsource-variable/jetbrains-mono";
+
+const signTop = "IN CASE OF LACK OF MOTIVATION";
+const signMid = "BREAK GLASS. PUSH BUTTON.";
+const signBottom = "RETURN TO BED";
+---
+
+<main class="sleep" aria-labelledby="sleep-title">
+  <input
+    id="glass-toggle"
+    class="sleep__toggle"
+    type="checkbox"
+    aria-label="Break the glass cover"
+  />
+  <input
+    id="sleep-toggle"
+    class="sleep__toggle"
+    type="checkbox"
+    aria-label="Push the alarm button to go back to sleep"
+    aria-describedby="sleep-note"
+  />
+
+  <div class="sleep__stage" role="group" aria-labelledby="sleep-title">
+    <a class="exit" href="/archive">[ history ]</a>
+
+    <div class="sleep__row">
+      <h1 id="sleep-title" class="sign">
+        <span class="sign__line sign__line--top">{signTop}</span>
+        <span class="sign__line sign__line--mid">{signMid}</span>
+
+        <span class="sign__icon" aria-hidden="true">
+          <svg viewBox="0 0 320 150" class="sign__iconSvg">
+            <g
+              fill="none"
+              stroke="#fff"
+              stroke-width="6"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="90" cy="75" r="38" opacity="0.75"></circle>
+              <path d="M90 36 L86 62 L102 70 L78 84 L104 96 L90 114"></path>
+              <path d="M86 62 L62 56 L44 70 L24 62"></path>
+              <path d="M102 70 L126 62 L146 76 L168 70"></path>
+              <path d="M78 84 L62 96 L44 118"></path>
+              <path d="M104 96 L122 112 L140 128"></path>
+
+              <circle cx="240" cy="50" r="22" opacity="0.9"></circle>
+              <circle cx="240" cy="50" r="36" opacity="0.45"></circle>
+              <path d="M210 142 V98 C210 86 222 80 234 86 V122"></path>
+              <path d="M234 122 V86 C234 76 246 72 256 80 V120"></path>
+              <path d="M256 120 V90 C256 82 268 80 274 88 V120"></path>
+              <path d="M210 120 L200 114" opacity="0.8"></path>
+            </g>
+          </svg>
+        </span>
+
+        <span class="sign__line sign__line--bot">{signBottom}</span>
+      </h1>
+
+      <div class="alarm">
+        <input
+          id="screw-tl"
+          class="sleep__toggle"
+          type="checkbox"
+          aria-label="Turn top left screw"
+        />
+        <input
+          id="screw-tr"
+          class="sleep__toggle"
+          type="checkbox"
+          aria-label="Turn top right screw"
+        />
+        <input
+          id="screw-bl"
+          class="sleep__toggle"
+          type="checkbox"
+          aria-label="Turn bottom left screw"
+        />
+        <input
+          id="screw-br"
+          class="sleep__toggle"
+          type="checkbox"
+          aria-label="Turn bottom right screw"
+        />
+
+        <label
+          for="glass-toggle"
+          class="alarm__hit alarm__hit--glass"
+          data-testid="hit-glass"
+        >
+          <span class="srOnly">Break glass.</span>
+        </label>
+        <label
+          for="sleep-toggle"
+          class="alarm__hit alarm__hit--push"
+          data-testid="hit-push"
+        >
+          <span class="srOnly">Push button.</span>
+        </label>
+
+        <label for="screw-tl" class="screwHit screwHit--tl">
+          <span class="srOnly">Turn screw.</span>
+        </label>
+        <label for="screw-tr" class="screwHit screwHit--tr">
+          <span class="srOnly">Turn screw.</span>
+        </label>
+        <label for="screw-bl" class="screwHit screwHit--bl">
+          <span class="srOnly">Turn screw.</span>
+        </label>
+        <label for="screw-br" class="screwHit screwHit--br">
+          <span class="srOnly">Turn screw.</span>
+        </label>
+
+        <svg class="alarm__svg" viewBox="0 0 320 420" aria-hidden="true">
+          <defs>
+            <linearGradient id="plastic" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#e03a39"></stop>
+              <stop offset="0.55" stop-color="#b31317"></stop>
+              <stop offset="1" stop-color="#7a0a0d"></stop>
+            </linearGradient>
+
+            <linearGradient id="edge" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity="0.26"></stop>
+              <stop offset="0.5" stop-color="#000000" stop-opacity="0.12"
+              ></stop>
+              <stop offset="1" stop-color="#000000" stop-opacity="0.28"></stop>
+            </linearGradient>
+
+            <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#ffffff" stop-opacity="0.78"></stop>
+              <stop offset="0.22" stop-color="#ffffff" stop-opacity="0.26"
+              ></stop>
+              <stop offset="0.72" stop-color="#ffffff" stop-opacity="0.10"
+              ></stop>
+              <stop offset="1" stop-color="#ffffff" stop-opacity="0.24"></stop>
+            </linearGradient>
+
+            <filter
+              id="softShadow"
+              x="-30%"
+              y="-30%"
+              width="160%"
+              height="160%"
+            >
+              <feGaussianBlur in="SourceAlpha" stdDeviation="6" result="blur"
+              ></feGaussianBlur>
+              <feOffset dx="0" dy="10" result="off"></feOffset>
+              <feColorMatrix
+                in="off"
+                type="matrix"
+                values="0 0 0 0 0.10  0 0 0 0 0.04  0 0 0 0 0.04  0 0 0 0.35 0"
+                result="shadow"></feColorMatrix>
+              <feMerge>
+                <feMergeNode in="shadow"></feMergeNode>
+                <feMergeNode in="SourceGraphic"></feMergeNode>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- outer body -->
+          <g filter="url(#softShadow)">
+            <rect
+              x="22"
+              y="22"
+              width="276"
+              height="376"
+              rx="26"
+              fill="url(#plastic)"></rect>
+            <rect
+              x="22"
+              y="22"
+              width="276"
+              height="376"
+              rx="26"
+              fill="none"
+              stroke="#330405"
+              stroke-width="10"></rect>
+            <rect
+              x="38"
+              y="38"
+              width="244"
+              height="344"
+              rx="18"
+              fill="none"
+              stroke="url(#edge)"
+              stroke-width="3"></rect>
+          </g>
+
+          <!-- screws -->
+          <g>
+            <g transform="translate(56 58)">
+              <circle
+                cx="0"
+                cy="0"
+                r="10"
+                fill="#e9e2d9"
+                stroke="#a79b90"
+                stroke-width="2"></circle>
+              <path
+                class="screwSlot screwSlot--tl"
+                d="M-6 0 H6"
+                stroke="rgba(70,56,46,0.62)"
+                stroke-width="2.2"
+                stroke-linecap="round"></path>
+            </g>
+            <g transform="translate(264 58)">
+              <circle
+                cx="0"
+                cy="0"
+                r="10"
+                fill="#e9e2d9"
+                stroke="#a79b90"
+                stroke-width="2"></circle>
+              <path
+                class="screwSlot screwSlot--tr"
+                d="M-6 0 H6"
+                stroke="rgba(70,56,46,0.62)"
+                stroke-width="2.2"
+                stroke-linecap="round"></path>
+            </g>
+            <g transform="translate(56 362)">
+              <circle
+                cx="0"
+                cy="0"
+                r="10"
+                fill="#e9e2d9"
+                stroke="#a79b90"
+                stroke-width="2"></circle>
+              <path
+                class="screwSlot screwSlot--bl"
+                d="M-6 0 H6"
+                stroke="rgba(70,56,46,0.62)"
+                stroke-width="2.2"
+                stroke-linecap="round"></path>
+            </g>
+            <g transform="translate(264 362)">
+              <circle
+                cx="0"
+                cy="0"
+                r="10"
+                fill="#e9e2d9"
+                stroke="#a79b90"
+                stroke-width="2"></circle>
+              <path
+                class="screwSlot screwSlot--br"
+                d="M-6 0 H6"
+                stroke="rgba(70,56,46,0.62)"
+                stroke-width="2.2"
+                stroke-linecap="round"></path>
+            </g>
+          </g>
+
+          <!-- top label on device -->
+          <g
+            fill="#fff6f1"
+            font-family="ui-sans-serif, system-ui, sans-serif"
+            text-anchor="middle"
+          >
+            <text
+              x="160"
+              y="116"
+              font-size="20"
+              font-weight="800"
+              letter-spacing="6"
+              opacity="0.95"
+            >
+              BREAK GLASS
+            </text>
+            <text
+              x="160"
+              y="142"
+              font-size="12"
+              font-weight="800"
+              letter-spacing="2"
+              opacity="0.82"
+            >
+              MANUAL CALL POINT
+            </text>
+          </g>
+
+          <!-- recessed window -->
+          <rect
+            x="52"
+            y="168"
+            width="216"
+            height="168"
+            rx="20"
+            fill="rgba(0,0,0,0.22)"></rect>
+          <rect
+            x="60"
+            y="176"
+            width="200"
+            height="152"
+            rx="16"
+            fill="rgba(255,255,255,0.06)"
+            stroke="rgba(255,255,255,0.18)"
+            stroke-width="2"></rect>
+
+          <!-- plunger behind glass -->
+          <g class="plunger">
+            <rect
+              x="82"
+              y="206"
+              width="156"
+              height="96"
+              rx="14"
+              fill="#f5f1ea"
+              stroke="#3c1412"
+              stroke-opacity="0.25"
+              stroke-width="2"></rect>
+            <path
+              d="M82 220 H238"
+              stroke="#000000"
+              stroke-opacity="0.07"
+              stroke-width="6"></path>
+          </g>
+          <g
+            fill="rgba(36, 12, 10, 0.72)"
+            font-family="ui-sans-serif, system-ui, sans-serif"
+            text-anchor="middle"
+          >
+            <text
+              x="160"
+              y="250"
+              font-size="18"
+              font-weight="900"
+              letter-spacing="6">PUSH</text
+            >
+          </g>
+
+          <!-- glass cover -->
+          <g class="glass">
+            <rect
+              x="60"
+              y="176"
+              width="200"
+              height="152"
+              rx="16"
+              fill="url(#glass)"
+              opacity="0.92"></rect>
+            <rect
+              x="60"
+              y="176"
+              width="200"
+              height="152"
+              rx="16"
+              fill="none"
+              stroke="#ffffff"
+              stroke-opacity="0.18"
+              stroke-width="2"></rect>
+            <path
+              d="M76 182 C 132 220, 176 182, 244 206"
+              fill="none"
+              stroke="rgba(255,255,255,0.6)"
+              stroke-width="5"
+              stroke-linecap="round"
+              opacity="0.75"></path>
+
+            <!-- cracks (appear on press) -->
+            <g
+              class="cracks"
+              fill="none"
+              stroke="rgba(255,255,255,0.94)"
+              stroke-width="2.2"
+            >
+              <path d="M160 184 L148 220 L176 240 L140 264 L182 288 L160 322"
+              ></path>
+              <path d="M148 220 L118 210 L94 230 L68 222"></path>
+              <path d="M176 240 L202 226 L230 246 L258 238"></path>
+              <path d="M140 264 L116 286 L96 318"></path>
+              <path d="M182 288 L202 306 L226 330"></path>
+            </g>
+          </g>
+
+          <!-- tiny emboss -->
+          <g
+            fill="rgba(255,245,240,0.80)"
+            font-family="ui-sans-serif, system-ui, sans-serif"
+            text-anchor="middle"
+          >
+            <text
+              x="160"
+              y="360"
+              font-size="12"
+              font-weight="900"
+              letter-spacing="3"
+              opacity="0.55"
+            >
+              MANUAL CALL POINT
+            </text>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <p id="sleep-note" class="srOnly">Break the glass, then push the button.</p>
+
+    <nav class="legal" aria-label="Legal">
+      <a class="legal__link" href="/imprint">Imprint</a>
+      <a class="legal__link" href="/privacy">Privacy</a>
+    </nav>
+  </div>
+
+  <div class="sleep__dim"></div>
+  <div class="sleep__lid sleep__lid--top"></div>
+  <div class="sleep__lid sleep__lid--bottom"></div>
+  <div
+    class="sleep__goodnight"
+    data-testid="goodnight"
+    role="status"
+    aria-live="polite"
+  >
+    Good night.
+  </div>
+</main>
+
+<script is:inline>
+  (() => {
+    const completedKey = "taeglich:completed:2026-02-08";
+    const glassToggle = document.getElementById("glass-toggle");
+    const sleepToggle = document.getElementById("sleep-toggle");
+    if (!(glassToggle instanceof HTMLInputElement)) return;
+    if (!(sleepToggle instanceof HTMLInputElement)) return;
+
+    const syncSleepEnabled = () => {
+      sleepToggle.disabled = !glassToggle.checked;
+    };
+
+    syncSleepEnabled();
+    glassToggle.addEventListener("change", syncSleepEnabled);
+
+    sleepToggle.addEventListener("change", () => {
+      if (!sleepToggle.checked) return;
+
+      try {
+        localStorage.setItem(completedKey, "1");
+      } catch {
+        // ignore (storage disabled)
+      }
+
+      // "Wake up" is reload-only: prevent unchecking via clicks.
+      glassToggle.disabled = true;
+      sleepToggle.disabled = true;
+    });
+  })();
+</script>
+
+<style>
+  :root {
+    color-scheme: only light;
+  }
+
+  .sleep {
+    --wall: #efe4da;
+    --wall-2: #e8d8c9;
+    --ink: #1a0c0b;
+    --font-sans:
+      "Space Grotesk", ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --font-mono:
+      "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      "Liberation Mono", monospace;
+    min-height: 100vh;
+    box-sizing: border-box;
+    padding: calc(72px + env(safe-area-inset-top)) 0
+      calc(48px + env(safe-area-inset-bottom));
+    background:
+      radial-gradient(
+        1100px 700px at 50% -10%,
+        #fff7f2 0%,
+        var(--wall) 55%,
+        #e4d5c7 100%
+      ),
+      radial-gradient(
+        circle at 22% 12%,
+        rgba(255, 255, 255, 0.7),
+        transparent 44%
+      ),
+      radial-gradient(
+        circle at 78% 8%,
+        rgba(255, 255, 255, 0.55),
+        transparent 48%
+      ),
+      radial-gradient(circle at 15% 70%, rgba(0, 0, 0, 0.04), transparent 55%),
+      repeating-linear-gradient(
+        135deg,
+        rgba(120, 84, 66, 0.045) 0 20px,
+        rgba(255, 255, 255, 0) 20px 58px
+      ),
+      linear-gradient(180deg, #f4e8de 0%, #ead8c9 100%);
+    color: var(--ink);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    position: relative;
+    font-family: var(--font-sans);
+  }
+
+  :global(body > header),
+  :global(body > footer) {
+    display: none;
+  }
+
+  :global(body > main) {
+    flex: 1;
+  }
+
+  .sleep__toggle {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .sleep__stage {
+    width: min(92vw, 980px);
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    transition:
+      transform 650ms cubic-bezier(0.16, 1, 0.3, 1),
+      filter 650ms ease,
+      opacity 650ms ease;
+  }
+
+  .sleep__row {
+    width: 100%;
+    display: grid;
+    gap: 18px;
+    align-items: center;
+    justify-items: center;
+  }
+
+  #sleep-toggle:checked ~ .sleep__stage {
+    pointer-events: none;
+  }
+
+  .exit {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: rgba(74, 27, 23, 0.72);
+    text-decoration: none;
+    z-index: 2;
+  }
+
+  .exit:hover {
+    text-decoration: underline;
+  }
+
+  .exit:focus-visible {
+    outline: 2px solid rgba(74, 27, 23, 0.55);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+
+  .sign {
+    width: 100%;
+    max-width: 440px;
+    border-radius: 18px;
+    background:
+      radial-gradient(
+        120% 120% at 18% 0%,
+        rgba(255, 255, 255, 0.12),
+        transparent 55%
+      ),
+      radial-gradient(
+        120% 140% at 90% 100%,
+        rgba(0, 0, 0, 0.16),
+        transparent 50%
+      ),
+      linear-gradient(180deg, #0e7a56 0%, #0b6044 100%);
+    border: 10px solid rgba(250, 248, 244, 0.92);
+    box-shadow:
+      0 26px 70px rgba(26, 10, 10, 0.22),
+      inset 0 0 0 2px rgba(0, 0, 0, 0.22);
+    padding: clamp(16px, 3vw, 26px);
+    text-align: center;
+    margin: 0;
+    text-transform: uppercase;
+    color: #ffffff;
+    position: relative;
+    isolation: isolate;
+  }
+
+  .sign::before {
+    content: "";
+    position: absolute;
+    inset: 14px;
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.65);
+    opacity: 0.85;
+    pointer-events: none;
+  }
+
+  .sign__line {
+    display: block;
+    font-family: var(--font-sans);
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.25);
+  }
+
+  .sign__line--top {
+    font-size: clamp(0.95rem, 1.4vw, 1.25rem);
+    font-weight: 900;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  .sign__line--mid {
+    margin-top: 10px;
+    font-size: clamp(1.05rem, 1.7vw, 1.35rem);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .sign__line--bot {
+    margin-top: 14px;
+    font-size: clamp(2rem, 4.1vw, 3.2rem);
+    font-weight: 900;
+    letter-spacing: 0.06em;
+    line-height: 0.92;
+  }
+
+  .sign__icon {
+    display: grid;
+    place-items: center;
+    margin-top: 14px;
+  }
+
+  .sign__iconSvg {
+    width: min(360px, 92%);
+    height: auto;
+    display: block;
+    filter: drop-shadow(0 18px 22px rgba(0, 0, 0, 0.18));
+  }
+
+  .alarm {
+    display: block;
+    width: min(92vw, 420px);
+    user-select: none;
+    filter: drop-shadow(0 26px 60px rgba(26, 10, 10, 0.35));
+    position: relative;
+    cursor: default;
+  }
+
+  .alarm__svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    pointer-events: none;
+  }
+
+  .alarm__hit {
+    position: absolute;
+    border-radius: 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 2;
+  }
+
+  .alarm__hit:focus-visible {
+    outline: 3px solid rgba(255, 224, 198, 0.95);
+    outline-offset: 6px;
+  }
+
+  .alarm__hit--glass {
+    left: 18%;
+    right: 18%;
+    top: 42%;
+    height: 36%;
+  }
+
+  .alarm__hit--push {
+    left: 26%;
+    right: 26%;
+    top: 49%;
+    height: 23%;
+    display: none;
+  }
+
+  .srOnly {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .cracks {
+    opacity: 0;
+    stroke-dasharray: 660;
+    stroke-dashoffset: 660;
+    transition:
+      opacity 200ms ease,
+      stroke-dashoffset 850ms ease;
+  }
+
+  #sleep-toggle:focus-visible + .sleep__stage .alarm {
+    outline: 3px solid rgba(255, 224, 198, 0.95);
+    outline-offset: 10px;
+    border-radius: 12px;
+  }
+
+  #glass-toggle:focus-visible ~ .sleep__stage .alarm {
+    outline: 3px solid rgba(255, 224, 198, 0.95);
+    outline-offset: 10px;
+    border-radius: 12px;
+  }
+
+  #sleep-toggle:checked ~ .sleep__stage {
+    transform: scale(0.985);
+    filter: blur(1px) saturate(0.85);
+    opacity: 0.42;
+  }
+
+  #glass-toggle:checked ~ .sleep__stage .cracks {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+
+  #glass-toggle:checked ~ .sleep__stage .glass {
+    opacity: 0.72;
+  }
+
+  #glass-toggle:checked ~ .sleep__stage .plunger {
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.22));
+  }
+
+  #sleep-toggle:checked ~ .sleep__stage .plunger {
+    transform: translateY(3px);
+    transform-box: fill-box;
+    transform-origin: center;
+  }
+
+  #glass-toggle:checked ~ .sleep__stage .alarm__hit--glass {
+    pointer-events: none;
+  }
+
+  #glass-toggle:checked ~ .sleep__stage .alarm__hit--push {
+    display: block;
+  }
+
+  .screwHit {
+    position: absolute;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    z-index: 3;
+    transform: translate(-50%, -50%);
+  }
+
+  .screwHit:focus-visible {
+    outline: 3px solid rgba(255, 224, 198, 0.95);
+    outline-offset: 6px;
+  }
+
+  .screwHit--tl {
+    left: 17.5%;
+    top: 13.81%;
+  }
+
+  .screwHit--tr {
+    left: 82.5%;
+    top: 13.81%;
+  }
+
+  .screwHit--bl {
+    left: 17.5%;
+    top: 86.19%;
+  }
+
+  .screwHit--br {
+    left: 82.5%;
+    top: 86.19%;
+  }
+
+  .screwSlot {
+    transform-box: fill-box;
+    transform-origin: center;
+    transition: transform 260ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  #screw-tl:checked ~ .alarm__svg .screwSlot--tl {
+    transform: rotate(90deg);
+  }
+
+  #screw-tr:checked ~ .alarm__svg .screwSlot--tr {
+    transform: rotate(90deg);
+  }
+
+  #screw-bl:checked ~ .alarm__svg .screwSlot--bl {
+    transform: rotate(90deg);
+  }
+
+  #screw-br:checked ~ .alarm__svg .screwSlot--br {
+    transform: rotate(90deg);
+  }
+
+  .sleep__dim {
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(
+      circle at 50% 40%,
+      rgba(44, 10, 10, 0.25),
+      rgba(0, 0, 0, 0.82)
+    );
+    opacity: 0;
+    transition: opacity 650ms ease;
+    z-index: 9997;
+    pointer-events: none;
+  }
+
+  .sleep__lid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 58vh;
+    background: #000;
+    transform: translateY(-120%);
+    transition: transform 900ms cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 9998;
+    pointer-events: none;
+  }
+
+  .sleep__lid--bottom {
+    top: auto;
+    bottom: 0;
+    transform: translateY(120%);
+    background: #000;
+  }
+
+  .sleep__goodnight {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    font-size: clamp(1.6rem, 4vw, 2.5rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #f7e3d8;
+    opacity: 0;
+    transition: opacity 600ms ease 420ms;
+    z-index: 9999;
+    pointer-events: none;
+    text-shadow: 0 2px 14px rgba(0, 0, 0, 0.5);
+  }
+
+  #sleep-toggle:checked ~ .sleep__dim {
+    opacity: 1;
+  }
+
+  #sleep-toggle:checked ~ .sleep__lid--top {
+    transform: translateY(0);
+  }
+
+  #sleep-toggle:checked ~ .sleep__lid--bottom {
+    transform: translateY(0);
+  }
+
+  #sleep-toggle:checked ~ .sleep__goodnight {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sleep__stage,
+    .sleep__dim,
+    .sleep__lid,
+    .sleep__goodnight,
+    .cracks {
+      transition: none;
+    }
+  }
+
+  @media (min-width: 900px) {
+    .sleep__row {
+      grid-template-columns: min(420px, 46vw) minmax(280px, 440px);
+      grid-template-areas: "alarm sign";
+      gap: 24px;
+      justify-items: stretch;
+      align-items: start;
+      justify-content: center;
+    }
+
+    .sign {
+      align-self: start;
+      grid-area: sign;
+    }
+
+    .alarm {
+      grid-area: alarm;
+      justify-self: start;
+    }
+  }
+
+  .legal {
+    display: flex;
+    gap: 12px;
+    font-size: 0.82rem;
+    font-family: var(--font-mono);
+  }
+
+  .legal__link {
+    color: rgba(74, 27, 23, 0.72);
+    text-decoration: none;
+  }
+
+  .legal__link:hover {
+    text-decoration: underline;
+  }
+
+  .legal__link:focus-visible {
+    outline: 2px solid rgba(74, 27, 23, 0.55);
+    outline-offset: 3px;
+    border-radius: 4px;
+  }
+</style>
