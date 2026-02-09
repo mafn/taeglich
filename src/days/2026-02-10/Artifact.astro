@@ -1,0 +1,1707 @@
+---
+import SiteLinks from "../../components/SiteLinks.astro";
+import ShellTheme from "../../components/ShellTheme.astro";
+import "@fontsource/press-start-2p";
+---
+
+<>
+  <ShellTheme
+    bg="#f9f4e9"
+    text="#1f2937"
+    muted="#4b5563"
+    border="#d6cfbe"
+    link="#1f2937"
+    linkHover="#111827"
+    pillBg="rgba(249, 244, 233, 0.95)"
+  />
+
+  <section class="runner" aria-labelledby="runner-title">
+    <header class="runner__header">
+      <p class="runner__kicker">2026-02-10</p>
+      <h1 id="runner-title">Last Run Before Bed</h1>
+      <p class="runner__hint">
+        Move: <kbd>Left</kbd> / <kbd>Right</kbd> · Jump: <kbd>Space</kbd> / <kbd
+          >Arrow Up</kbd
+        >
+      </p>
+    </header>
+
+    <div class="runner__stage">
+      <canvas id="runnerCanvas" width="960" height="540" aria-hidden="true"
+      ></canvas>
+
+      <div id="startOverlay" class="overlay" data-state="open">
+        <div class="overlay__card">
+          <h2>I've decided to go running instead of vibe coding</h2>
+          <p>Move with Left/Right. Jump with Space or Arrow Up.</p>
+          <button id="startButton" class="overlay__button" type="button"
+            >Start Running</button
+          >
+          <nav aria-label="Site" class="overlay__links">
+            <SiteLinks linkClass="overlay__link" showSeparators={false} />
+          </nav>
+        </div>
+      </div>
+
+      <div
+        id="endOverlay"
+        class="overlay"
+        data-state="closed"
+        aria-live="polite"
+        aria-hidden="true"
+        inert
+      >
+        <div class="overlay__card">
+          <h2 id="endTitle">You lost</h2>
+          <p id="endReason">You stopped running.</p>
+          <button id="restartButton" class="overlay__button" type="button"
+            >Run Again</button
+          >
+          <nav aria-label="Site" class="overlay__links">
+            <SiteLinks linkClass="overlay__link" showSeparators={false} />
+          </nav>
+        </div>
+      </div>
+
+      <div class="runner__hud" aria-live="polite">
+        <p id="speedStat">Speed: 0%</p>
+        <p id="distanceStat">Distance: 0m / 4000m</p>
+      </div>
+    </div>
+
+    <div class="runner__controls" aria-label="Touch controls">
+      <button
+        id="leftButton"
+        class="runner__control runner__control--subtle"
+        type="button"
+        aria-label="Move left"
+      >
+        Left
+      </button>
+      <button
+        id="jumpButton"
+        class="runner__control runner__control--jump"
+        type="button"
+        aria-label="Jump"
+      >
+        Jump
+      </button>
+      <button
+        id="rightButton"
+        class="runner__control runner__control--subtle"
+        type="button"
+        aria-label="Move right"
+      >
+        Right
+      </button>
+    </div>
+  </section>
+
+  <div
+    id="rotateOverlay"
+    class="overlay overlay--rotate overlay--global"
+    data-state="closed"
+    aria-live="polite"
+    aria-hidden="true"
+    inert
+  >
+    <div class="overlay__card rotate-card">
+      <div class="rotate-card__icon" aria-hidden="true">
+        <span class="rotate-card__phone rotate-card__phone--portrait"></span>
+        <span class="rotate-card__arrow">-></span>
+        <span class="rotate-card__phone rotate-card__phone--landscape"></span>
+      </div>
+      <h2 class="rotate-card__title">Rotate your screen to play</h2>
+      <p class="rotate-card__copy">
+        This run is tuned for landscape on mobile. Turn your phone sideways to
+        continue.
+      </p>
+      <nav aria-label="Site" class="overlay__links rotate-card__links">
+        <SiteLinks
+          linkClass="overlay__link rotate-card__link"
+          showSeparators={false}
+        />
+      </nav>
+    </div>
+  </div>
+
+  <noscript>
+    <div class="runner__noscript">
+      This game needs JavaScript for the runner loop. Use the <a href="/archive"
+        >archive</a
+      > if scripting is off.
+    </div>
+  </noscript>
+
+  <style>
+    .runner {
+      min-height: 100vh;
+      min-height: 100svh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: clamp(0.5rem, 2vh, 1rem);
+      padding: 1rem;
+      background:
+        radial-gradient(circle at 15% 15%, #fff5c8, transparent 30%),
+        radial-gradient(circle at 85% 20%, #d4ecff, transparent 25%),
+        linear-gradient(180deg, #f9f4e9 0%, #ece5d2 100%);
+      font-family: "Press Start 2P", monospace;
+      color: #1f2937;
+    }
+
+    .runner__header {
+      text-align: center;
+      display: grid;
+      gap: clamp(0.3rem, 1vw, 0.6rem);
+      max-width: 58rem;
+    }
+
+    .runner__kicker {
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      color: #6b7280;
+      margin: 0;
+    }
+
+    .runner__header h1 {
+      margin: 0;
+      font-size: clamp(0.95rem, 2.6vw, 1.4rem);
+      line-height: 1.4;
+    }
+
+    .runner__hint {
+      margin: 0;
+      font-size: 0.62rem;
+      color: #4b5563;
+      letter-spacing: 0.08em;
+    }
+
+    .runner__hint kbd {
+      display: inline-block;
+      border: 2px solid #cbd5e1;
+      border-bottom-width: 4px;
+      border-radius: 0.4rem;
+      padding: 0.2rem 0.35rem;
+      background: #fff;
+      font: inherit;
+      font-size: 0.55rem;
+    }
+
+    .runner__stage {
+      position: relative;
+      width: min(100%, 960px);
+      aspect-ratio: 16 / 9;
+      border: 4px solid #1f2937;
+      border-radius: 1rem;
+      overflow: clip;
+      background: #e5f0ff;
+      box-shadow: 0 18px 40px rgba(31, 41, 55, 0.2);
+    }
+
+    #runnerCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .overlay {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      z-index: 10;
+      place-items: center;
+      padding: 1rem;
+      background: rgba(10, 18, 35, 0.58);
+      transition: opacity 180ms ease;
+    }
+
+    .overlay--rotate {
+      z-index: 20;
+      background:
+        radial-gradient(
+          circle at 12% 18%,
+          rgba(255, 221, 122, 0.28),
+          transparent 32%
+        ),
+        radial-gradient(
+          circle at 88% 14%,
+          rgba(111, 191, 255, 0.26),
+          transparent 30%
+        ),
+        linear-gradient(180deg, rgba(15, 23, 42, 0.92), rgba(11, 18, 32, 0.92));
+      backdrop-filter: blur(4px);
+    }
+
+    .overlay--global {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      place-items: center;
+      padding: max(1rem, env(safe-area-inset-top))
+        max(1rem, env(safe-area-inset-right))
+        max(1rem, env(safe-area-inset-bottom))
+        max(1rem, env(safe-area-inset-left));
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .overlay[data-state="closed"] {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .overlay[data-state="open"] {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .overlay__card {
+      width: min(94%, 42rem);
+      border: 4px solid #1f2937;
+      border-radius: 0.8rem;
+      background: #fffcf4;
+      padding: clamp(0.6rem, 2.5vw, 1.8rem);
+      text-align: center;
+      display: grid;
+      gap: 0.6rem;
+    }
+
+    .rotate-card {
+      width: min(100%, 36rem);
+      min-height: min(78svh, 34rem);
+      border-color: #0f172a;
+      border-radius: 1rem;
+      background: linear-gradient(180deg, #fffefa 0%, #f8f0df 100%);
+      box-shadow:
+        0 0 0 5px rgba(15, 23, 42, 0.25),
+        0 16px 40px rgba(2, 6, 23, 0.45);
+      padding: clamp(1.25rem, 4.8vw, 2rem);
+      gap: 1.1rem;
+      align-content: center;
+    }
+
+    .rotate-card__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .rotate-card__phone {
+      display: inline-block;
+      border: 3px solid #111827;
+      border-radius: 0.45rem;
+      background: #ffffff;
+      position: relative;
+      box-shadow: inset 0 0 0 2px #dbeafe;
+    }
+
+    .rotate-card__phone::after {
+      content: "";
+      position: absolute;
+      inset: 0.3rem;
+      border-radius: 0.18rem;
+      border: 2px solid #cbd5e1;
+    }
+
+    .rotate-card__phone--portrait {
+      width: 1.8rem;
+      height: 2.9rem;
+    }
+
+    .rotate-card__phone--landscape {
+      width: 2.9rem;
+      height: 1.8rem;
+    }
+
+    .rotate-card__arrow {
+      font-size: 1.2rem;
+      color: #1e3a8a;
+      letter-spacing: 0.1em;
+    }
+
+    .rotate-card__title {
+      margin: 0;
+      font-size: clamp(1.05rem, 5.4vw, 1.45rem);
+      line-height: 1.5;
+      color: #0f172a;
+    }
+
+    .rotate-card__copy {
+      margin: 0;
+      font-size: clamp(0.66rem, 3.1vw, 0.82rem);
+      line-height: 1.75;
+      color: #334155;
+      letter-spacing: 0.03em;
+    }
+
+    .rotate-card__links {
+      gap: 0.65rem;
+      margin-top: 0.4rem;
+    }
+
+    .rotate-card__link {
+      border-width: 2px;
+      border-color: #0f172a;
+      background: #fff8e8;
+      color: #0f172a;
+      padding: 0.6rem 0.95rem;
+      font-size: clamp(0.58rem, 2.85vw, 0.72rem);
+      box-shadow: 0 3px 0 #0f172a;
+      transform: translateY(0);
+      transition:
+        transform 120ms ease,
+        box-shadow 120ms ease,
+        background-color 120ms ease;
+    }
+
+    .rotate-card__link:hover {
+      background: #fff2cc;
+      transform: translateY(1px);
+      box-shadow: 0 2px 0 #0f172a;
+    }
+
+    .overlay__card h2 {
+      margin: 0;
+      font-size: clamp(0.85rem, 2.4vw, 1.25rem);
+      line-height: 1.5;
+    }
+
+    .overlay__card p {
+      margin: 0;
+      font-size: 0.62rem;
+      color: #374151;
+      line-height: 1.6;
+    }
+
+    .overlay__button {
+      justify-self: center;
+      border: 3px solid #1f2937;
+      border-bottom-width: 5px;
+      border-radius: 0.7rem;
+      background: #ffdb6e;
+      color: #111827;
+      padding: 0.65rem 0.9rem;
+      font-family: inherit;
+      font-size: 0.65rem;
+      cursor: pointer;
+    }
+
+    .overlay__button:hover {
+      background: #ffd04c;
+    }
+
+    .overlay__button:focus-visible,
+    .overlay__link:focus-visible,
+    .runner__control:focus-visible {
+      outline: 3px solid #0ea5e9;
+      outline-offset: 3px;
+    }
+
+    .overlay__links {
+      display: flex;
+      justify-content: center;
+      gap: 0.45rem;
+      flex-wrap: wrap;
+    }
+
+    .overlay__link {
+      border: 2px solid #1f2937;
+      border-radius: 999px;
+      padding: 0.45rem 0.75rem;
+      text-decoration: none;
+      color: #1f2937;
+      font-size: 0.55rem;
+      background: #fff;
+    }
+
+    .runner__hud {
+      position: absolute;
+      top: 0.6rem;
+      left: 0.6rem;
+      display: grid;
+      gap: 0.35rem;
+      background: rgba(255, 252, 244, 0.93);
+      border: 2px solid #1f2937;
+      border-radius: 0.5rem;
+      padding: 0.45rem 0.6rem;
+      font-size: 0.55rem;
+      line-height: 1.5;
+      pointer-events: none;
+    }
+
+    .runner__hud p {
+      margin: 0;
+    }
+
+    .runner__controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+    }
+
+    .runner__control {
+      border: 3px solid #1f2937;
+      border-bottom-width: 5px;
+      border-radius: 999px;
+      padding: 0.65rem 1rem;
+      min-width: 7.2rem;
+      background: #fff;
+      color: #111827;
+      font-family: inherit;
+      font-size: 0.62rem;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .runner__control--jump {
+      min-width: 8.8rem;
+      background: #ffda72;
+    }
+
+    .runner__control--subtle {
+      background: #fffdf4;
+    }
+
+    .runner__noscript {
+      max-width: 40rem;
+      margin: 1.5rem auto;
+      padding: 1rem;
+      border: 2px solid #1f2937;
+      border-radius: 0.7rem;
+      font-family: "Press Start 2P", monospace;
+      font-size: 0.6rem;
+      line-height: 1.9;
+      background: #fffcf4;
+    }
+
+    .runner__noscript a {
+      color: #1f2937;
+      text-underline-offset: 0.2rem;
+    }
+
+    @media (max-width: 900px) and (orientation: portrait) {
+      .overlay--global {
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+      }
+
+      .overlay--global {
+        padding: max(0.8rem, env(safe-area-inset-top))
+          max(0.8rem, env(safe-area-inset-right))
+          max(0.8rem, env(safe-area-inset-bottom))
+          max(0.8rem, env(safe-area-inset-left));
+      }
+
+      .rotate-card {
+        min-height: min(84svh, 40rem);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .overlay {
+        transition: none;
+      }
+    }
+  </style>
+
+  <script>
+    (() => {
+      const canvas = document.getElementById("runnerCanvas");
+      const startOverlay = document.getElementById("startOverlay");
+      const endOverlay = document.getElementById("endOverlay");
+      const rotateOverlay = document.getElementById("rotateOverlay");
+      const startButton = document.getElementById("startButton");
+      const restartButton = document.getElementById("restartButton");
+      const leftButton = document.getElementById("leftButton");
+      const jumpButton = document.getElementById("jumpButton");
+      const rightButton = document.getElementById("rightButton");
+      const endTitle = document.getElementById("endTitle");
+      const endReason = document.getElementById("endReason");
+      const speedStat = document.getElementById("speedStat");
+      const distanceStat = document.getElementById("distanceStat");
+
+      if (
+        !(canvas instanceof HTMLCanvasElement) ||
+        !(startOverlay instanceof HTMLElement) ||
+        !(endOverlay instanceof HTMLElement) ||
+        !(rotateOverlay instanceof HTMLElement) ||
+        !(startButton instanceof HTMLButtonElement) ||
+        !(restartButton instanceof HTMLButtonElement) ||
+        !(leftButton instanceof HTMLButtonElement) ||
+        !(jumpButton instanceof HTMLButtonElement) ||
+        !(rightButton instanceof HTMLButtonElement) ||
+        !(endTitle instanceof HTMLElement) ||
+        !(endReason instanceof HTMLElement) ||
+        !(speedStat instanceof HTMLElement) ||
+        !(distanceStat instanceof HTMLElement)
+      ) {
+        return;
+      }
+
+      const context = canvas.getContext("2d");
+      if (!context) return;
+
+      const params = new URLSearchParams(window.location.search);
+      const demoMode = params.get("demo");
+      const fastMode = params.get("speed") === "fast";
+      const pathParts = window.location.pathname.split("/").filter(Boolean);
+      const daySlug = pathParts[pathParts.length - 1] ?? "unknown-day";
+
+      interface Gap {
+        x: number;
+        width: number;
+      }
+      interface Hazard {
+        x: number;
+        width: number;
+        height: number;
+      }
+      interface Puddle {
+        x: number;
+        width: number;
+        height: number;
+      }
+      interface FallingBlock {
+        x: number;
+        width: number;
+        height: number;
+        dropY: number;
+        dropped: boolean;
+        armed: boolean;
+      }
+      interface Cloud {
+        x: number;
+        y: number;
+        size: number;
+      }
+
+      const state = {
+        running: false,
+        ended: false,
+        result: "",
+        finishDistance: demoMode === "finish" ? 700 : 4000,
+        worldDistance: 0,
+        playerX: 150,
+        playerY: 0,
+        playerVy: 0,
+        playerGroundY: 0,
+        playerSpeedX: 0,
+        inGapFall: false,
+        startedAt: 0,
+        dpr: Math.max(1, Math.min(2, window.devicePixelRatio || 1)),
+        scale: 1,
+        speedPx: 0,
+        baseMaxSpeed: 280,
+        minMaxSpeed: 110,
+        maxSpeedCurrent: 280,
+        exhaustion: 0,
+        slowTimer: 0,
+        chaserX: -130,
+        chaserActive: false,
+        bedSequence: false,
+        bedSequenceTime: 0,
+        bedLockDistance: 0,
+        gaps: [] as Gap[],
+        hazards: [] as Hazard[],
+        puddles: [] as Puddle[],
+        fallingBlocks: [] as FallingBlock[],
+        clouds: [] as Cloud[],
+        bedX: 0,
+        orientationBlocked: false,
+      };
+
+      const controls = {
+        left: false,
+        right: false,
+      };
+
+      const player = {
+        width: 30,
+        height: 70,
+        jumpVelocity: 470,
+        gravity: 1040,
+        moveAccel: 820,
+        moveFriction: 0.84,
+        maxMoveSpeed: 165,
+      };
+
+      const world = {
+        width: 960,
+        height: 540,
+        groundY: 440,
+      };
+
+      function hashString(input: string) {
+        let hash = 2166136261;
+        for (let index = 0; index < input.length; index += 1) {
+          hash ^= input.charCodeAt(index);
+          hash = Math.imul(hash, 16777619);
+        }
+        return hash >>> 0;
+      }
+
+      function createRng(seedInput: string) {
+        let seed = hashString(seedInput) || 1;
+        return () => {
+          seed += 0x6d2b79f5;
+          let result = Math.imul(seed ^ (seed >>> 15), seed | 1);
+          result ^= result + Math.imul(result ^ (result >>> 7), result | 61);
+          return ((result ^ (result >>> 14)) >>> 0) / 4294967296;
+        };
+      }
+
+      function setOverlay(el: HTMLElement, open: boolean) {
+        el.dataset.state = open ? "open" : "closed";
+        if (open) {
+          el.removeAttribute("aria-hidden");
+          el.removeAttribute("inert");
+        } else {
+          el.setAttribute("aria-hidden", "true");
+          el.setAttribute("inert", "");
+        }
+      }
+
+      function resize() {
+        if (!(canvas instanceof HTMLCanvasElement)) return;
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return;
+
+        state.scale = rect.width / world.width;
+        canvas.width = Math.round(rect.width * state.dpr);
+        canvas.height = Math.round(rect.height * state.dpr);
+        if (context) {
+          context.setTransform(
+            state.dpr * state.scale,
+            0,
+            0,
+            state.dpr * state.scale,
+            0,
+            0,
+          );
+        }
+      }
+
+      function shouldBlockForOrientation() {
+        return window.matchMedia(
+          "(max-width: 900px) and (orientation: portrait)",
+        ).matches;
+      }
+
+      function syncOrientationGate() {
+        const blocked = shouldBlockForOrientation();
+        state.orientationBlocked = blocked;
+
+        if (blocked) {
+          controls.left = false;
+          controls.right = false;
+          clearLeft();
+          clearRight();
+        }
+
+        if (rotateOverlay) {
+          setOverlay(rotateOverlay, blocked);
+        }
+
+        if (blocked) {
+          if (startOverlay) {
+            setOverlay(startOverlay, false);
+          }
+          return;
+        }
+
+        if (!state.running && !state.ended) {
+          if (startOverlay) {
+            setOverlay(startOverlay, true);
+          }
+        }
+      }
+
+      function buildWorld() {
+        const rng = createRng(`${daySlug}:${demoMode || "normal"}`);
+
+        state.gaps = [];
+        state.hazards = [];
+        state.puddles = [];
+        state.fallingBlocks = [];
+        state.clouds = [];
+        state.worldDistance = 0;
+        state.exhaustion = 0;
+        state.speedPx = 0;
+        state.maxSpeedCurrent = state.baseMaxSpeed;
+        state.slowTimer = demoMode === "slow" ? 2.2 : 0;
+        state.chaserX = -130;
+        state.chaserActive = demoMode === "slow";
+        state.bedSequence = false;
+        state.bedSequenceTime = 0;
+        state.bedLockDistance = 0;
+        state.playerX = 150;
+        state.playerSpeedX = 0;
+        state.inGapFall = false;
+        const safeLeadDistance = 620;
+        const finishBuffer = 180;
+        const maxObstacleX = state.finishDistance - finishBuffer;
+        const occupiedRanges: { start: number; end: number }[] = [];
+
+        function intersectsWithSpacing(
+          x: number,
+          width: number,
+          spacing: number,
+        ) {
+          const nextStart = x - spacing;
+          const nextEnd = x + width + spacing;
+          for (const placed of occupiedRanges) {
+            if (nextStart <= placed.end && nextEnd >= placed.start) {
+              return true;
+            }
+          }
+          return false;
+        }
+
+        function registerObstacle(x: number, width: number) {
+          occupiedRanges.push({ start: x, end: x + width });
+        }
+
+        function maybePlace(
+          collection: { x: number; width: number; [key: string]: any }[],
+          obstacle: { x: number; width: number; [key: string]: any },
+          spacing: number,
+        ) {
+          if (
+            obstacle.x < safeLeadDistance ||
+            obstacle.x + obstacle.width > maxObstacleX ||
+            intersectsWithSpacing(obstacle.x, obstacle.width, spacing)
+          ) {
+            return false;
+          }
+
+          collection.push(obstacle);
+          registerObstacle(obstacle.x, obstacle.width);
+          return true;
+        }
+
+        function overlapsGap(x: number, width: number) {
+          for (const gap of state.gaps) {
+            if (x <= gap.x + gap.width && x + width >= gap.x) return true;
+          }
+          return false;
+        }
+
+        function placePuddle(
+          x: number,
+          width: number,
+          height: number,
+          spacing = 110,
+        ) {
+          if (x < safeLeadDistance || x + width > maxObstacleX) return false;
+          if (overlapsGap(x, width)) return false;
+          if (intersectsWithSpacing(x, width, spacing)) return false;
+          state.puddles.push({ x, width, height });
+          registerObstacle(x, width);
+          return true;
+        }
+
+        if (demoMode === "fall") {
+          maybePlace(state.gaps, { x: safeLeadDistance, width: 170 }, 120);
+        }
+
+        if (demoMode === "hazard") {
+          maybePlace(
+            state.hazards,
+            { x: safeLeadDistance, width: 34, height: 22 },
+            120,
+          );
+        }
+
+        if (demoMode === "slip") {
+          placePuddle(safeLeadDistance + 40, 130, 20, 120);
+        }
+
+        if (
+          demoMode !== "finish" &&
+          demoMode !== "fall" &&
+          demoMode !== "slow"
+        ) {
+          let marker = safeLeadDistance + 220;
+          while (marker < state.finishDistance - 220) {
+            const gapWidth = 72 + rng() * 70;
+            if (!(demoMode === "hazard" && marker < 700)) {
+              maybePlace(
+                state.gaps,
+                {
+                  x: marker + rng() * 35,
+                  width: gapWidth,
+                },
+                120,
+              );
+            }
+            marker += 280 + rng() * 220;
+          }
+        }
+
+        if (
+          demoMode !== "finish" &&
+          demoMode !== "fall" &&
+          demoMode !== "slow"
+        ) {
+          let marker = safeLeadDistance + 120;
+          while (marker < state.finishDistance - 180) {
+            maybePlace(
+              state.hazards,
+              {
+                x: marker + rng() * 30,
+                width: 24 + rng() * 20,
+                height: 16 + rng() * 14,
+              },
+              115,
+            );
+            marker += 240 + rng() * 170;
+          }
+        }
+
+        if (
+          demoMode !== "finish" &&
+          demoMode !== "fall" &&
+          demoMode !== "slow"
+        ) {
+          for (const anchor of [
+            safeLeadDistance + 240,
+            safeLeadDistance + 920,
+          ]) {
+            for (let attempt = 0; attempt < 8; attempt += 1) {
+              const maybeX = anchor + rng() * 140;
+              if (placePuddle(maybeX, 96 + rng() * 34, 22 + rng() * 12, 120))
+                break;
+            }
+          }
+
+          let marker = safeLeadDistance + 260;
+          while (marker < state.finishDistance - 140) {
+            if (rng() > 0.28) {
+              placePuddle(
+                marker + rng() * 40,
+                78 + rng() * 52,
+                20 + rng() * 12,
+                105,
+              );
+            }
+            marker += 280 + rng() * 170;
+          }
+        }
+
+        if (demoMode !== "finish" && demoMode !== "fall") {
+          let marker = safeLeadDistance + 340;
+          while (marker < state.finishDistance - 220) {
+            maybePlace(
+              state.fallingBlocks,
+              {
+                x: marker + rng() * 40,
+                width: 64 + rng() * 26,
+                height: 42 + rng() * 20,
+                dropY: 0,
+                dropped: false,
+                armed: false,
+              },
+              120,
+            );
+            marker += 430 + rng() * 220;
+          }
+        }
+
+        if (
+          demoMode !== "finish" &&
+          demoMode !== "fall" &&
+          state.puddles.length < 2
+        ) {
+          for (
+            let candidate = safeLeadDistance + 160;
+            candidate < maxObstacleX - 140 && state.puddles.length < 2;
+            candidate += 140
+          ) {
+            const width = 100 + rng() * 30;
+            const height = 22 + rng() * 10;
+            if (!placePuddle(candidate, width, height, 85)) {
+              placePuddle(candidate, width, height, 60);
+            }
+          }
+        }
+
+        for (let index = 0; index < 6; index += 1) {
+          state.clouds.push({
+            x: 180 + index * 220,
+            y: 60 + rng() * 120,
+            size: 28 + rng() * 42,
+          });
+        }
+
+        state.bedX = state.finishDistance;
+        state.playerGroundY = world.groundY - player.height;
+        state.playerY = state.playerGroundY;
+      }
+
+      function groundAt(worldX: number) {
+        for (const gap of state.gaps) {
+          if (worldX >= gap.x && worldX <= gap.x + gap.width) {
+            return world.height + 200;
+          }
+        }
+        return world.groundY;
+      }
+
+      function jump() {
+        if (!state.running || state.ended) return;
+        if (state.bedSequence) return;
+        const isGrounded = Math.abs(state.playerY - state.playerGroundY) < 2;
+        if (!isGrounded) return;
+        state.playerVy = -player.jumpVelocity;
+      }
+
+      function endRun(reason: string, wasBedFinish = false) {
+        state.running = false;
+        state.ended = true;
+        state.result = reason;
+        if (endTitle) {
+          endTitle.textContent = wasBedFinish
+            ? "You've lost, good night"
+            : "You lost";
+        }
+        if (endReason) {
+          endReason.textContent = reason;
+        }
+        if (endOverlay) {
+          setOverlay(endOverlay, true);
+        }
+        if (restartButton) {
+          restartButton.focus();
+        }
+      }
+
+      function restart() {
+        if (state.orientationBlocked) return;
+
+        state.playerY = world.groundY - player.height;
+        state.playerGroundY = state.playerY;
+        state.playerVy = 0;
+        state.playerX = 150;
+        state.playerSpeedX = 0;
+        controls.left = false;
+        controls.right = false;
+        state.ended = false;
+        state.running = true;
+        state.result = "";
+        state.startedAt = performance.now();
+        buildWorld();
+        if (endTitle) {
+          endTitle.textContent = "You lost";
+        }
+        if (startOverlay) {
+          setOverlay(startOverlay, false);
+        }
+        if (endOverlay) {
+          setOverlay(endOverlay, false);
+        }
+      }
+
+      function start() {
+        if (state.orientationBlocked) return;
+        restart();
+      }
+
+      let leftPointerId: number | null = null;
+      let rightPointerId: number | null = null;
+
+      function clearLeft(pointerId?: number) {
+        if (pointerId !== undefined && leftPointerId !== pointerId) return;
+        leftPointerId = null;
+        controls.left = false;
+      }
+
+      function clearRight(pointerId?: number) {
+        if (pointerId !== undefined && rightPointerId !== pointerId) return;
+        rightPointerId = null;
+        controls.right = false;
+      }
+
+      function update(deltaSeconds: number) {
+        if (state.orientationBlocked || !state.running || state.ended) return;
+
+        const simStep = fastMode ? deltaSeconds * 2.2 : deltaSeconds;
+        state.maxSpeedCurrent =
+          state.baseMaxSpeed -
+          (state.baseMaxSpeed - state.minMaxSpeed) * state.exhaustion;
+
+        if (state.bedSequence) {
+          state.bedSequenceTime += simStep;
+          state.speedPx = 0;
+          state.worldDistance = state.bedLockDistance;
+        } else {
+          const forwardAccel = controls.right ? 360 : 0;
+          const braking = controls.left ? 320 : 0;
+          const drag = controls.right ? 55 : 125;
+          state.speedPx += (forwardAccel - braking - drag) * simStep;
+          if (state.speedPx < 0) state.speedPx = 0;
+          if (state.speedPx > state.maxSpeedCurrent)
+            state.speedPx = state.maxSpeedCurrent;
+          state.worldDistance += state.speedPx * simStep;
+        }
+
+        const moveIntent = (controls.right ? 1 : 0) - (controls.left ? 1 : 0);
+        if (!state.bedSequence) {
+          state.playerSpeedX += moveIntent * player.moveAccel * simStep;
+          state.playerSpeedX *= player.moveFriction;
+          if (state.playerSpeedX > player.maxMoveSpeed)
+            state.playerSpeedX = player.maxMoveSpeed;
+          if (state.playerSpeedX < -player.maxMoveSpeed)
+            state.playerSpeedX = -player.maxMoveSpeed;
+          state.playerX += state.playerSpeedX * simStep;
+          if (state.playerX < 90) {
+            state.playerX = 90;
+            state.playerSpeedX = 0;
+          }
+          if (state.playerX > 330) {
+            state.playerX = 330;
+            state.playerSpeedX = 0;
+          }
+        } else {
+          const bedScreenX = state.bedX - state.worldDistance;
+          const settleX = Math.max(120, Math.min(300, bedScreenX - 2));
+          state.playerX +=
+            (settleX - state.playerX) * Math.min(1, simStep * 4.6);
+          state.playerSpeedX = 0;
+        }
+
+        const playerWorldX = state.worldDistance + state.playerX;
+        const playerGround = groundAt(playerWorldX) - player.height;
+        state.playerGroundY = playerGround;
+
+        state.playerVy += player.gravity * simStep;
+        state.playerY += state.playerVy * simStep;
+
+        if (state.playerY >= playerGround) {
+          const groundTarget = state.bedSequence
+            ? playerGround + Math.min(20, state.bedSequenceTime * 30)
+            : playerGround;
+          state.playerY = groundTarget;
+          state.playerVy = 0;
+        }
+
+        if (!state.bedSequence && playerGround > world.height) {
+          if (state.playerY >= world.groundY - player.height + 8) {
+            state.inGapFall = true;
+          }
+        }
+        if (state.inGapFall) {
+          if (state.playerY >= world.groundY - player.height + 8) {
+            endRun("You fell off the track.");
+            return;
+          }
+          if (playerGround <= world.groundY - player.height) {
+            state.inGapFall = false;
+          }
+        }
+
+        if (state.playerY > world.height + 10) {
+          endRun("You fell off the track.");
+          return;
+        }
+
+        const playerBox = {
+          left: playerWorldX - player.width * 0.35,
+          right: playerWorldX + player.width * 0.35,
+          top: state.playerY + 12,
+          bottom: state.playerY + player.height,
+        };
+
+        for (const hazard of state.hazards) {
+          const hazardBox = {
+            left: hazard.x,
+            right: hazard.x + hazard.width,
+            top: world.groundY - hazard.height,
+            bottom: world.groundY,
+          };
+
+          const intersects =
+            playerBox.left < hazardBox.right &&
+            playerBox.right > hazardBox.left &&
+            playerBox.top < hazardBox.bottom &&
+            playerBox.bottom > hazardBox.top;
+
+          if (intersects) {
+            endRun("You stepped in poop and wiped out.");
+            return;
+          }
+        }
+
+        for (const puddle of state.puddles) {
+          const puddleLeft = puddle.x;
+          const puddleRight = puddle.x + puddle.width;
+          const footOnGround =
+            Math.abs(state.playerY - state.playerGroundY) < 3;
+          const feetInside =
+            playerBox.right > puddleLeft + 6 &&
+            playerBox.left < puddleRight - 6;
+          if (feetInside && footOnGround) {
+            endRun("You slipped in a puddle and lost the run.");
+            return;
+          }
+        }
+
+        for (const block of state.fallingBlocks) {
+          if (!block.dropped && playerWorldX + 10 >= block.x - 120) {
+            block.armed = true;
+          }
+          if (!block.dropped && block.armed && playerWorldX + 18 >= block.x) {
+            block.dropped = true;
+          }
+          if (block.dropped) {
+            block.dropY = Math.min(280, block.dropY + 520 * simStep);
+            const blockLeft = block.x;
+            const blockRight = block.x + block.width;
+            const blockTop = 90 + block.dropY;
+            const blockBottom = blockTop + block.height;
+            const overlaps =
+              playerBox.left < blockRight &&
+              playerBox.right > blockLeft &&
+              playerBox.top < blockBottom &&
+              playerBox.bottom > blockTop;
+            if (overlaps) {
+              endRun("A falling block smashed your jump.");
+              return;
+            }
+          }
+        }
+
+        if (!state.bedSequence) {
+          const usage =
+            state.maxSpeedCurrent > 0
+              ? state.speedPx / state.maxSpeedCurrent
+              : 0;
+          state.exhaustion = Math.min(
+            1,
+            state.exhaustion + Math.max(0, usage - 0.52) * 0.18 * simStep,
+          );
+          if (usage < 0.38) {
+            state.exhaustion = Math.max(
+              0,
+              state.exhaustion - (0.22 - usage * 0.2) * simStep,
+            );
+          }
+        }
+
+        const dangerSpeed = 26;
+        if (
+          !state.bedSequence &&
+          state.speedPx < dangerSpeed &&
+          state.worldDistance > 280
+        ) {
+          state.slowTimer += simStep;
+        } else {
+          state.slowTimer = Math.max(0, state.slowTimer - simStep * 1.6);
+        }
+
+        state.chaserActive = state.chaserActive || state.slowTimer > 1.4;
+        if (state.chaserActive && !state.bedSequence) {
+          const pressure = Math.max(
+            0,
+            (dangerSpeed - state.speedPx) / dangerSpeed,
+          );
+          state.chaserX += (52 + pressure * 170) * simStep;
+          if (state.chaserX + 32 >= state.playerX - 12) {
+            endRun("You got caught from behind for running too slow.");
+            return;
+          }
+        } else {
+          state.chaserX = Math.max(-130, state.chaserX - 130 * simStep);
+        }
+
+        const bedContactStart = state.finishDistance;
+        if (
+          !state.bedSequence &&
+          playerWorldX >= bedContactStart &&
+          state.playerVy === 0
+        ) {
+          state.bedSequence = true;
+          state.bedSequenceTime = 0;
+          state.bedLockDistance = Math.max(
+            state.worldDistance,
+            state.finishDistance - state.playerX + 2,
+          );
+          state.speedPx = 0;
+          controls.left = false;
+          controls.right = false;
+        }
+
+        if (state.bedSequence && state.bedSequenceTime >= 0.9) {
+          endRun("You reached the bed and stopped running.", true);
+          return;
+        }
+      }
+
+      function drawStickFigure(x: number, y: number, tiredness: number) {
+        if (!context) return;
+        const stroke = 4;
+        context.lineWidth = stroke;
+        context.strokeStyle = "#111827";
+        context.fillStyle = "#111827";
+
+        const locomotion = Math.max(
+          0,
+          Math.min(
+            1,
+            state.bedSequence
+              ? 0
+              : Math.abs(state.playerSpeedX) / 40 + state.speedPx / 75,
+          ),
+        );
+        const slump = tiredness * 12;
+        const sway =
+          locomotion > 0.08
+            ? Math.sin(performance.now() * 0.008) *
+              (1.5 + tiredness * 3) *
+              locomotion
+            : 0;
+
+        context.beginPath();
+        context.arc(x, y + 12, 14, 0, Math.PI * 2);
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(x, y + 26);
+        context.lineTo(x - slump * 0.2 + sway, y + 54 + slump * 0.5);
+        context.stroke();
+
+        context.beginPath();
+        context.moveTo(x - 2, y + 37);
+        context.lineTo(x - 18 - tiredness * 6, y + 44 + tiredness * 4);
+        context.moveTo(x + 1, y + 39);
+        context.lineTo(x + 16 + tiredness * 4, y + 48 + tiredness * 6);
+        context.stroke();
+
+        const stride =
+          locomotion > 0.08
+            ? Math.sin(performance.now() * 0.02 + state.worldDistance * 0.02) *
+              (12 * locomotion)
+            : 0;
+        context.beginPath();
+        context.moveTo(x - slump * 0.2 + sway, y + 54 + slump * 0.5);
+        context.lineTo(x - 12 + stride * 0.4, y + 74);
+        context.moveTo(x - slump * 0.2 + sway, y + 54 + slump * 0.5);
+        context.lineTo(x + 12 - stride * 0.4, y + 72 + tiredness * 4);
+        context.stroke();
+
+        context.fillStyle = "#ef4444";
+        context.beginPath();
+        context.ellipse(
+          x + 3,
+          y + 16,
+          3 + tiredness * 2,
+          5 + tiredness * 2,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        context.fill();
+      }
+
+      function draw() {
+        if (!context) return;
+        context.clearRect(0, 0, world.width, world.height);
+
+        context.fillStyle = "#dbeafe";
+        context.fillRect(0, 0, world.width, world.height);
+
+        for (const cloud of state.clouds) {
+          const x =
+            ((cloud.x - state.worldDistance * 0.25) % (world.width + 200)) - 80;
+          context.fillStyle = "#ffffff";
+          context.beginPath();
+          context.arc(x, cloud.y, cloud.size * 0.35, 0, Math.PI * 2);
+          context.arc(
+            x + cloud.size * 0.24,
+            cloud.y + 6,
+            cloud.size * 0.28,
+            0,
+            Math.PI * 2,
+          );
+          context.arc(
+            x - cloud.size * 0.24,
+            cloud.y + 8,
+            cloud.size * 0.22,
+            0,
+            Math.PI * 2,
+          );
+          context.fill();
+        }
+
+        context.fillStyle = "#c4d79b";
+        context.fillRect(
+          0,
+          world.groundY,
+          world.width,
+          world.height - world.groundY,
+        );
+
+        for (const gap of state.gaps) {
+          const x = gap.x - state.worldDistance;
+          if (x > world.width || x + gap.width < 0) continue;
+          context.fillStyle = "#1f2937";
+          context.fillRect(
+            x,
+            world.groundY,
+            gap.width,
+            world.height - world.groundY,
+          );
+        }
+
+        context.fillStyle = "#6b3f1f";
+        for (const hazard of state.hazards) {
+          const x = hazard.x - state.worldDistance;
+          if (x > world.width || x + hazard.width < 0) continue;
+          const baseX = x + hazard.width * 0.5;
+          const baseY = world.groundY - hazard.height * 0.18;
+
+          context.beginPath();
+          context.arc(
+            baseX - hazard.width * 0.14,
+            baseY - hazard.height * 0.45,
+            hazard.width * 0.18,
+            0,
+            Math.PI * 2,
+          );
+          context.arc(
+            baseX + hazard.width * 0.03,
+            baseY - hazard.height * 0.55,
+            hazard.width * 0.2,
+            0,
+            Math.PI * 2,
+          );
+          context.arc(
+            baseX + hazard.width * 0.2,
+            baseY - hazard.height * 0.38,
+            hazard.width * 0.16,
+            0,
+            Math.PI * 2,
+          );
+          context.fill();
+
+          context.beginPath();
+          context.ellipse(
+            baseX,
+            baseY,
+            hazard.width * 0.55,
+            hazard.height * 0.45,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          context.fill();
+
+          context.fillStyle = "#4a2b14";
+          context.beginPath();
+          context.arc(
+            baseX - hazard.width * 0.18,
+            baseY - hazard.height * 0.18,
+            2.6,
+            0,
+            Math.PI * 2,
+          );
+          context.arc(
+            baseX + hazard.width * 0.18,
+            baseY - hazard.height * 0.12,
+            2.2,
+            0,
+            Math.PI * 2,
+          );
+          context.fill();
+          context.fillStyle = "#6b3f1f";
+        }
+
+        for (const puddle of state.puddles) {
+          const x = puddle.x - state.worldDistance;
+          if (x > world.width || x + puddle.width < 0) continue;
+          const centerX = x + puddle.width * 0.5;
+          const depth = Math.max(10, puddle.height * 0.52);
+          const baseY = world.groundY + depth * 0.14;
+          const left = x + puddle.width * 0.08;
+          const right = x + puddle.width * 0.92;
+          const topY = baseY - depth * 0.58;
+          const wobble =
+            Math.sin((puddle.x + state.worldDistance) * 0.009) * depth * 0.1;
+
+          const shadow = context.createRadialGradient(
+            centerX,
+            baseY + depth * 0.18,
+            1,
+            centerX,
+            baseY + depth * 0.18,
+            puddle.width * 0.46,
+          );
+          shadow.addColorStop(0, "rgba(15, 23, 42, 0.12)");
+          shadow.addColorStop(1, "rgba(15, 23, 42, 0)");
+          context.fillStyle = shadow;
+          context.beginPath();
+          context.ellipse(
+            centerX,
+            baseY + depth * 0.18,
+            puddle.width * 0.42,
+            depth * 0.22,
+            0,
+            0,
+            Math.PI * 2,
+          );
+          context.fill();
+
+          context.beginPath();
+          context.moveTo(left, baseY);
+          context.bezierCurveTo(
+            x + puddle.width * 0.24,
+            topY - wobble,
+            x + puddle.width * 0.72,
+            topY + wobble * 0.45,
+            right,
+            baseY,
+          );
+          context.bezierCurveTo(
+            x + puddle.width * 0.78,
+            baseY + depth * 0.2,
+            x + puddle.width * 0.22,
+            baseY + depth * 0.2,
+            left,
+            baseY,
+          );
+          context.closePath();
+
+          const water = context.createLinearGradient(
+            centerX,
+            topY,
+            centerX,
+            baseY + depth * 0.2,
+          );
+          water.addColorStop(0, "#9fc1f2");
+          water.addColorStop(0.6, "#537fbe");
+          water.addColorStop(1, "#3e649e");
+          context.fillStyle = water;
+          context.fill();
+
+          context.strokeStyle = "rgba(43, 78, 138, 0.7)";
+          context.lineWidth = 1.8;
+          context.stroke();
+
+          context.strokeStyle = "rgba(255, 255, 255, 0.22)";
+          context.lineWidth = 1.1;
+          context.beginPath();
+          context.moveTo(x + puddle.width * 0.31, topY + depth * 0.24);
+          context.quadraticCurveTo(
+            x + puddle.width * 0.46,
+            topY + depth * 0.06,
+            x + puddle.width * 0.63,
+            topY + depth * 0.2,
+          );
+          context.stroke();
+        }
+
+        for (const block of state.fallingBlocks) {
+          const x = block.x - state.worldDistance;
+          if (x > world.width || x + block.width < -20) continue;
+
+          const top = 90 + block.dropY;
+          context.strokeStyle = "#64748b";
+          context.lineWidth = 2;
+          context.beginPath();
+          context.moveTo(x + block.width * 0.2, 0);
+          context.lineTo(x + block.width * 0.2, top);
+          context.moveTo(x + block.width * 0.8, 0);
+          context.lineTo(x + block.width * 0.8, top);
+          context.stroke();
+
+          context.fillStyle = "#4b5563";
+          context.fillRect(x, top, block.width, block.height);
+          context.strokeStyle = "#111827";
+          context.lineWidth = 3;
+          context.strokeRect(x, top, block.width, block.height);
+
+          if (!block.dropped) {
+            context.fillStyle = block.armed ? "#dc2626" : "#f59e0b";
+            context.beginPath();
+            context.moveTo(x + block.width * 0.5, world.groundY - 30);
+            context.lineTo(x + block.width * 0.5 - 8, world.groundY - 45);
+            context.lineTo(x + block.width * 0.5 + 8, world.groundY - 45);
+            context.closePath();
+            context.fill();
+          }
+        }
+
+        const bedX = state.bedX - state.worldDistance - 34;
+        context.fillStyle = "#8b5e3c";
+        context.fillRect(bedX, world.groundY - 38, 72, 14);
+        context.fillStyle = "#fef3c7";
+        context.fillRect(bedX + 10, world.groundY - 52, 52, 17);
+        context.fillStyle = "#e5e7eb";
+        context.fillRect(bedX + 6, world.groundY - 49, 12, 10);
+        context.fillStyle = "#7f1d1d";
+        context.fillRect(bedX - 4, world.groundY - 22, 8, 22);
+
+        if (state.chaserX > -120) {
+          context.fillStyle = "#374151";
+          context.fillRect(state.chaserX, 0, 34, world.height);
+          context.fillStyle = "#111827";
+          context.fillRect(state.chaserX + 12, 0, 6, world.height);
+        }
+
+        if (!state.bedSequence) {
+          drawStickFigure(state.playerX, state.playerY, state.exhaustion);
+        } else {
+          const sleepX = bedX + 28;
+          const sleepY = world.groundY - 49;
+          context.fillStyle = "#d1d5db";
+          context.fillRect(sleepX - 3, sleepY + 2, 36, 11);
+          context.fillStyle = "#9ca3af";
+          context.fillRect(sleepX + 4, sleepY + 3, 16, 9);
+          context.fillStyle = "#111827";
+          context.beginPath();
+          context.arc(sleepX - 7, sleepY + 9, 7, 0, Math.PI * 2);
+          context.fill();
+        }
+
+        if (state.bedSequence) {
+          context.fillStyle = "rgba(239, 68, 68, 0.92)";
+          context.fillRect(
+            bedX + 9,
+            world.groundY - 47,
+            56,
+            16 + Math.min(8, state.bedSequenceTime * 14),
+          );
+          context.strokeStyle = "rgba(127, 29, 29, 0.7)";
+          context.lineWidth = 1.6;
+          context.strokeRect(
+            bedX + 9,
+            world.groundY - 47,
+            56,
+            16 + Math.min(8, state.bedSequenceTime * 14),
+          );
+        }
+
+        if (speedStat) {
+          speedStat.textContent = `Speed: ${Math.max(0, Math.round((state.speedPx / state.baseMaxSpeed) * 100))}%`;
+        }
+        const distanceNow = state.bedSequence
+          ? state.finishDistance
+          : Math.min(state.finishDistance, state.worldDistance + state.playerX);
+        if (distanceStat) {
+          distanceStat.textContent = `Distance: ${Math.round(distanceNow)}m / ${state.finishDistance}m`;
+        }
+      }
+
+      let previous = 0;
+      function frame(timestamp: number) {
+        if (!previous) previous = timestamp;
+        const deltaSeconds = Math.min(0.04, (timestamp - previous) / 1000);
+        previous = timestamp;
+
+        update(deltaSeconds);
+        draw();
+
+        requestAnimationFrame(frame);
+      }
+
+      function onViewportChange() {
+        resize();
+        syncOrientationGate();
+      }
+
+      window.addEventListener("resize", onViewportChange);
+
+      window.addEventListener("keydown", (event) => {
+        if (state.orientationBlocked) return;
+        if (event.code === "ArrowLeft") {
+          controls.left = true;
+          return;
+        }
+        if (event.code === "ArrowRight") {
+          controls.right = true;
+          return;
+        }
+        if (event.code === "Space" || event.code === "ArrowUp") {
+          event.preventDefault();
+          jump();
+        }
+      });
+
+      window.addEventListener("keyup", (event) => {
+        if (state.orientationBlocked) return;
+        if (event.code === "ArrowLeft") controls.left = false;
+        if (event.code === "ArrowRight") controls.right = false;
+      });
+
+      window.addEventListener("pointerup", (event) => {
+        clearLeft(event.pointerId);
+        clearRight(event.pointerId);
+      });
+
+      window.addEventListener("pointercancel", (event) => {
+        clearLeft(event.pointerId);
+        clearRight(event.pointerId);
+      });
+
+      window.addEventListener("blur", () => {
+        clearLeft();
+        clearRight();
+      });
+
+      startButton.addEventListener("click", start);
+      restartButton.addEventListener("click", restart);
+      leftButton.addEventListener("pointerdown", (event) => {
+        if (state.orientationBlocked) return;
+        leftPointerId = event.pointerId;
+        controls.left = true;
+        leftButton.setPointerCapture(event.pointerId);
+      });
+      leftButton.addEventListener("pointerup", (event) => {
+        clearLeft(event.pointerId);
+      });
+      leftButton.addEventListener("pointercancel", (event) => {
+        clearLeft(event.pointerId);
+      });
+      leftButton.addEventListener("lostpointercapture", (event) => {
+        clearLeft(event.pointerId);
+      });
+      leftButton.addEventListener("pointerleave", (event) => {
+        clearLeft(event.pointerId);
+      });
+      jumpButton.addEventListener("pointerdown", jump);
+      rightButton.addEventListener("pointerdown", (event) => {
+        if (state.orientationBlocked) return;
+        rightPointerId = event.pointerId;
+        controls.right = true;
+        rightButton.setPointerCapture(event.pointerId);
+      });
+      rightButton.addEventListener("pointerup", (event) => {
+        clearRight(event.pointerId);
+      });
+      rightButton.addEventListener("pointercancel", (event) => {
+        clearRight(event.pointerId);
+      });
+      rightButton.addEventListener("lostpointercapture", (event) => {
+        clearRight(event.pointerId);
+      });
+      rightButton.addEventListener("pointerleave", (event) => {
+        clearRight(event.pointerId);
+      });
+
+      buildWorld();
+      resize();
+      syncOrientationGate();
+      draw();
+      requestAnimationFrame(frame);
+    })();
+  </script>
+</>
