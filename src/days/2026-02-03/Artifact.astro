@@ -18,6 +18,8 @@ import "@fontsource/comfortaa/700.css";
       >
         <Image
           src={robotImage}
+          widths={[400, 800, 1200, robotImage.width]}
+          sizes="(max-width: 500px) 100vw, 500px"
           alt="A cute, sad robot sitting next to an unassembled machine part."
           class="h-auto w-full rounded-[15px]"
         />
