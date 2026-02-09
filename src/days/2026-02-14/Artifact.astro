@@ -1,7 +1,25 @@
 ---
+import { getImage } from "astro:assets";
 import ShellTheme from "../../components/ShellTheme.astro";
-import valentineCat from "../../assets/images/valentine-cat.png";
-import sadCat from "../../assets/images/sad-cat.png";
+import valentineCatImg from "../../assets/images/valentine-cat.png";
+import sadCatImg from "../../assets/images/sad-cat.png";
+
+const valentineAlt =
+  "A fluffy cat surrounded by hearts and flowers, looking expectant.";
+const sadAlt = "A small, lonely cat looking down with large, teary eyes.";
+
+const valentineCat = await getImage({
+  src: valentineCatImg,
+  width: 300,
+  densities: [1, 2, 3],
+  format: "webp",
+});
+const sadCat = await getImage({
+  src: sadCatImg,
+  width: 300,
+  densities: [1, 2, 3],
+  format: "webp",
+});
 ---
 
 <ShellTheme
@@ -51,9 +69,14 @@ import sadCat from "../../assets/images/sad-cat.png";
         <img
           id="popupImg"
           src={valentineCat.src}
-          data-valentine={valentineCat.src}
-          data-sad={sadCat.src}
-          alt="Cat"
+          srcset={valentineCat.srcSet?.attribute}
+          data-valentine-src={valentineCat.src}
+          data-valentine-srcset={valentineCat.srcSet?.attribute}
+          data-valentine-alt={valentineAlt}
+          data-sad-src={sadCat.src}
+          data-sad-srcset={sadCat.srcSet?.attribute}
+          data-sad-alt={sadAlt}
+          alt={valentineAlt}
           class="cat-img"
         />
       </div>
@@ -185,9 +208,11 @@ import sadCat from "../../assets/images/sad-cat.png";
 
       noHoverCount++;
 
-      // 1. First time: Grumpy Cat
+      // 1. First time: Valentine Cat
       if (noHoverCount === 1 && !catPopupShown) {
-        popupImg.src = popupImg.dataset.valentine;
+        popupImg.src = popupImg.dataset.valentineSrc;
+        popupImg.srcset = popupImg.dataset.valentineSrcset || "";
+        popupImg.alt = popupImg.dataset.valentineAlt || "";
         popupNote.innerText = "Don't you dare!";
         closeOverlay.innerText = "CLOSE";
         catOverlay.style.display = "flex";
@@ -255,7 +280,9 @@ import sadCat from "../../assets/images/sad-cat.png";
 
       if (noHoverCount >= phases.length + 5) {
         finalState = true;
-        popupImg.src = popupImg.dataset.sad;
+        popupImg.src = popupImg.dataset.sadSrc;
+        popupImg.srcset = popupImg.dataset.sadSrcset || "";
+        popupImg.alt = popupImg.dataset.sadAlt || "";
         popupNote.innerText = "Is this really what you want? 💔";
         closeOverlay.innerText = "YES, I AM HEARTLESS. (No)";
         catOverlay.style.display = "flex";
