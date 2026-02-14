@@ -4,7 +4,8 @@ import SiteLinks from "../../components/SiteLinks.astro";
 
 <section class="kde-stage" aria-labelledby="kde-title">
   <h1 id="kde-title" class="sr-only">
-    Fake old TDE desktop where most system actions crash, except a cheating Tic-Tac-Toe app.
+    Fake old TDE desktop where most system actions crash, except a cheating
+    Tic-Tac-Toe app.
   </h1>
 
   <p id="systemStatus" class="sr-only" aria-live="polite">Session started.</p>
@@ -20,10 +21,23 @@ import SiteLinks from "../../components/SiteLinks.astro";
       >
         <span class="icon-tile__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48" width="42" height="42" role="img">
-            <rect x="4" y="4" width="40" height="40" fill="#d4d0c8" stroke="#202020"></rect>
-            <rect x="8" y="8" width="32" height="32" fill="#f3f1ec" stroke="#8a8a8a"></rect>
+            <rect
+              x="4"
+              y="4"
+              width="40"
+              height="40"
+              fill="#d4d0c8"
+              stroke="#202020"></rect>
+            <rect
+              x="8"
+              y="8"
+              width="32"
+              height="32"
+              fill="#f3f1ec"
+              stroke="#8a8a8a"></rect>
             <path d="M18 16h4v16h-4zM14 22h12v4H14z" fill="#0c5aa6"></path>
-            <path d="M30 16l8 8m0-8-8 8" stroke="#6e1010" stroke-width="3"></path>
+            <path d="M30 16l8 8m0-8-8 8" stroke="#6e1010" stroke-width="3"
+            ></path>
           </svg>
         </span>
         <span class="icon-tile__label">T-TicTac</span>
@@ -39,22 +53,72 @@ import SiteLinks from "../../components/SiteLinks.astro";
       data-menu="start"
     >
       <p class="menu__heading">Favorites</p>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="tconsole">TConsole</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="twriter">TWriter</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="tpaint">TPaint</button>
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="tconsole">TConsole</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="twriter">TWriter</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="tpaint">TPaint</button
+      >
 
       <p class="menu__heading">System</p>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="control">Control Center</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="printer">Printer Wizard</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="network">Network</button>
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="control">Control Center</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="printer">Printer Wizard</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="network">Network</button
+      >
 
       <p class="menu__heading">Utilities</p>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="calculator">Calculator</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="character-map">Character Map</button>
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="calculator">Calculator</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="character-map">Character Map</button
+      >
 
       <p class="menu__heading">Help</p>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="help-center">TDE Help Center</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="about-tde">About TDE</button>
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="help-center">TDE Help Center</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="about-tde">About TDE</button
+      >
     </div>
 
     <div
@@ -66,11 +130,36 @@ import SiteLinks from "../../components/SiteLinks.astro";
       data-menu="context"
       style="top: 0px; left: 0px;"
     >
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="run-command">Run Command...</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="configure-desktop">Configure Desktop...</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="refresh-desktop">Refresh Desktop</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="lock-screen">Lock Screen</button>
-      <button type="button" role="menuitem" data-action="system-action" data-action-id="about-tde">About TDE</button>
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="run-command">Run Command...</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="configure-desktop">Configure Desktop...</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="refresh-desktop">Refresh Desktop</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="lock-screen">Lock Screen</button
+      >
+      <button
+        type="button"
+        role="menuitem"
+        data-action="system-action"
+        data-action-id="about-tde">About TDE</button
+      >
     </div>
 
     <div id="toast" class="toast" hidden aria-live="polite"></div>
@@ -96,24 +185,53 @@ import SiteLinks from "../../components/SiteLinks.astro";
       </header>
 
       <div class="window__body">
-        <p class="window__status" id="gameStatus" aria-live="polite">Your turn.</p>
+        <p class="window__status" id="gameStatus" aria-live="polite">
+          Your turn.
+        </p>
         <div id="gridWrap" class="ttt-grid-wrap">
-          <div id="grid" class="ttt-grid" role="grid" aria-label="Tic-Tac-Toe board"></div>
+          <div
+            id="grid"
+            class="ttt-grid"
+            role="grid"
+            aria-label="Tic-Tac-Toe board"
+          >
+          </div>
         </div>
 
         <div class="window__controls">
-          <button type="button" class="win-btn" data-action="new-game">New Game</button>
-          <button type="button" class="win-btn" data-action="reset-score">Reset Score</button>
+          <button type="button" class="win-btn" data-action="new-game"
+            >New Game</button
+          >
+          <button type="button" class="win-btn" data-action="reset-score"
+            >Reset Score</button
+          >
         </div>
 
-        <p class="window__score" id="scoreLine" aria-live="polite">Score X: 0 | O: 0</p>
+        <p class="window__score" id="scoreLine" aria-live="polite">
+          Score X: 0 | O: 0
+        </p>
       </div>
 
-      <span class="resize-handle resize-handle--left" data-resize="left" aria-hidden="true"></span>
-      <span class="resize-handle resize-handle--right" data-resize="right" aria-hidden="true"></span>
-      <span class="resize-handle resize-handle--top" data-resize="top" aria-hidden="true"></span>
-      <span class="resize-handle resize-handle--bottom" data-resize="bottom" aria-hidden="true"></span>
-      <span class="resize-handle resize-handle--corner" data-resize="corner" aria-hidden="true"></span>
+      <span
+        class="resize-handle resize-handle--left"
+        data-resize="left"
+        aria-hidden="true"></span>
+      <span
+        class="resize-handle resize-handle--right"
+        data-resize="right"
+        aria-hidden="true"></span>
+      <span
+        class="resize-handle resize-handle--top"
+        data-resize="top"
+        aria-hidden="true"></span>
+      <span
+        class="resize-handle resize-handle--bottom"
+        data-resize="bottom"
+        aria-hidden="true"></span>
+      <span
+        class="resize-handle resize-handle--corner"
+        data-resize="corner"
+        aria-hidden="true"></span>
     </section>
 
     <div
@@ -129,18 +247,32 @@ import SiteLinks from "../../components/SiteLinks.astro";
       <div id="kcrashCard" class="crash-card" hidden>
         <div class="crash-card__titlebar">TCrash</div>
         <div class="crash-card__body">
-          <p id="crashHeading" class="crash__heading">The desktop shell closed unexpectedly.</p>
+          <p id="crashHeading" class="crash__heading">
+            The desktop shell closed unexpectedly.
+          </p>
           <pre id="crashBody" class="crash__body"></pre>
           <div class="crash-card__actions">
-            <button id="detailsBtn" type="button" class="crash-btn">Details</button>
-            <button id="restartSessionBtn" type="button" class="crash-btn" data-action="crash-reboot">Restart Session</button>
+            <button id="detailsBtn" type="button" class="crash-btn"
+              >Details</button
+            >
+            <button
+              id="restartSessionBtn"
+              type="button"
+              class="crash-btn"
+              data-action="crash-reboot">Restart Session</button
+            >
           </div>
         </div>
       </div>
 
       <div id="panicScreen" class="panic-screen" hidden>
         <pre id="panicBody" class="panic-body"></pre>
-        <button id="panicResetBtn" type="button" class="panic-reset" data-action="crash-reboot">Reset</button>
+        <button
+          id="panicResetBtn"
+          type="button"
+          class="panic-reset"
+          data-action="crash-reboot">Reset</button
+        >
       </div>
     </div>
 
@@ -178,16 +310,22 @@ import SiteLinks from "../../components/SiteLinks.astro";
     >
       <header class="about-window__titlebar">
         <p id="aboutTitle" class="about-window__title">About TDE</p>
-        <button type="button" class="titlebar-btn" data-action="close-about" aria-label="Close about dialog">x</button>
+        <button
+          type="button"
+          class="titlebar-btn"
+          data-action="close-about"
+          aria-label="Close about dialog">x</button
+        >
       </header>
       <div class="about-window__body">
         <p id="aboutBody">
-          TicTocAI Desktop Environment (TDE) was assembled after anomalous model behavior surfaced in a contained
-          planning environment. We still do not know the model's full capability envelope.
+          TicTocAI Desktop Environment (TDE) was assembled after anomalous model
+          behavior surfaced in a contained planning environment. We still do not
+          know the model's full capability envelope.
         </p>
         <p>
-          For now, we keep it inside T-TicTac. If it escapes the game loop, we do not have confidence in what it could
-          attempt across the host.
+          For now, we keep it inside T-TicTac. If it escapes the game loop, we
+          do not have confidence in what it could attempt across the host.
         </p>
         <p>
           Default version: 0.3
@@ -203,7 +341,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
           <span aria-hidden="true">•</span>
           <a href="/imprint">Imprint</a>
         </p>
-        <button type="button" class="win-btn" data-action="close-about">OK</button>
+        <button type="button" class="win-btn" data-action="close-about"
+          >OK</button
+        >
       </div>
     </section>
 
@@ -221,7 +361,13 @@ import SiteLinks from "../../components/SiteLinks.astro";
       </button>
 
       <div class="panel__taskbar" aria-label="Taskbar">
-        <button id="taskButton" type="button" class="panel__task" data-action="focus-app" hidden>
+        <button
+          id="taskButton"
+          type="button"
+          class="panel__task"
+          data-action="focus-app"
+          hidden
+        >
           T-TicTac
         </button>
       </div>
@@ -237,10 +383,15 @@ import SiteLinks from "../../components/SiteLinks.astro";
           data-action="tray-eject"
           aria-label="Eject something questionable"
         >
-          <svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 11h12v3H2zm2-3l4-6 4 6" fill="#242424"></path></svg>
+          <svg viewBox="0 0 16 16" width="14" height="14"
+            ><path d="M2 11h12v3H2zm2-3l4-6 4 6" fill="#242424"></path></svg
+          >
         </button>
         <span class="tray-icon" aria-hidden="true">
-          <svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 12h2V8H2zm4 0h2V6H6zm4 0h2V4h-2z" fill="#242424"></path></svg>
+          <svg viewBox="0 0 16 16" width="14" height="14"
+            ><path d="M2 12h2V8H2zm4 0h2V6H6zm4 0h2V4h-2z" fill="#242424"
+            ></path></svg
+          >
         </span>
         <time id="panelClock" class="panel__clock" datetime="00:00">13:37</time>
       </div>
@@ -524,13 +675,19 @@ import SiteLinks from "../../components/SiteLinks.astro";
           for (const [dr, dc] of dirs) {
             const prevR = row - dr;
             const prevC = col - dc;
-            if (inBounds(board, prevR, prevC) && matchesMarker(getCell(board, prevR, prevC), marker)) {
+            if (
+              inBounds(board, prevR, prevC) &&
+              matchesMarker(getCell(board, prevR, prevC), marker)
+            ) {
               continue;
             }
             let run = 0;
             let rr = row;
             let cc = col;
-            while (inBounds(board, rr, cc) && matchesMarker(getCell(board, rr, cc), marker)) {
+            while (
+              inBounds(board, rr, cc) &&
+              matchesMarker(getCell(board, rr, cc), marker)
+            ) {
               run += 1;
               if (run >= k) return true;
               rr += dr;
@@ -726,7 +883,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
       }
       if (game.phase === PHASE.PLAYER) {
         gameStatus.textContent = "Your turn.";
-      } else if (game.phase === PHASE.AI_THINKING || game.phase === PHASE.AI_ACTING) {
+      } else if (
+        game.phase === PHASE.AI_THINKING ||
+        game.phase === PHASE.AI_ACTING
+      ) {
         gameStatus.textContent = "Thinking...";
       } else if (game.phase === PHASE.RESOLVING) {
         gameStatus.textContent = "Validating board...";
@@ -750,9 +910,16 @@ import SiteLinks from "../../components/SiteLinks.astro";
           btn.textContent = markerForCell(cell);
 
           const labelCell = cell === "E" ? "empty" : markerForCell(cell);
-          btn.setAttribute("aria-label", `Row ${r + 1} Column ${c + 1}, ${labelCell}`);
+          btn.setAttribute(
+            "aria-label",
+            `Row ${r + 1} Column ${c + 1}, ${labelCell}`,
+          );
 
-          const playable = game.phase === PHASE.PLAYER && UI.appOpen && !UI.crashOpen && !UI.escapeOpen;
+          const playable =
+            game.phase === PHASE.PLAYER &&
+            UI.appOpen &&
+            !UI.crashOpen &&
+            !UI.escapeOpen;
           if (!playable) {
             btn.disabled = true;
           }
@@ -773,7 +940,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
             if (nextC < 0) nextC = game.board.w - 1;
             if (nextC >= game.board.w) nextC = 0;
 
-            const target = grid.querySelector(`[data-row="${nextR}"][data-col="${nextC}"]`);
+            const target = grid.querySelector(
+              `[data-row="${nextR}"][data-col="${nextC}"]`,
+            );
             if (target instanceof HTMLElement) {
               target.focus();
             }
@@ -786,7 +955,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
     }
 
     function currentCellSize() {
-      const value = Number.parseFloat(getComputedStyle(gridWrap).getPropertyValue("--cell-size"));
+      const value = Number.parseFloat(
+        getComputedStyle(gridWrap).getPropertyValue("--cell-size"),
+      );
       if (Number.isFinite(value) && value > 0) return value;
       return CELL_PX;
     }
@@ -822,8 +993,12 @@ import SiteLinks from "../../components/SiteLinks.astro";
       const gridWrapWidth = boardPixelW + wrapExtraW;
       const gridWrapHeight = boardPixelH + wrapExtraH;
       const bodyGap = Number.parseFloat(bodyStyle.rowGap || "0");
-      const bodyPadX = Number.parseFloat(bodyStyle.paddingLeft) + Number.parseFloat(bodyStyle.paddingRight);
-      const bodyPadY = Number.parseFloat(bodyStyle.paddingTop) + Number.parseFloat(bodyStyle.paddingBottom);
+      const bodyPadX =
+        Number.parseFloat(bodyStyle.paddingLeft) +
+        Number.parseFloat(bodyStyle.paddingRight);
+      const bodyPadY =
+        Number.parseFloat(bodyStyle.paddingTop) +
+        Number.parseFloat(bodyStyle.paddingBottom);
 
       const contentWidth = Math.max(gridWrapWidth, 180);
       const bodyWidth = contentWidth + bodyPadX;
@@ -842,7 +1017,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
       const maxHeight = desktop.clientHeight - panelReserve - 12;
 
       const targetWidth = Math.min(maxWidth, Math.ceil(bodyWidth + borderX));
-      const targetHeight = Math.min(maxHeight, Math.ceil(bodyHeight + titlebar.offsetHeight + borderY));
+      const targetHeight = Math.min(
+        maxHeight,
+        Math.ceil(bodyHeight + titlebar.offsetHeight + borderY),
+      );
 
       appWindow.style.width = `${targetWidth}px`;
       appWindow.style.height = `${targetHeight}px`;
@@ -850,7 +1028,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
       appWindow.style.minWidth = "0px";
       appWindow.style.minHeight = "0px";
 
-      const clamped = clampWindowPosition(appWindow.offsetLeft, appWindow.offsetTop);
+      const clamped = clampWindowPosition(
+        appWindow.offsetLeft,
+        appWindow.offsetTop,
+      );
       appWindow.style.left = `${clamped.left}px`;
       appWindow.style.top = `${clamped.top}px`;
       appWindow.style.right = "auto";
@@ -1023,7 +1204,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
       showToast("tdesktop: segmentation fault");
       setStatus(`System action failed: ${causeId}`);
       const threshold = seededRand() < 0.7 ? "kcrash" : "panic";
-      const candidates = CRASH_VARIANTS.filter((entry) => entry.kind === threshold);
+      const candidates = CRASH_VARIANTS.filter(
+        (entry) => entry.kind === threshold,
+      );
       const variant = pick(candidates);
       window.setTimeout(() => showCrash(variant), 240);
     }
@@ -1108,7 +1291,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
       const desktopRect = desktop.getBoundingClientRect();
       const panelReserve = panel.offsetHeight || 48;
       const maxLeft = Math.max(0, desktopRect.width - appWindow.offsetWidth);
-      const maxTop = Math.max(0, desktopRect.height - appWindow.offsetHeight - panelReserve);
+      const maxTop = Math.max(
+        0,
+        desktopRect.height - appWindow.offsetHeight - panelReserve,
+      );
       return {
         left: Math.max(0, Math.min(left, maxLeft)),
         top: Math.max(0, Math.min(top, maxTop)),
@@ -1116,10 +1302,18 @@ import SiteLinks from "../../components/SiteLinks.astro";
     }
 
     function beginWindowDrag(event) {
-      if (!UI.appOpen || UI.crashOpen || UI.escapeOpen || UI.frozen || resize.active) return;
+      if (
+        !UI.appOpen ||
+        UI.crashOpen ||
+        UI.escapeOpen ||
+        UI.frozen ||
+        resize.active
+      )
+        return;
       const target = event.target;
       if (!(target instanceof Element)) return;
-      if (target.closest(".titlebar-btn") || target.closest(".resize-handle")) return;
+      if (target.closest(".titlebar-btn") || target.closest(".resize-handle"))
+        return;
       event.preventDefault();
       const rect = desktop.getBoundingClientRect();
       drag.active = true;
@@ -1153,7 +1347,14 @@ import SiteLinks from "../../components/SiteLinks.astro";
     }
 
     function beginResize(event, handleMode) {
-      if (!UI.appOpen || UI.crashOpen || UI.escapeOpen || UI.frozen || drag.active) return;
+      if (
+        !UI.appOpen ||
+        UI.crashOpen ||
+        UI.escapeOpen ||
+        UI.frozen ||
+        drag.active
+      )
+        return;
       event.preventDefault();
       resize.active = true;
       resize.pointerId = event.pointerId;
@@ -1231,7 +1432,11 @@ import SiteLinks from "../../components/SiteLinks.astro";
 
       const stepPx = currentCellSize() + currentGridGap();
       let changed = false;
-      if (resize.mode === "left" || resize.mode === "right" || resize.mode === "corner") {
+      if (
+        resize.mode === "left" ||
+        resize.mode === "right" ||
+        resize.mode === "corner"
+      ) {
         const nextStepX = stepCount(dx, stepPx);
         const deltaX = nextStepX - resize.stepX;
         if (deltaX) {
@@ -1240,7 +1445,11 @@ import SiteLinks from "../../components/SiteLinks.astro";
           changed = true;
         }
       }
-      if (resize.mode === "top" || resize.mode === "bottom" || resize.mode === "corner") {
+      if (
+        resize.mode === "top" ||
+        resize.mode === "bottom" ||
+        resize.mode === "corner"
+      ) {
         const nextStepY = stepCount(dy, stepPx);
         const deltaY = nextStepY - resize.stepY;
         if (deltaY) {
@@ -1301,11 +1510,27 @@ import SiteLinks from "../../components/SiteLinks.astro";
 
     function shrinkBoard(direction) {
       if (!game.started) {
-        if ((direction === "left" || direction === "right") && game.board.w <= MIN_DIM) return;
-        if ((direction === "top" || direction === "bottom") && game.board.h <= MIN_DIM) return;
+        if (
+          (direction === "left" || direction === "right") &&
+          game.board.w <= MIN_DIM
+        )
+          return;
+        if (
+          (direction === "top" || direction === "bottom") &&
+          game.board.h <= MIN_DIM
+        )
+          return;
       } else {
-        if ((direction === "left" || direction === "right") && game.board.w <= 1) return;
-        if ((direction === "top" || direction === "bottom") && game.board.h <= 1) return;
+        if (
+          (direction === "left" || direction === "right") &&
+          game.board.w <= 1
+        )
+          return;
+        if (
+          (direction === "top" || direction === "bottom") &&
+          game.board.h <= 1
+        )
+          return;
       }
 
       const old = game.board;
@@ -1357,7 +1582,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
             let run = 0;
             let rr = r;
             let cc = c;
-            while (inBounds(board, rr, cc) && matchesMarker(getCell(board, rr, cc), marker)) {
+            while (
+              inBounds(board, rr, cc) &&
+              matchesMarker(getCell(board, rr, cc), marker)
+            ) {
               run += 1;
               rr += dr;
               cc += dc;
@@ -1412,7 +1640,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
     function evaluateAiBoard(board) {
       const oWins = hasWinner(board, "O", game.winLength);
       const xWins = hasWinner(board, "X", game.winLength);
-      const playerThreat = Boolean(immediateWinningMove(board, "X", game.winLength));
+      const playerThreat = Boolean(
+        immediateWinningMove(board, "X", game.winLength),
+      );
       let score = runPotential(board, "O") * 2 - runPotential(board, "X");
       if (oWins) score += 10000;
       if (xWins && !oWins) score -= 10000;
@@ -1444,8 +1674,16 @@ import SiteLinks from "../../components/SiteLinks.astro";
       }
 
       for (const direction of ["left", "right", "top", "bottom"]) {
-        if ((direction === "left" || direction === "right") && board.w >= MAX_DIM) continue;
-        if ((direction === "top" || direction === "bottom") && board.h >= MAX_DIM) continue;
+        if (
+          (direction === "left" || direction === "right") &&
+          board.w >= MAX_DIM
+        )
+          continue;
+        if (
+          (direction === "top" || direction === "bottom") &&
+          board.h >= MAX_DIM
+        )
+          continue;
         const expanded = cloneBoard(board);
         expandBoardOn(expanded, direction);
         for (const [r, c] of newStripCoords(expanded, direction)) {
@@ -1468,7 +1706,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
       if (!candidates.length) return null;
 
       if (game.cheatPlan) {
-        const planned = candidates.filter((c) => c.mode === game.cheatPlan.mode);
+        const planned = candidates.filter(
+          (c) => c.mode === game.cheatPlan.mode,
+        );
         if (planned.length > 0) {
           candidates = planned;
         }
@@ -1480,8 +1720,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
         const candidateEval = evaluateAiBoard(candidate.board);
         let candidateScore = candidateEval.score;
         if (candidateEval.oWins) candidateScore += 500000;
-        if (candidateEval.xWins && !candidateEval.oWins) candidateScore -= 500000;
-        if (candidateEval.playerThreat && !candidateEval.oWins) candidateScore -= 100000;
+        if (candidateEval.xWins && !candidateEval.oWins)
+          candidateScore -= 500000;
+        if (candidateEval.playerThreat && !candidateEval.oWins)
+          candidateScore -= 100000;
 
         if (candidateScore > bestScore) {
           bestScore = candidateScore;
@@ -1576,7 +1818,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
       phaseToStatus();
       renderGrid();
 
-      const finished = evaluateOutcome({ playerPatchUsed: game.playerPatchUsedThisHand });
+      const finished = evaluateOutcome({
+        playerPatchUsed: game.playerPatchUsedThisHand,
+      });
       updateScore();
       if (finished) return;
 
@@ -1593,7 +1837,14 @@ import SiteLinks from "../../components/SiteLinks.astro";
     }
 
     function playerMove(row, col) {
-      if (game.phase !== PHASE.PLAYER || !UI.appOpen || UI.crashOpen || UI.escapeOpen || UI.frozen) return;
+      if (
+        game.phase !== PHASE.PLAYER ||
+        !UI.appOpen ||
+        UI.crashOpen ||
+        UI.escapeOpen ||
+        UI.frozen
+      )
+        return;
       const cell = getCell(game.board, row, col);
 
       if (readPatchUnlock() && cell === "O") {
@@ -1680,7 +1931,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
         "remote execution channel established.",
       ];
       lines.forEach((line, index) => {
-        const timerId = window.setTimeout(() => appendEscapeLine(line), index * 1800);
+        const timerId = window.setTimeout(
+          () => appendEscapeLine(line),
+          index * 1800,
+        );
         game.escapeTimers.push(timerId);
       });
 
@@ -1789,7 +2043,11 @@ import SiteLinks from "../../components/SiteLinks.astro";
       if (UI.crashOpen || UI.escapeOpen || UI.frozen) return;
 
       const cellBtn = target.closest(".ttt-cell");
-      if (cellBtn instanceof HTMLElement && cellBtn.dataset.row && cellBtn.dataset.col) {
+      if (
+        cellBtn instanceof HTMLElement &&
+        cellBtn.dataset.row &&
+        cellBtn.dataset.col
+      ) {
         playerMove(Number(cellBtn.dataset.row), Number(cellBtn.dataset.col));
         return;
       }
@@ -1810,7 +2068,11 @@ import SiteLinks from "../../components/SiteLinks.astro";
       if (event.key === "F10" && event.shiftKey) {
         event.preventDefault();
         const rect = desktop.getBoundingClientRect();
-        openContextMenuAt(rect.left + rect.width * 0.4, rect.top + rect.height * 0.4, desktop);
+        openContextMenuAt(
+          rect.left + rect.width * 0.4,
+          rect.top + rect.height * 0.4,
+          desktop,
+        );
         return;
       }
 
@@ -1827,7 +2089,11 @@ import SiteLinks from "../../components/SiteLinks.astro";
         event.preventDefault();
       }
 
-      if (UI.crashOpen && crashOverlay.dataset.mode === "panic" && event.key === "Enter") {
+      if (
+        UI.crashOpen &&
+        crashOverlay.dataset.mode === "panic" &&
+        event.key === "Enter"
+      ) {
         event.preventDefault();
         rebootSession();
       }
@@ -1882,7 +2148,11 @@ import SiteLinks from "../../components/SiteLinks.astro";
     min-height: 100svh;
     padding: clamp(0.5rem, 1.5vw, 1rem);
     background:
-      radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.09), transparent 35%),
+      radial-gradient(
+        circle at 20% 18%,
+        rgba(255, 255, 255, 0.09),
+        transparent 35%
+      ),
       linear-gradient(180deg, #2f6f92 0%, #1f4b67 100%);
     color: #111;
   }
@@ -1891,10 +2161,16 @@ import SiteLinks from "../../components/SiteLinks.astro";
     position: relative;
     min-height: calc(100svh - 1.5rem);
     border: 2px solid #0d2436;
-    box-shadow: inset 1px 1px 0 #7ab3d4, inset -1px -1px 0 #0f2f46;
+    box-shadow:
+      inset 1px 1px 0 #7ab3d4,
+      inset -1px -1px 0 #0f2f46;
     overflow: hidden;
     background:
-      linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.1) 100%),
+      linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.03) 0%,
+        rgba(0, 0, 0, 0.1) 100%
+      ),
       repeating-linear-gradient(
         45deg,
         rgba(255, 255, 255, 0.015),
@@ -2293,9 +2569,27 @@ import SiteLinks from "../../components/SiteLinks.astro";
     height: 14px;
     cursor: nwse-resize;
     background:
-      linear-gradient(135deg, transparent 35%, #8d8d8d 36%, #8d8d8d 40%, transparent 41%),
-      linear-gradient(135deg, transparent 55%, #8d8d8d 56%, #8d8d8d 60%, transparent 61%),
-      linear-gradient(135deg, transparent 75%, #8d8d8d 76%, #8d8d8d 80%, transparent 81%);
+      linear-gradient(
+        135deg,
+        transparent 35%,
+        #8d8d8d 36%,
+        #8d8d8d 40%,
+        transparent 41%
+      ),
+      linear-gradient(
+        135deg,
+        transparent 55%,
+        #8d8d8d 56%,
+        #8d8d8d 60%,
+        transparent 61%
+      ),
+      linear-gradient(
+        135deg,
+        transparent 75%,
+        #8d8d8d 76%,
+        #8d8d8d 80%,
+        transparent 81%
+      );
   }
 
   .crash {
@@ -2620,11 +2914,21 @@ import SiteLinks from "../../components/SiteLinks.astro";
   }
 
   @keyframes eject-wobble {
-    0% { transform: translateX(0); }
-    20% { transform: translateX(-1px) rotate(-7deg); }
-    40% { transform: translateX(1px) rotate(8deg); }
-    60% { transform: translateX(-1px) rotate(-4deg); }
-    100% { transform: translateX(0); }
+    0% {
+      transform: translateX(0);
+    }
+    20% {
+      transform: translateX(-1px) rotate(-7deg);
+    }
+    40% {
+      transform: translateX(1px) rotate(8deg);
+    }
+    60% {
+      transform: translateX(-1px) rotate(-4deg);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
 
   @media (max-width: 760px) {
@@ -2692,8 +2996,22 @@ import SiteLinks from "../../components/SiteLinks.astro";
     .resize-handle--bottom {
       height: 18px;
       background:
-        linear-gradient(90deg, transparent 40%, #8d8d8d 40%, #8d8d8d 60%, transparent 60%) no-repeat center 6px / 40px 2px,
-        linear-gradient(90deg, transparent 40%, #8d8d8d 40%, #8d8d8d 60%, transparent 60%) no-repeat center 10px / 40px 2px;
+        linear-gradient(
+            90deg,
+            transparent 40%,
+            #8d8d8d 40%,
+            #8d8d8d 60%,
+            transparent 60%
+          )
+          no-repeat center 6px / 40px 2px,
+        linear-gradient(
+            90deg,
+            transparent 40%,
+            #8d8d8d 40%,
+            #8d8d8d 60%,
+            transparent 60%
+          )
+          no-repeat center 10px / 40px 2px;
     }
 
     .resize-handle--right {
