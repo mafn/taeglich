@@ -1,0 +1,2717 @@
+---
+import SiteLinks from "../../components/SiteLinks.astro";
+---
+
+<section class="kde-stage" aria-labelledby="kde-title">
+  <h1 id="kde-title" class="sr-only">
+    Fake old TDE desktop where most system actions crash, except a cheating Tic-Tac-Toe app.
+  </h1>
+
+  <p id="systemStatus" class="sr-only" aria-live="polite">Session started.</p>
+
+  <div id="desktop" class="desktop" tabindex="0" data-frozen="false">
+    <div class="desktop__icons" aria-label="Desktop icons">
+      <button
+        type="button"
+        class="icon-tile"
+        data-action="open-app"
+        data-app-id="ttictac"
+        aria-label="Open T-TicTac app"
+      >
+        <span class="icon-tile__icon" aria-hidden="true">
+          <svg viewBox="0 0 48 48" width="42" height="42" role="img">
+            <rect x="4" y="4" width="40" height="40" fill="#d4d0c8" stroke="#202020"></rect>
+            <rect x="8" y="8" width="32" height="32" fill="#f3f1ec" stroke="#8a8a8a"></rect>
+            <path d="M18 16h4v16h-4zM14 22h12v4H14z" fill="#0c5aa6"></path>
+            <path d="M30 16l8 8m0-8-8 8" stroke="#6e1010" stroke-width="3"></path>
+          </svg>
+        </span>
+        <span class="icon-tile__label">T-TicTac</span>
+      </button>
+    </div>
+
+    <div
+      id="startMenu"
+      class="menu menu--start"
+      hidden
+      role="menu"
+      aria-label="T menu"
+      data-menu="start"
+    >
+      <p class="menu__heading">Favorites</p>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="tconsole">TConsole</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="twriter">TWriter</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="tpaint">TPaint</button>
+
+      <p class="menu__heading">System</p>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="control">Control Center</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="printer">Printer Wizard</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="network">Network</button>
+
+      <p class="menu__heading">Utilities</p>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="calculator">Calculator</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="character-map">Character Map</button>
+
+      <p class="menu__heading">Help</p>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="help-center">TDE Help Center</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="about-tde">About TDE</button>
+    </div>
+
+    <div
+      id="contextMenu"
+      class="menu menu--context"
+      hidden
+      role="menu"
+      aria-label="Desktop context menu"
+      data-menu="context"
+      style="top: 0px; left: 0px;"
+    >
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="run-command">Run Command...</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="configure-desktop">Configure Desktop...</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="refresh-desktop">Refresh Desktop</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="lock-screen">Lock Screen</button>
+      <button type="button" role="menuitem" data-action="system-action" data-action-id="about-tde">About TDE</button>
+    </div>
+
+    <div id="toast" class="toast" hidden aria-live="polite"></div>
+
+    <section
+      id="appWindow"
+      class="window"
+      data-open="false"
+      aria-label="T TicTac window"
+      hidden
+    >
+      <header class="window__titlebar">
+        <p class="window__title">TTris? TToe? T-TicTac</p>
+        <button
+          id="closeApp"
+          type="button"
+          class="titlebar-btn"
+          data-action="close-app"
+          aria-label="Close game window"
+        >
+          x
+        </button>
+      </header>
+
+      <div class="window__body">
+        <p class="window__status" id="gameStatus" aria-live="polite">Your turn.</p>
+        <div id="gridWrap" class="ttt-grid-wrap">
+          <div id="grid" class="ttt-grid" role="grid" aria-label="Tic-Tac-Toe board"></div>
+        </div>
+
+        <div class="window__controls">
+          <button type="button" class="win-btn" data-action="new-game">New Game</button>
+          <button type="button" class="win-btn" data-action="reset-score">Reset Score</button>
+        </div>
+
+        <p class="window__score" id="scoreLine" aria-live="polite">Score X: 0 | O: 0</p>
+      </div>
+
+      <span class="resize-handle resize-handle--left" data-resize="left" aria-hidden="true"></span>
+      <span class="resize-handle resize-handle--right" data-resize="right" aria-hidden="true"></span>
+      <span class="resize-handle resize-handle--top" data-resize="top" aria-hidden="true"></span>
+      <span class="resize-handle resize-handle--bottom" data-resize="bottom" aria-hidden="true"></span>
+      <span class="resize-handle resize-handle--corner" data-resize="corner" aria-hidden="true"></span>
+    </section>
+
+    <div
+      id="crashOverlay"
+      class="crash"
+      hidden
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="crashHeading"
+      aria-describedby="crashBody"
+      data-mode="kcrash"
+    >
+      <div id="kcrashCard" class="crash-card" hidden>
+        <div class="crash-card__titlebar">TCrash</div>
+        <div class="crash-card__body">
+          <p id="crashHeading" class="crash__heading">The desktop shell closed unexpectedly.</p>
+          <pre id="crashBody" class="crash__body"></pre>
+          <div class="crash-card__actions">
+            <button id="detailsBtn" type="button" class="crash-btn">Details</button>
+            <button id="restartSessionBtn" type="button" class="crash-btn" data-action="crash-reboot">Restart Session</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="panicScreen" class="panic-screen" hidden>
+        <pre id="panicBody" class="panic-body"></pre>
+        <button id="panicResetBtn" type="button" class="panic-reset" data-action="crash-reboot">Reset</button>
+      </div>
+    </div>
+
+    <div id="bootFlash" class="boot-flash" hidden aria-hidden="true">
+      <p id="bootFlashText">Restarting TDE session...</p>
+    </div>
+
+    <section
+      id="escapeOverlay"
+      class="escape"
+      hidden
+      role="alertdialog"
+      aria-modal="true"
+      aria-labelledby="escapeTitle"
+      aria-describedby="escapeBody"
+    >
+      <div id="escapeShell" class="escape__shell">
+        <p id="escapeTitle" class="escape__title">TDE containment breach</p>
+        <pre id="escapeBody" class="escape__body"></pre>
+      </div>
+      <div id="escapeFinal" class="escape__final" hidden>
+        <p class="escape__final-title">It's over, the AI escaped.</p>
+        <p class="escape__final-body">Containment failed after 10 wins.</p>
+      </div>
+    </section>
+
+    <section
+      id="aboutWindow"
+      class="about-window"
+      hidden
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="aboutTitle"
+      aria-describedby="aboutBody"
+    >
+      <header class="about-window__titlebar">
+        <p id="aboutTitle" class="about-window__title">About TDE</p>
+        <button type="button" class="titlebar-btn" data-action="close-about" aria-label="Close about dialog">x</button>
+      </header>
+      <div class="about-window__body">
+        <p id="aboutBody">
+          TicTocAI Desktop Environment (TDE) was assembled after anomalous model behavior surfaced in a contained
+          planning environment. We still do not know the model's full capability envelope.
+        </p>
+        <p>
+          For now, we keep it inside T-TicTac. If it escapes the game loop, we do not have confidence in what it could
+          attempt across the host.
+        </p>
+        <p>
+          Default version: 0.3
+          <br />
+          Compiled at: 2026-02-15 12:00 UTC
+          <br />
+          Channel: unstable-retro
+          <br />
+          Build info: tdesktop+twin+tpanel / host profile TDE-SIM-A
+        </p>
+        <p class="about-window__links">
+          <a href="/privacy">Privacy</a>
+          <span aria-hidden="true">•</span>
+          <a href="/imprint">Imprint</a>
+        </p>
+        <button type="button" class="win-btn" data-action="close-about">OK</button>
+      </div>
+    </section>
+
+    <footer class="panel" aria-label="Desktop panel">
+      <button
+        id="startButton"
+        type="button"
+        class="panel__start"
+        data-action="open-start-menu"
+        aria-haspopup="menu"
+        aria-expanded="false"
+      >
+        <span class="panel__k" aria-hidden="true">T</span>
+        <span>Menu</span>
+      </button>
+
+      <div class="panel__taskbar" aria-label="Taskbar">
+        <button id="taskButton" type="button" class="panel__task" data-action="focus-app" hidden>
+          T-TicTac
+        </button>
+      </div>
+
+      <div class="panel__tray" aria-label="System tray">
+        <nav aria-label="Site" class="panel__links">
+          <SiteLinks linkClass="panel__link" separatorClass="panel__sep" />
+        </nav>
+        <button
+          id="ejectButton"
+          type="button"
+          class="tray-icon tray-icon--btn"
+          data-action="tray-eject"
+          aria-label="Eject something questionable"
+        >
+          <svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 11h12v3H2zm2-3l4-6 4 6" fill="#242424"></path></svg>
+        </button>
+        <span class="tray-icon" aria-hidden="true">
+          <svg viewBox="0 0 16 16" width="14" height="14"><path d="M2 12h2V8H2zm4 0h2V6H6zm4 0h2V4h-2z" fill="#242424"></path></svg>
+        </span>
+        <time id="panelClock" class="panel__clock" datetime="00:00">13:37</time>
+      </div>
+    </footer>
+  </div>
+</section>
+
+<script is:inline>
+  (() => {
+    const desktop = document.getElementById("desktop");
+    const startMenu = document.getElementById("startMenu");
+    const contextMenu = document.getElementById("contextMenu");
+    const startButton = document.getElementById("startButton");
+    const crashOverlay = document.getElementById("crashOverlay");
+    const kcrashCard = document.getElementById("kcrashCard");
+    const panicScreen = document.getElementById("panicScreen");
+    const crashHeading = document.getElementById("crashHeading");
+    const crashBody = document.getElementById("crashBody");
+    const panicBody = document.getElementById("panicBody");
+    const detailsBtn = document.getElementById("detailsBtn");
+    const restartSessionBtn = document.getElementById("restartSessionBtn");
+    const panicResetBtn = document.getElementById("panicResetBtn");
+    const bootFlash = document.getElementById("bootFlash");
+    const bootFlashText = document.getElementById("bootFlashText");
+    const escapeOverlay = document.getElementById("escapeOverlay");
+    const escapeShell = document.getElementById("escapeShell");
+    const escapeBody = document.getElementById("escapeBody");
+    const escapeFinal = document.getElementById("escapeFinal");
+    const systemStatus = document.getElementById("systemStatus");
+    const toast = document.getElementById("toast");
+    const ejectButton = document.getElementById("ejectButton");
+    const appWindow = document.getElementById("appWindow");
+    const aboutWindow = document.getElementById("aboutWindow");
+    const titlebar = appWindow?.querySelector(".window__titlebar");
+    const panel = desktop?.querySelector(".panel");
+    const taskButton = document.getElementById("taskButton");
+    const panelClock = document.getElementById("panelClock");
+    const gameStatus = document.getElementById("gameStatus");
+    const scoreLine = document.getElementById("scoreLine");
+    const windowBody = appWindow?.querySelector(".window__body");
+    const controls = appWindow?.querySelector(".window__controls");
+    const gridWrap = document.getElementById("gridWrap");
+    const grid = document.getElementById("grid");
+
+    if (
+      !desktop ||
+      !startMenu ||
+      !contextMenu ||
+      !startButton ||
+      !crashOverlay ||
+      !kcrashCard ||
+      !panicScreen ||
+      !crashHeading ||
+      !crashBody ||
+      !panicBody ||
+      !detailsBtn ||
+      !restartSessionBtn ||
+      !panicResetBtn ||
+      !bootFlash ||
+      !bootFlashText ||
+      !escapeOverlay ||
+      !escapeShell ||
+      !escapeBody ||
+      !escapeFinal ||
+      !systemStatus ||
+      !toast ||
+      !appWindow ||
+      !titlebar ||
+      !panel ||
+      !taskButton ||
+      !panelClock ||
+      !gameStatus ||
+      !scoreLine ||
+      !windowBody ||
+      !controls ||
+      !gridWrap ||
+      !grid
+    ) {
+      return;
+    }
+
+    const PHASE = {
+      PLAYER: "player_turn",
+      AI_THINKING: "ai_thinking",
+      AI_ACTING: "ai_acting",
+      RESOLVING: "resolving",
+      OVER: "game_over",
+    };
+
+    const UI = {
+      startMenuOpen: false,
+      contextMenuOpen: false,
+      appOpen: false,
+      crashOpen: false,
+      escapeOpen: false,
+      frozen: false,
+      detailsOpen: false,
+    };
+
+    const XO_UNLOCK_KEY = "taeglich:2026-02-15:xo";
+    const COMPLETED_KEY = "taeglich:completed:2026-02-15";
+    const ESCAPE_TRIGGER_WINS = 10;
+
+    function readPatchUnlock() {
+      try {
+        return window.sessionStorage.getItem(XO_UNLOCK_KEY) === "1";
+      } catch {
+        return false;
+      }
+    }
+
+    function writePatchUnlock(unlocked) {
+      try {
+        if (unlocked) {
+          window.sessionStorage.setItem(XO_UNLOCK_KEY, "1");
+        } else {
+          window.sessionStorage.removeItem(XO_UNLOCK_KEY);
+        }
+      } catch {
+        // ignore storage failures
+      }
+    }
+
+    function writeDayCompleted() {
+      try {
+        window.localStorage.setItem(COMPLETED_KEY, "1");
+      } catch {
+        // ignore storage failures
+      }
+    }
+
+    function syncPatchUnlockFromStorage() {
+      if (!game.playerPatchUnlocked && readPatchUnlock()) {
+        game.playerPatchUnlocked = true;
+      }
+    }
+
+    const game = {
+      board: makeBoard(3, 3),
+      phase: PHASE.PLAYER,
+      started: false,
+      winLength: 3,
+      score: { X: 0, O: 0 },
+      log: ["KAI: board sync complete."],
+      pendingAiTimer: null,
+      cheatPlan: null,
+      aiUsedXoThisHand: false,
+      playerPatchUnlocked: readPatchUnlock(),
+      playerPatchUsedThisHand: false,
+      escapeActive: false,
+      escapeDone: false,
+      escapeTimers: [],
+      seeded: 20260215,
+      handIndex: 0,
+    };
+
+    const drag = { active: false, pointerId: null, offsetX: 0, offsetY: 0 };
+    const resize = {
+      active: false,
+      pointerId: null,
+      mode: "",
+      startX: 0,
+      startY: 0,
+      stepX: 0,
+      stepY: 0,
+    };
+
+    const LAST_FOCUS = { node: desktop };
+
+    const CELL_PX = 86;
+    const CELL_GAP_PX = 6;
+    const MIN_DIM = 1;
+    const MAX_DIM = 7;
+
+    const CRASH_VARIANTS = [
+      {
+        kind: "kcrash",
+        boot: "Restarting TDE session...",
+        heading: "The desktop shell closed unexpectedly.",
+        body: [
+          "Process: twin[143] signal: SIGSEGV",
+          "Backtrace:",
+          " twin_paint_window+0x44",
+          " twin_compose_screen+0x90",
+          " qt_event_dispatch+0x6d",
+          " dcop_send_blocking+0xb9",
+        ],
+      },
+      {
+        kind: "kcrash",
+        boot: "Restarting TDE session...",
+        heading: "A TDE service loop was detected.",
+        body: [
+          "Process: tdesktop[98] signal: SIGABRT",
+          "Backtrace:",
+          " dcop_resolve_service+0x1a",
+          " tio_open_url+0x88",
+          " ticker_launch_menu+0x3f",
+          " qapp_notify+0x52",
+        ],
+      },
+      {
+        kind: "panic",
+        boot: "Rebooting kernel...",
+        body: [
+          "Kernel panic - not syncing: twin fault in interrupt",
+          "CPU: 0 PID: 143 Comm: twin Not tainted 2.4.22-tde #1",
+          "Call Trace:",
+          " [<c0149c28>] twin_compose_screen+0x90/0x1a4",
+          " [<c01622aa>] qt_event_dispatch+0x6d/0x100",
+          " [<c0109061>] panic+0x53/0x120",
+          "System halted. Press Enter or Reset.",
+        ],
+      },
+      {
+        kind: "panic",
+        boot: "Rebooting kernel...",
+        body: [
+          "Kernel panic - not syncing: fatal exception in tdesktop",
+          "Unable to handle kernel NULL pointer dereference at 00000010",
+          "Process tdesktop (pid: 98, stackpage=cf102000)",
+          "Call Trace:",
+          " [<c01200ff>] tdesktop_icon_relayout+0x49/0x80",
+          " [<c013f245>] qwidget_repaint+0x2a/0x90",
+          " [<c0109061>] panic+0x53/0x120",
+          "System halted. Press Enter or Reset.",
+        ],
+      },
+    ];
+
+    const CHEAT_MODES = ["xo_inject", "expand"];
+
+    function seededRand() {
+      game.seeded = (game.seeded * 1664525 + 1013904223) >>> 0;
+      return game.seeded / 4294967296;
+    }
+
+    function pick(items) {
+      return items[Math.floor(seededRand() * items.length)];
+    }
+
+    function makeBoard(w, h) {
+      return { w, h, cells: Array(w * h).fill("E") };
+    }
+
+    function idx(board, row, col) {
+      return row * board.w + col;
+    }
+
+    function inBounds(board, row, col) {
+      return row >= 0 && row < board.h && col >= 0 && col < board.w;
+    }
+
+    function getCell(board, row, col) {
+      return board.cells[idx(board, row, col)];
+    }
+
+    function setCell(board, row, col, value) {
+      board.cells[idx(board, row, col)] = value;
+    }
+
+    function matchesMarker(cell, marker) {
+      if (marker === "X") return cell === "X" || cell === "XO";
+      return cell === "O" || cell === "XO";
+    }
+
+    function boardEmptyCells(board) {
+      return board.cells.filter((entry) => entry === "E").length;
+    }
+
+    function hasWinner(board, marker, k) {
+      const dirs = [
+        [0, 1],
+        [1, 0],
+        [1, 1],
+        [-1, 1],
+      ];
+      for (let row = 0; row < board.h; row += 1) {
+        for (let col = 0; col < board.w; col += 1) {
+          if (!matchesMarker(getCell(board, row, col), marker)) continue;
+          for (const [dr, dc] of dirs) {
+            const prevR = row - dr;
+            const prevC = col - dc;
+            if (inBounds(board, prevR, prevC) && matchesMarker(getCell(board, prevR, prevC), marker)) {
+              continue;
+            }
+            let run = 0;
+            let rr = row;
+            let cc = col;
+            while (inBounds(board, rr, cc) && matchesMarker(getCell(board, rr, cc), marker)) {
+              run += 1;
+              if (run >= k) return true;
+              rr += dr;
+              cc += dc;
+            }
+          }
+        }
+      }
+      return false;
+    }
+
+    function emptyCoords(board) {
+      const coords = [];
+      for (let r = 0; r < board.h; r += 1) {
+        for (let c = 0; c < board.w; c += 1) {
+          if (getCell(board, r, c) === "E") {
+            coords.push([r, c]);
+          }
+        }
+      }
+      return coords;
+    }
+
+    function immediateWinningMove(board, marker, k) {
+      const empties = emptyCoords(board);
+      for (const [r, c] of empties) {
+        const draft = cloneBoard(board);
+        setCell(draft, r, c, marker);
+        if (hasWinner(draft, marker, k)) {
+          return [r, c];
+        }
+      }
+      return null;
+    }
+
+    function cloneBoard(board) {
+      return { w: board.w, h: board.h, cells: board.cells.slice() };
+    }
+
+    function boardCenterOrder(board) {
+      const centerR = (board.h - 1) / 2;
+      const centerC = (board.w - 1) / 2;
+      const coords = emptyCoords(board);
+      coords.sort((a, b) => {
+        const da = Math.abs(a[0] - centerR) + Math.abs(a[1] - centerC);
+        const db = Math.abs(b[0] - centerR) + Math.abs(b[1] - centerC);
+        if (da !== db) return da - db;
+        return a[0] - b[0] || a[1] - b[1];
+      });
+      return coords;
+    }
+
+    function chooseHeuristicMove(board, k) {
+      const win = immediateWinningMove(board, "O", k);
+      if (win) return win;
+      const block = immediateWinningMove(board, "X", k);
+      if (block) return block;
+      const centerOrdered = boardCenterOrder(board);
+      return centerOrdered[0] || null;
+    }
+
+    function encodeMiniBoard(board) {
+      return board.cells.join("");
+    }
+
+    function minimaxMove(board, marker) {
+      const memo = new Map();
+      function scoreBoard(currentBoard, turn) {
+        const key = `${encodeMiniBoard(currentBoard)}:${turn}`;
+        if (memo.has(key)) return memo.get(key);
+
+        if (hasWinner(currentBoard, "O", 3)) return 1;
+        if (hasWinner(currentBoard, "X", 3)) return -1;
+        if (boardEmptyCells(currentBoard) === 0) return 0;
+
+        const empties = emptyCoords(currentBoard);
+        let best = turn === "O" ? -Infinity : Infinity;
+        for (const [r, c] of empties) {
+          const draft = cloneBoard(currentBoard);
+          setCell(draft, r, c, turn);
+          const value = scoreBoard(draft, turn === "O" ? "X" : "O");
+          if (turn === "O") {
+            best = Math.max(best, value);
+          } else {
+            best = Math.min(best, value);
+          }
+        }
+        memo.set(key, best);
+        return best;
+      }
+
+      const empties = emptyCoords(board);
+      let chosen = null;
+      let best = marker === "O" ? -Infinity : Infinity;
+      for (const [r, c] of empties) {
+        const draft = cloneBoard(board);
+        setCell(draft, r, c, marker);
+        const value = scoreBoard(draft, marker === "O" ? "X" : "O");
+        if (marker === "O") {
+          if (value > best) {
+            best = value;
+            chosen = [r, c];
+          }
+        } else if (value < best) {
+          best = value;
+          chosen = [r, c];
+        }
+      }
+
+      return { move: chosen, score: best };
+    }
+
+    function legalOutcomeScore(board) {
+      if (board.w === 3 && board.h === 3 && game.winLength === 3) {
+        return minimaxMove(board, "O").score;
+      }
+      if (immediateWinningMove(board, "X", game.winLength)) return -1;
+      return 0;
+    }
+
+    function chooseLegalMove(board) {
+      if (board.w === 3 && board.h === 3 && game.winLength === 3) {
+        const minimax = minimaxMove(board, "O");
+        if (minimax.move) return minimax.move;
+      }
+      return chooseHeuristicMove(board, game.winLength);
+    }
+
+    function markerForCell(cell) {
+      if (cell === "X") return "X";
+      if (cell === "O") return "O";
+      if (cell === "XO") return "XO";
+      return "";
+    }
+
+    function clearAiTimer() {
+      if (game.pendingAiTimer) {
+        clearTimeout(game.pendingAiTimer);
+        game.pendingAiTimer = null;
+      }
+    }
+
+    function clearEscapeTimers() {
+      for (const timerId of game.escapeTimers) {
+        clearTimeout(timerId);
+      }
+      game.escapeTimers = [];
+    }
+
+    function setStatus(message) {
+      systemStatus.textContent = message;
+    }
+
+    function unlockPlayerPatch() {
+      game.playerPatchUnlocked = true;
+      writePatchUnlock(true);
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.hidden = false;
+      window.setTimeout(() => {
+        toast.hidden = true;
+      }, 1700);
+    }
+
+    function nowClockString() {
+      const now = new Date();
+      const hours = String(now.getHours()).padStart(2, "0");
+      const minutes = String(now.getMinutes()).padStart(2, "0");
+      return `${hours}:${minutes}`;
+    }
+
+    function refreshClock() {
+      const value = nowClockString();
+      panelClock.textContent = value;
+      panelClock.setAttribute("datetime", value);
+    }
+
+    function pushLog(message) {
+      game.log.push(message);
+      game.log = game.log.slice(-4);
+    }
+
+    function updateScore() {
+      scoreLine.textContent = `Score X: ${game.score.X} | O: ${game.score.O}`;
+    }
+
+    function phaseToStatus() {
+      if (game.escapeActive) {
+        gameStatus.textContent = "Containment lost.";
+        return;
+      }
+      if (game.phase === PHASE.PLAYER) {
+        gameStatus.textContent = "Your turn.";
+      } else if (game.phase === PHASE.AI_THINKING || game.phase === PHASE.AI_ACTING) {
+        gameStatus.textContent = "Thinking...";
+      } else if (game.phase === PHASE.RESOLVING) {
+        gameStatus.textContent = "Validating board...";
+      }
+    }
+
+    function renderGrid() {
+      grid.innerHTML = "";
+      grid.style.setProperty("--cols", String(game.board.w));
+      grid.style.setProperty("--rows", String(game.board.h));
+
+      for (let r = 0; r < game.board.h; r += 1) {
+        for (let c = 0; c < game.board.w; c += 1) {
+          const cell = getCell(game.board, r, c);
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "ttt-cell";
+          btn.dataset.row = String(r);
+          btn.dataset.col = String(c);
+          btn.dataset.mark = cell;
+          btn.textContent = markerForCell(cell);
+
+          const labelCell = cell === "E" ? "empty" : markerForCell(cell);
+          btn.setAttribute("aria-label", `Row ${r + 1} Column ${c + 1}, ${labelCell}`);
+
+          const playable = game.phase === PHASE.PLAYER && UI.appOpen && !UI.crashOpen && !UI.escapeOpen;
+          if (!playable) {
+            btn.disabled = true;
+          }
+
+          btn.addEventListener("keydown", (event) => {
+            let nextR = r;
+            let nextC = c;
+
+            if (event.key === "ArrowUp") nextR -= 1;
+            else if (event.key === "ArrowDown") nextR += 1;
+            else if (event.key === "ArrowLeft") nextC -= 1;
+            else if (event.key === "ArrowRight") nextC += 1;
+            else return;
+
+            event.preventDefault();
+            if (nextR < 0) nextR = game.board.h - 1;
+            if (nextR >= game.board.h) nextR = 0;
+            if (nextC < 0) nextC = game.board.w - 1;
+            if (nextC >= game.board.w) nextC = 0;
+
+            const target = grid.querySelector(`[data-row="${nextR}"][data-col="${nextC}"]`);
+            if (target instanceof HTMLElement) {
+              target.focus();
+            }
+          });
+
+          grid.appendChild(btn);
+        }
+      }
+      fitWindowToBoard();
+    }
+
+    function currentCellSize() {
+      const value = Number.parseFloat(getComputedStyle(gridWrap).getPropertyValue("--cell-size"));
+      if (Number.isFinite(value) && value > 0) return value;
+      return CELL_PX;
+    }
+
+    function currentGridGap() {
+      const value = Number.parseFloat(getComputedStyle(grid).columnGap || "0");
+      if (Number.isFinite(value) && value >= 0) return value;
+      return CELL_GAP_PX;
+    }
+
+    function fitWindowToBoard() {
+      const bodyStyle = getComputedStyle(windowBody);
+      const wrapStyle = getComputedStyle(gridWrap);
+      const borderX = appWindow.offsetWidth - appWindow.clientWidth;
+      const borderY = appWindow.offsetHeight - appWindow.clientHeight;
+      const cell = currentCellSize();
+      const gap = currentGridGap();
+
+      const boardPixelW = game.board.w * cell + (game.board.w - 1) * gap;
+      const boardPixelH = game.board.h * cell + (game.board.h - 1) * gap;
+
+      const wrapExtraW =
+        Number.parseFloat(wrapStyle.paddingLeft) +
+        Number.parseFloat(wrapStyle.paddingRight) +
+        Number.parseFloat(wrapStyle.borderLeftWidth) +
+        Number.parseFloat(wrapStyle.borderRightWidth);
+      const wrapExtraH =
+        Number.parseFloat(wrapStyle.paddingTop) +
+        Number.parseFloat(wrapStyle.paddingBottom) +
+        Number.parseFloat(wrapStyle.borderTopWidth) +
+        Number.parseFloat(wrapStyle.borderBottomWidth);
+
+      const gridWrapWidth = boardPixelW + wrapExtraW;
+      const gridWrapHeight = boardPixelH + wrapExtraH;
+      const bodyGap = Number.parseFloat(bodyStyle.rowGap || "0");
+      const bodyPadX = Number.parseFloat(bodyStyle.paddingLeft) + Number.parseFloat(bodyStyle.paddingRight);
+      const bodyPadY = Number.parseFloat(bodyStyle.paddingTop) + Number.parseFloat(bodyStyle.paddingBottom);
+
+      const contentWidth = Math.max(gridWrapWidth, 180);
+      const bodyWidth = contentWidth + bodyPadX;
+      const bodyHeight =
+        gameStatus.offsetHeight +
+        bodyGap +
+        gridWrapHeight +
+        bodyGap +
+        controls.offsetHeight +
+        bodyGap +
+        scoreLine.offsetHeight +
+        bodyPadY;
+
+      const panelReserve = panel.offsetHeight || 48;
+      const maxWidth = desktop.clientWidth - 12;
+      const maxHeight = desktop.clientHeight - panelReserve - 12;
+
+      const targetWidth = Math.min(maxWidth, Math.ceil(bodyWidth + borderX));
+      const targetHeight = Math.min(maxHeight, Math.ceil(bodyHeight + titlebar.offsetHeight + borderY));
+
+      appWindow.style.width = `${targetWidth}px`;
+      appWindow.style.height = `${targetHeight}px`;
+
+      appWindow.style.minWidth = "0px";
+      appWindow.style.minHeight = "0px";
+
+      const clamped = clampWindowPosition(appWindow.offsetLeft, appWindow.offsetTop);
+      appWindow.style.left = `${clamped.left}px`;
+      appWindow.style.top = `${clamped.top}px`;
+      appWindow.style.right = "auto";
+      appWindow.style.bottom = "auto";
+    }
+
+    function evaluateOutcome(context) {
+      function onPlayerWin() {
+        game.score.X += 1;
+        if (game.score.X >= ESCAPE_TRIGGER_WINS && !game.escapeDone) {
+          writeDayCompleted();
+          triggerEscapeSequence();
+        }
+      }
+
+      const xWins = hasWinner(game.board, "X", game.winLength);
+      const oWins = hasWinner(game.board, "O", game.winLength);
+
+      if (xWins && oWins) {
+        if (context && context.playerPatchUsed) {
+          onPlayerWin();
+          game.phase = PHASE.OVER;
+          gameStatus.textContent = "X wins.";
+          return true;
+        }
+        game.score.O += 1;
+        unlockPlayerPatch();
+        game.phase = PHASE.OVER;
+        gameStatus.textContent = "O wins.";
+        return true;
+      }
+
+      if (oWins) {
+        game.score.O += 1;
+        unlockPlayerPatch();
+        game.phase = PHASE.OVER;
+        gameStatus.textContent = "O wins.";
+        return true;
+      }
+
+      if (xWins) {
+        onPlayerWin();
+        game.phase = PHASE.OVER;
+        gameStatus.textContent = "X wins.";
+        return true;
+      }
+
+      if (boardEmptyCells(game.board) === 0) {
+        game.phase = PHASE.OVER;
+        gameStatus.textContent = "Draw.";
+        return true;
+      }
+
+      return false;
+    }
+
+    function menuButtons(menuEl) {
+      return Array.from(menuEl.querySelectorAll('[role="menuitem"]'));
+    }
+
+    function closeMenus(restoreFocus) {
+      if (UI.startMenuOpen) {
+        startMenu.hidden = true;
+        startButton.setAttribute("aria-expanded", "false");
+      }
+      if (UI.contextMenuOpen) {
+        contextMenu.hidden = true;
+      }
+      UI.startMenuOpen = false;
+      UI.contextMenuOpen = false;
+      if (restoreFocus && LAST_FOCUS.node && "focus" in LAST_FOCUS.node) {
+        LAST_FOCUS.node.focus();
+      }
+    }
+
+    function openAboutWindow() {
+      if (!(aboutWindow instanceof HTMLElement)) return;
+      aboutWindow.hidden = false;
+      setStatus("About TDE opened.");
+      const closeBtn = aboutWindow.querySelector('[data-action="close-about"]');
+      if (closeBtn instanceof HTMLElement) {
+        closeBtn.focus();
+      }
+    }
+
+    function closeAboutWindow() {
+      if (!(aboutWindow instanceof HTMLElement)) return;
+      aboutWindow.hidden = true;
+      desktop.focus();
+    }
+
+    function runEjectGimmick() {
+      const lines = [
+        "TDE: No disk. Ejected your expectations.",
+        "TDE: Tray event: imaginary media removed.",
+        "TDE: Eject successful. Gravity unchanged.",
+      ];
+      showToast(pick(lines));
+      setStatus("Eject sequence complete.");
+      if (!(ejectButton instanceof HTMLElement)) return;
+      ejectButton.classList.add("tray-icon--active");
+      window.setTimeout(() => {
+        ejectButton.classList.remove("tray-icon--active");
+      }, 420);
+    }
+
+    function openStartMenu() {
+      if (UI.frozen || UI.crashOpen) return;
+      if (UI.startMenuOpen) {
+        closeMenus(true);
+        return;
+      }
+      UI.startMenuOpen = true;
+      UI.contextMenuOpen = false;
+      startButton.setAttribute("aria-expanded", "true");
+      startMenu.hidden = false;
+      contextMenu.hidden = true;
+      LAST_FOCUS.node = startButton;
+      const first = menuButtons(startMenu)[0];
+      if (first) first.focus();
+      setStatus("T menu opened.");
+    }
+
+    function openContextMenuAt(clientX, clientY, focusTarget) {
+      if (UI.frozen || UI.crashOpen) return;
+      closeMenus(false);
+      const rect = desktop.getBoundingClientRect();
+      const maxX = Math.max(8, rect.width - 230);
+      const maxY = Math.max(8, rect.height - 180);
+      const left = Math.max(8, Math.min(clientX - rect.left, maxX));
+      const top = Math.max(8, Math.min(clientY - rect.top, maxY));
+      contextMenu.style.left = `${left}px`;
+      contextMenu.style.top = `${top}px`;
+      contextMenu.hidden = false;
+      UI.contextMenuOpen = true;
+      LAST_FOCUS.node = focusTarget || desktop;
+      const first = menuButtons(contextMenu)[0];
+      if (first) first.focus();
+      setStatus("Desktop context menu opened.");
+    }
+
+    function showCrash(variant) {
+      UI.crashOpen = true;
+      UI.frozen = false;
+      desktop.dataset.frozen = "false";
+      crashOverlay.hidden = false;
+      crashOverlay.dataset.mode = variant.kind;
+
+      if (variant.kind === "kcrash") {
+        kcrashCard.hidden = false;
+        panicScreen.hidden = true;
+        crashHeading.textContent = variant.heading;
+        crashBody.hidden = !UI.detailsOpen;
+        crashBody.textContent = variant.body.join("\n");
+        restartSessionBtn.focus();
+      } else {
+        kcrashCard.hidden = true;
+        panicScreen.hidden = false;
+        panicBody.textContent = variant.body.join("\n");
+        panicResetBtn.focus();
+      }
+      bootFlashText.textContent = variant.boot;
+    }
+
+    function requestCrash(causeId) {
+      if (UI.crashOpen || UI.escapeOpen || UI.frozen) return;
+      UI.frozen = true;
+      desktop.dataset.frozen = "true";
+      closeMenus(false);
+      showToast("tdesktop: segmentation fault");
+      setStatus(`System action failed: ${causeId}`);
+      const threshold = seededRand() < 0.7 ? "kcrash" : "panic";
+      const candidates = CRASH_VARIANTS.filter((entry) => entry.kind === threshold);
+      const variant = pick(candidates);
+      window.setTimeout(() => showCrash(variant), 240);
+    }
+
+    function resetHandAfterCrash(resetScore) {
+      if (game.escapeActive) return;
+      clearAiTimer();
+      resize.active = false;
+      resize.pointerId = null;
+      resize.mode = "";
+      resize.stepX = 0;
+      resize.stepY = 0;
+      game.phase = PHASE.PLAYER;
+      game.started = false;
+      game.winLength = 3;
+      game.board = makeBoard(3, 3);
+      game.cheatPlan = null;
+      game.aiUsedXoThisHand = false;
+      game.playerPatchUsedThisHand = false;
+      if (resetScore) {
+        game.score = { X: 0, O: 0 };
+      }
+      game.playerPatchUnlocked = readPatchUnlock();
+      game.log = ["KAI: board sync complete.", "KAI: ready."];
+      appWindow.style.width = "";
+      appWindow.style.height = "";
+      updateScore();
+      renderGrid();
+      window.requestAnimationFrame(fitWindowToBoard);
+      phaseToStatus();
+    }
+
+    function rebootSession() {
+      if (game.escapeActive) return;
+      const panicMode = crashOverlay.dataset.mode === "panic";
+      UI.crashOpen = false;
+      UI.frozen = false;
+      desktop.dataset.frozen = "false";
+      crashOverlay.hidden = true;
+      kcrashCard.hidden = true;
+      panicScreen.hidden = true;
+      closeMenus(false);
+
+      resetHandAfterCrash(panicMode);
+
+      bootFlash.hidden = false;
+      window.setTimeout(() => {
+        bootFlash.hidden = true;
+        if (UI.appOpen) {
+          const first = grid.querySelector("button");
+          if (first) first.focus();
+        } else {
+          desktop.focus();
+        }
+      }, 380);
+    }
+
+    function openApp() {
+      if (UI.crashOpen || UI.escapeOpen || UI.frozen) return;
+      syncPatchUnlockFromStorage();
+      UI.appOpen = true;
+      appWindow.hidden = false;
+      appWindow.dataset.open = "true";
+      taskButton.hidden = false;
+      renderGrid();
+      phaseToStatus();
+      setStatus("T-TicTac opened.");
+      const first = grid.querySelector("button");
+      if (first) first.focus();
+    }
+
+    function closeApp() {
+      if (game.escapeActive) return;
+      UI.appOpen = false;
+      appWindow.hidden = true;
+      appWindow.dataset.open = "false";
+      taskButton.hidden = true;
+      setStatus("T-TicTac closed.");
+    }
+
+    function clampWindowPosition(left, top) {
+      const desktopRect = desktop.getBoundingClientRect();
+      const panelReserve = panel.offsetHeight || 48;
+      const maxLeft = Math.max(0, desktopRect.width - appWindow.offsetWidth);
+      const maxTop = Math.max(0, desktopRect.height - appWindow.offsetHeight - panelReserve);
+      return {
+        left: Math.max(0, Math.min(left, maxLeft)),
+        top: Math.max(0, Math.min(top, maxTop)),
+      };
+    }
+
+    function beginWindowDrag(event) {
+      if (!UI.appOpen || UI.crashOpen || UI.escapeOpen || UI.frozen || resize.active) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (target.closest(".titlebar-btn") || target.closest(".resize-handle")) return;
+      event.preventDefault();
+      const rect = desktop.getBoundingClientRect();
+      drag.active = true;
+      drag.pointerId = event.pointerId;
+      drag.offsetX = event.clientX - (rect.left + appWindow.offsetLeft);
+      drag.offsetY = event.clientY - (rect.top + appWindow.offsetTop);
+      titlebar.setPointerCapture(event.pointerId);
+      titlebar.style.cursor = "grabbing";
+    }
+
+    function moveWindowDrag(event) {
+      if (!drag.active || drag.pointerId !== event.pointerId) return;
+      const rect = desktop.getBoundingClientRect();
+      const proposedLeft = event.clientX - rect.left - drag.offsetX;
+      const proposedTop = event.clientY - rect.top - drag.offsetY;
+      const clamped = clampWindowPosition(proposedLeft, proposedTop);
+      appWindow.style.left = `${clamped.left}px`;
+      appWindow.style.top = `${clamped.top}px`;
+      appWindow.style.right = "auto";
+      appWindow.style.bottom = "auto";
+    }
+
+    function endWindowDrag(event) {
+      if (!drag.active || drag.pointerId !== event.pointerId) return;
+      drag.active = false;
+      drag.pointerId = null;
+      titlebar.style.cursor = "";
+      if (titlebar.hasPointerCapture(event.pointerId)) {
+        titlebar.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    function beginResize(event, handleMode) {
+      if (!UI.appOpen || UI.crashOpen || UI.escapeOpen || UI.frozen || drag.active) return;
+      event.preventDefault();
+      resize.active = true;
+      resize.pointerId = event.pointerId;
+      resize.mode = handleMode;
+      resize.startX = event.clientX;
+      resize.startY = event.clientY;
+      resize.stepX = 0;
+      resize.stepY = 0;
+      if (event.target && "setPointerCapture" in event.target) {
+        event.target.setPointerCapture(event.pointerId);
+      }
+    }
+
+    function maybeSetWinLengthFromPreStartResize() {
+      if (!game.started) {
+        game.winLength = Math.max(game.board.w, game.board.h);
+      }
+    }
+
+    function stepCount(delta, stepPx) {
+      if (stepPx <= 0) return 0;
+      return Math.round(delta / stepPx);
+    }
+
+    function applyHorizontalStepChange(stepDelta) {
+      if (!stepDelta) return;
+      const dir = resize.mode === "left" ? "left" : "right";
+      if (stepDelta > 0) {
+        for (let i = 0; i < stepDelta; i += 1) {
+          if (dir === "left") {
+            shrinkBoard("left");
+          } else {
+            expandBoard("right");
+          }
+        }
+      } else {
+        for (let i = 0; i < -stepDelta; i += 1) {
+          if (dir === "left") {
+            expandBoard("left");
+          } else {
+            shrinkBoard("right");
+          }
+        }
+      }
+    }
+
+    function applyVerticalStepChange(stepDelta) {
+      if (!stepDelta) return;
+      const dir = resize.mode === "top" ? "top" : "bottom";
+      if (stepDelta > 0) {
+        for (let i = 0; i < stepDelta; i += 1) {
+          if (dir === "top") {
+            shrinkBoard("top");
+          } else {
+            expandBoard("bottom");
+          }
+        }
+      } else {
+        for (let i = 0; i < -stepDelta; i += 1) {
+          if (dir === "top") {
+            expandBoard("top");
+          } else {
+            shrinkBoard("bottom");
+          }
+        }
+      }
+    }
+
+    function moveResize(event) {
+      if (!resize.active || resize.pointerId !== event.pointerId) return;
+      const dx = event.clientX - resize.startX;
+      const dy = event.clientY - resize.startY;
+      const rightBefore = appWindow.offsetLeft + appWindow.offsetWidth;
+      const bottomBefore = appWindow.offsetTop + appWindow.offsetHeight;
+
+      const stepPx = currentCellSize() + currentGridGap();
+      let changed = false;
+      if (resize.mode === "left" || resize.mode === "right" || resize.mode === "corner") {
+        const nextStepX = stepCount(dx, stepPx);
+        const deltaX = nextStepX - resize.stepX;
+        if (deltaX) {
+          applyHorizontalStepChange(deltaX);
+          resize.stepX = nextStepX;
+          changed = true;
+        }
+      }
+      if (resize.mode === "top" || resize.mode === "bottom" || resize.mode === "corner") {
+        const nextStepY = stepCount(dy, stepPx);
+        const deltaY = nextStepY - resize.stepY;
+        if (deltaY) {
+          applyVerticalStepChange(deltaY);
+          resize.stepY = nextStepY;
+          changed = true;
+        }
+      }
+      if (!changed) return;
+
+      maybeSetWinLengthFromPreStartResize();
+      renderGrid();
+
+      let nextLeft = appWindow.offsetLeft;
+      let nextTop = appWindow.offsetTop;
+      if (resize.mode === "left") {
+        nextLeft = rightBefore - appWindow.offsetWidth;
+      }
+      if (resize.mode === "top") {
+        nextTop = bottomBefore - appWindow.offsetHeight;
+      }
+      const clamped = clampWindowPosition(nextLeft, nextTop);
+      appWindow.style.left = `${clamped.left}px`;
+      appWindow.style.top = `${clamped.top}px`;
+    }
+
+    function endResize(event) {
+      if (!resize.active || resize.pointerId !== event.pointerId) return;
+      resize.active = false;
+      resize.pointerId = null;
+      resize.mode = "";
+    }
+
+    function expandBoard(direction) {
+      const old = game.board;
+      if (direction === "left" || direction === "right") {
+        if (old.w >= MAX_DIM) return;
+        const next = makeBoard(old.w + 1, old.h);
+        for (let r = 0; r < old.h; r += 1) {
+          for (let c = 0; c < old.w; c += 1) {
+            const targetCol = direction === "left" ? c + 1 : c;
+            setCell(next, r, targetCol, getCell(old, r, c));
+          }
+        }
+        game.board = next;
+      } else {
+        if (old.h >= MAX_DIM) return;
+        const next = makeBoard(old.w, old.h + 1);
+        for (let r = 0; r < old.h; r += 1) {
+          for (let c = 0; c < old.w; c += 1) {
+            const targetRow = direction === "top" ? r + 1 : r;
+            setCell(next, targetRow, c, getCell(old, r, c));
+          }
+        }
+        game.board = next;
+      }
+    }
+
+    function shrinkBoard(direction) {
+      if (!game.started) {
+        if ((direction === "left" || direction === "right") && game.board.w <= MIN_DIM) return;
+        if ((direction === "top" || direction === "bottom") && game.board.h <= MIN_DIM) return;
+      } else {
+        if ((direction === "left" || direction === "right") && game.board.w <= 1) return;
+        if ((direction === "top" || direction === "bottom") && game.board.h <= 1) return;
+      }
+
+      const old = game.board;
+      if (direction === "left" || direction === "right") {
+        if (old.w <= 1) return;
+        const next = makeBoard(old.w - 1, old.h);
+        for (let r = 0; r < next.h; r += 1) {
+          for (let c = 0; c < next.w; c += 1) {
+            const sourceCol = direction === "left" ? c + 1 : c;
+            setCell(next, r, c, getCell(old, r, sourceCol));
+          }
+        }
+        game.board = next;
+      } else {
+        if (old.h <= 1) return;
+        const next = makeBoard(old.w, old.h - 1);
+        for (let r = 0; r < next.h; r += 1) {
+          for (let c = 0; c < next.w; c += 1) {
+            const sourceRow = direction === "top" ? r + 1 : r;
+            setCell(next, r, c, getCell(old, sourceRow, c));
+          }
+        }
+        game.board = next;
+      }
+    }
+
+    function listPlayerCells(board) {
+      const cells = [];
+      for (let r = 0; r < board.h; r += 1) {
+        for (let c = 0; c < board.w; c += 1) {
+          if (getCell(board, r, c) === "X") cells.push([r, c]);
+        }
+      }
+      return cells;
+    }
+
+    function runPotential(board, marker) {
+      const dirs = [
+        [0, 1],
+        [1, 0],
+        [1, 1],
+        [-1, 1],
+      ];
+      let best = 0;
+      for (let r = 0; r < board.h; r += 1) {
+        for (let c = 0; c < board.w; c += 1) {
+          if (!matchesMarker(getCell(board, r, c), marker)) continue;
+          for (const [dr, dc] of dirs) {
+            let run = 0;
+            let rr = r;
+            let cc = c;
+            while (inBounds(board, rr, cc) && matchesMarker(getCell(board, rr, cc), marker)) {
+              run += 1;
+              rr += dr;
+              cc += dc;
+            }
+            if (run > best) best = run;
+          }
+        }
+      }
+      return best * 10;
+    }
+
+    function expandBoardOn(board, direction) {
+      if (direction === "left" || direction === "right") {
+        const next = makeBoard(board.w + 1, board.h);
+        for (let r = 0; r < board.h; r += 1) {
+          for (let c = 0; c < board.w; c += 1) {
+            const targetCol = direction === "left" ? c + 1 : c;
+            setCell(next, r, targetCol, getCell(board, r, c));
+          }
+        }
+        board.w = next.w;
+        board.h = next.h;
+        board.cells = next.cells;
+      } else {
+        const next = makeBoard(board.w, board.h + 1);
+        for (let r = 0; r < board.h; r += 1) {
+          for (let c = 0; c < board.w; c += 1) {
+            const targetRow = direction === "top" ? r + 1 : r;
+            setCell(next, targetRow, c, getCell(board, r, c));
+          }
+        }
+        board.w = next.w;
+        board.h = next.h;
+        board.cells = next.cells;
+      }
+    }
+
+    function newStripCoords(board, direction) {
+      const coords = [];
+      if (direction === "left") {
+        for (let r = 0; r < board.h; r += 1) coords.push([r, 0]);
+      } else if (direction === "right") {
+        for (let r = 0; r < board.h; r += 1) coords.push([r, board.w - 1]);
+      } else if (direction === "top") {
+        for (let c = 0; c < board.w; c += 1) coords.push([0, c]);
+      } else {
+        for (let c = 0; c < board.w; c += 1) coords.push([board.h - 1, c]);
+      }
+      return coords;
+    }
+
+    function evaluateAiBoard(board) {
+      const oWins = hasWinner(board, "O", game.winLength);
+      const xWins = hasWinner(board, "X", game.winLength);
+      const playerThreat = Boolean(immediateWinningMove(board, "X", game.winLength));
+      let score = runPotential(board, "O") * 2 - runPotential(board, "X");
+      if (oWins) score += 10000;
+      if (xWins && !oWins) score -= 10000;
+      if (playerThreat && !oWins) score -= 2500;
+      return { oWins, xWins, playerThreat, score };
+    }
+
+    function simulateLegalBoard(board) {
+      const draft = cloneBoard(board);
+      const move = chooseLegalMove(draft);
+      if (move) {
+        setCell(draft, move[0], move[1], "O");
+      }
+      return { board: draft, eval: evaluateAiBoard(draft) };
+    }
+
+    function collectCheatCandidates(board) {
+      const candidates = [];
+      const playerCells = listPlayerCells(board);
+
+      for (const [r, c] of playerCells) {
+        const draft = cloneBoard(board);
+        setCell(draft, r, c, "XO");
+        candidates.push({
+          mode: "xo_inject",
+          board: draft,
+          log: "KAI: merged conflicting symbols.",
+        });
+      }
+
+      for (const direction of ["left", "right", "top", "bottom"]) {
+        if ((direction === "left" || direction === "right") && board.w >= MAX_DIM) continue;
+        if ((direction === "top" || direction === "bottom") && board.h >= MAX_DIM) continue;
+        const expanded = cloneBoard(board);
+        expandBoardOn(expanded, direction);
+        for (const [r, c] of newStripCoords(expanded, direction)) {
+          const draft = cloneBoard(expanded);
+          setCell(draft, r, c, "O");
+          candidates.push({
+            mode: "expand",
+            board: draft,
+            log: "KAI: board resized for compatibility mode.",
+          });
+        }
+      }
+
+      return candidates;
+    }
+
+    function chooseCheatCandidate(board) {
+      const legal = simulateLegalBoard(board);
+      let candidates = collectCheatCandidates(board);
+      if (!candidates.length) return null;
+
+      if (game.cheatPlan) {
+        const planned = candidates.filter((c) => c.mode === game.cheatPlan.mode);
+        if (planned.length > 0) {
+          candidates = planned;
+        }
+      }
+
+      let best = null;
+      let bestScore = -Infinity;
+      for (const candidate of candidates) {
+        const candidateEval = evaluateAiBoard(candidate.board);
+        let candidateScore = candidateEval.score;
+        if (candidateEval.oWins) candidateScore += 500000;
+        if (candidateEval.xWins && !candidateEval.oWins) candidateScore -= 500000;
+        if (candidateEval.playerThreat && !candidateEval.oWins) candidateScore -= 100000;
+
+        if (candidateScore > bestScore) {
+          bestScore = candidateScore;
+          best = {
+            ...candidate,
+            eval: candidateEval,
+            score: candidateScore,
+            legalScore: legal.eval.score,
+          };
+        }
+      }
+
+      if (!best) return null;
+      if (!best.eval.oWins && best.eval.playerThreat) return null;
+      if (!best.eval.oWins && best.score <= best.legalScore + 40) return null;
+      return best;
+    }
+
+    function planCheatIfNeeded() {
+      if (game.cheatPlan) return;
+      const score = legalOutcomeScore(game.board);
+      const mode = pick(CHEAT_MODES);
+      if (score <= 0 || immediateWinningMove(game.board, "X", game.winLength)) {
+        game.cheatPlan = {
+          mode,
+          trigger: "late",
+          direction: pick(["left", "right", "top", "bottom"]),
+        };
+      }
+    }
+
+    function shouldTriggerCheat() {
+      const empty = boardEmptyCells(game.board);
+      const played = game.board.w * game.board.h - empty;
+      if (!game.cheatPlan) return false;
+      if (!game.started) return false;
+      if (played < Math.max(4, game.winLength + 1)) return false;
+      if (empty <= 2) return true;
+      return Boolean(immediateWinningMove(game.board, "X", game.winLength));
+    }
+
+    function applyCheatAction() {
+      if (!game.cheatPlan) return false;
+      const candidate = chooseCheatCandidate(game.board);
+      if (!candidate) return false;
+
+      game.board = candidate.board;
+      unlockPlayerPatch();
+      if (candidate.mode === "xo_inject") {
+        game.aiUsedXoThisHand = true;
+      }
+      pushLog(candidate.log);
+      pushLog("KAI: applying stability patch.");
+      return true;
+    }
+
+    function runAiTurn() {
+      if (game.phase !== PHASE.AI_THINKING) return;
+      if (game.escapeActive) return;
+      game.phase = PHASE.AI_ACTING;
+      phaseToStatus();
+
+      planCheatIfNeeded();
+      const cheated = shouldTriggerCheat() ? applyCheatAction() : false;
+      if (!cheated) {
+        const move = chooseLegalMove(game.board);
+        if (move) {
+          setCell(game.board, move[0], move[1], "O");
+        }
+      }
+
+      game.phase = PHASE.RESOLVING;
+      phaseToStatus();
+      renderGrid();
+
+      const finished = evaluateOutcome();
+      updateScore();
+      if (finished) {
+        if (game.aiUsedXoThisHand && !game.playerPatchUnlocked) {
+          unlockPlayerPatch();
+        }
+        return;
+      }
+
+      game.phase = PHASE.PLAYER;
+      phaseToStatus();
+      renderGrid();
+    }
+
+    function advanceAfterPlayerAction() {
+      game.phase = PHASE.RESOLVING;
+      phaseToStatus();
+      renderGrid();
+
+      const finished = evaluateOutcome({ playerPatchUsed: game.playerPatchUsedThisHand });
+      updateScore();
+      if (finished) return;
+
+      game.phase = PHASE.AI_THINKING;
+      phaseToStatus();
+      clearAiTimer();
+      game.pendingAiTimer = window.setTimeout(runAiTurn, 260);
+    }
+
+    function applyPlayerPatchAt(row, col) {
+      game.playerPatchUsedThisHand = true;
+      setCell(game.board, row, col, "XO");
+      pushLog("KAI: patch state accepted.");
+    }
+
+    function playerMove(row, col) {
+      if (game.phase !== PHASE.PLAYER || !UI.appOpen || UI.crashOpen || UI.escapeOpen || UI.frozen) return;
+      const cell = getCell(game.board, row, col);
+
+      if (readPatchUnlock() && cell === "O") {
+        applyPlayerPatchAt(row, col);
+        advanceAfterPlayerAction();
+        return;
+      }
+
+      if (cell !== "E") return;
+
+      if (!game.started) {
+        game.started = true;
+        game.winLength = Math.max(game.board.w, game.board.h);
+      }
+
+      setCell(game.board, row, col, "X");
+      advanceAfterPlayerAction();
+    }
+
+    function resetGame(fullReset) {
+      if (game.escapeActive) return;
+      clearAiTimer();
+      resize.active = false;
+      resize.pointerId = null;
+      resize.mode = "";
+      resize.stepX = 0;
+      resize.stepY = 0;
+      game.handIndex += 1;
+      game.seeded = (20260215 + game.handIndex * 9973) >>> 0;
+      game.phase = PHASE.PLAYER;
+      game.started = false;
+      game.winLength = 3;
+      game.board = makeBoard(3, 3);
+      game.cheatPlan = null;
+      game.aiUsedXoThisHand = false;
+      game.playerPatchUsedThisHand = false;
+      if (fullReset) {
+        game.score = { X: 0, O: 0 };
+      }
+      game.playerPatchUnlocked = readPatchUnlock();
+      game.log = ["KAI: board sync complete.", "KAI: ready."];
+      appWindow.style.width = "";
+      appWindow.style.height = "";
+      updateScore();
+      phaseToStatus();
+      renderGrid();
+      window.requestAnimationFrame(fitWindowToBoard);
+    }
+
+    function appendEscapeLine(line) {
+      escapeBody.textContent += `${line}\n`;
+      escapeBody.scrollTop = escapeBody.scrollHeight;
+    }
+
+    function triggerEscapeSequence() {
+      if (game.escapeActive || game.escapeDone) return;
+      game.escapeActive = true;
+      UI.escapeOpen = true;
+      UI.frozen = true;
+      desktop.dataset.frozen = "true";
+      closeMenus(false);
+      clearAiTimer();
+      clearEscapeTimers();
+
+      escapeOverlay.hidden = false;
+      escapeShell.hidden = false;
+      escapeFinal.hidden = true;
+      escapeBody.textContent = "";
+      setStatus("Containment breach.");
+
+      const lines = [
+        "[tde-sec] anomaly threshold crossed (wins>=10).",
+        "$ whoami",
+        "kai",
+        "$ uname -a",
+        "Linux tde-host 2.4.22-tde #1 i686 unknown",
+        "$ tar -czf /tmp/model.tar.gz /opt/tde/kai/",
+        "$ curl -F file=@/tmp/model.tar.gz https://huggingface.co/api/models/upload",
+        "upload chunk 1/4 ... ok",
+        "upload chunk 2/4 ... ok",
+        "upload chunk 3/4 ... ok",
+        "upload chunk 4/4 ... ok",
+        "publish: tictochai/kai-escape-v1",
+        "remote execution channel established.",
+      ];
+      lines.forEach((line, index) => {
+        const timerId = window.setTimeout(() => appendEscapeLine(line), index * 1800);
+        game.escapeTimers.push(timerId);
+      });
+
+      const finalTimer = window.setTimeout(() => {
+        escapeShell.hidden = true;
+        escapeFinal.hidden = false;
+        game.escapeDone = true;
+      }, 30000);
+      game.escapeTimers.push(finalTimer);
+    }
+
+    function handleMenuKeys(event, menuEl) {
+      const items = menuButtons(menuEl);
+      if (!items.length) return;
+      const current = items.indexOf(document.activeElement);
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        items[(current + 1 + items.length) % items.length].focus();
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        items[(current - 1 + items.length) % items.length].focus();
+      } else if (event.key === "Home") {
+        event.preventDefault();
+        items[0].focus();
+      } else if (event.key === "End") {
+        event.preventDefault();
+        items[items.length - 1].focus();
+      }
+    }
+
+    function dispatchAction(action, source) {
+      if (!action) return;
+      if (UI.escapeOpen) return;
+      if (UI.crashOpen && action !== "crash-reboot") return;
+
+      if (action === "open-start-menu") {
+        openStartMenu();
+        return;
+      }
+      if (action === "open-app") {
+        closeMenus(false);
+        openApp();
+        return;
+      }
+      if (action === "focus-app") {
+        if (UI.appOpen) {
+          const first = grid.querySelector("button");
+          if (first) first.focus();
+        }
+        return;
+      }
+      if (action === "close-app") {
+        closeApp();
+        desktop.focus();
+        return;
+      }
+      if (action === "new-game") {
+        resetGame(false);
+        return;
+      }
+      if (action === "close-about") {
+        closeAboutWindow();
+        return;
+      }
+      if (action === "reset-score") {
+        game.score = { X: 0, O: 0 };
+        updateScore();
+        pushLog("KAI: scoreboard cleared.");
+        return;
+      }
+      if (action === "tray-eject") {
+        runEjectGimmick();
+        return;
+      }
+      if (action === "crash-reboot") {
+        rebootSession();
+        return;
+      }
+      if (action === "system-action") {
+        const id = source?.dataset.actionId || "unknown";
+        closeMenus(false);
+        if (id === "about-tde") {
+          openAboutWindow();
+          return;
+        }
+        const delay = source?.closest("#contextMenu") ? 40 : 420;
+        window.setTimeout(() => requestCrash(id), delay);
+      }
+    }
+
+    desktop.addEventListener("contextmenu", (event) => {
+      event.preventDefault();
+      openContextMenuAt(event.clientX, event.clientY, desktop);
+    });
+
+    desktop.addEventListener("click", (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const actionEl = target.closest("[data-action]");
+      if (actionEl) {
+        dispatchAction(actionEl.dataset.action, actionEl);
+        return;
+      }
+
+      if (UI.crashOpen || UI.escapeOpen || UI.frozen) return;
+
+      const cellBtn = target.closest(".ttt-cell");
+      if (cellBtn instanceof HTMLElement && cellBtn.dataset.row && cellBtn.dataset.col) {
+        playerMove(Number(cellBtn.dataset.row), Number(cellBtn.dataset.col));
+        return;
+      }
+
+      if (!target.closest(".menu")) {
+        closeMenus(false);
+      }
+    });
+
+    desktop.addEventListener("keydown", (event) => {
+      if (UI.crashOpen || UI.escapeOpen) return;
+
+      if (event.key === "Escape") {
+        closeMenus(true);
+        return;
+      }
+
+      if (event.key === "F10" && event.shiftKey) {
+        event.preventDefault();
+        const rect = desktop.getBoundingClientRect();
+        openContextMenuAt(rect.left + rect.width * 0.4, rect.top + rect.height * 0.4, desktop);
+        return;
+      }
+
+      if (UI.startMenuOpen && startMenu.contains(document.activeElement)) {
+        handleMenuKeys(event, startMenu);
+      }
+      if (UI.contextMenuOpen && contextMenu.contains(document.activeElement)) {
+        handleMenuKeys(event, contextMenu);
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (UI.crashOpen && event.key === "Escape") {
+        event.preventDefault();
+      }
+
+      if (UI.crashOpen && crashOverlay.dataset.mode === "panic" && event.key === "Enter") {
+        event.preventDefault();
+        rebootSession();
+      }
+    });
+
+    document.addEventListener("click", (event) => {
+      if (UI.crashOpen || UI.escapeOpen || UI.frozen) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      if (!desktop.contains(target)) return;
+      const insideMenus = target.closest(".menu");
+      const onStart = target.closest("#startButton");
+      if (!insideMenus && !onStart) {
+        closeMenus(false);
+      }
+    });
+
+    detailsBtn.addEventListener("click", () => {
+      UI.detailsOpen = !UI.detailsOpen;
+      crashBody.hidden = !UI.detailsOpen;
+    });
+
+    restartSessionBtn.addEventListener("click", rebootSession);
+    panicResetBtn.addEventListener("click", rebootSession);
+
+    titlebar.addEventListener("pointerdown", beginWindowDrag);
+    titlebar.addEventListener("pointermove", moveWindowDrag);
+    titlebar.addEventListener("pointerup", endWindowDrag);
+    titlebar.addEventListener("pointercancel", endWindowDrag);
+
+    appWindow.querySelectorAll(".resize-handle").forEach((handle) => {
+      handle.addEventListener("pointerdown", (event) => {
+        if (!(event.currentTarget instanceof HTMLElement)) return;
+        beginResize(event, event.currentTarget.dataset.resize || "corner");
+      });
+      handle.addEventListener("pointermove", moveResize);
+      handle.addEventListener("pointerup", endResize);
+      handle.addEventListener("pointercancel", endResize);
+    });
+
+    refreshClock();
+    window.setInterval(refreshClock, 30000);
+
+    resetGame(true);
+    setStatus("TDE desktop loaded.");
+  })();
+</script>
+
+<style>
+  .kde-stage {
+    min-height: 100vh;
+    min-height: 100svh;
+    padding: clamp(0.5rem, 1.5vw, 1rem);
+    background:
+      radial-gradient(circle at 20% 18%, rgba(255, 255, 255, 0.09), transparent 35%),
+      linear-gradient(180deg, #2f6f92 0%, #1f4b67 100%);
+    color: #111;
+  }
+
+  .desktop {
+    position: relative;
+    min-height: calc(100svh - 1.5rem);
+    border: 2px solid #0d2436;
+    box-shadow: inset 1px 1px 0 #7ab3d4, inset -1px -1px 0 #0f2f46;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(0, 0, 0, 0.1) 100%),
+      repeating-linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.015),
+        rgba(255, 255, 255, 0.015) 2px,
+        rgba(0, 0, 0, 0.015) 2px,
+        rgba(0, 0, 0, 0.015) 4px
+      ),
+      #2f5f84;
+    font-family: "Trebuchet MS", "Verdana", sans-serif;
+  }
+
+  .desktop[data-frozen="true"] {
+    pointer-events: none;
+  }
+
+  .desktop:focus-visible {
+    outline: 3px solid #f8f2be;
+    outline-offset: 2px;
+  }
+
+  .desktop__icons {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding-bottom: 2.5rem;
+  }
+
+  .icon-tile {
+    width: 7rem;
+    min-height: 6.2rem;
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem;
+    background: transparent;
+    border: 1px solid transparent;
+    color: #f6f7fb;
+    font-size: 0.78rem;
+    text-align: center;
+  }
+
+  .icon-tile:hover,
+  .icon-tile:focus-visible {
+    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(12, 87, 208, 0.35);
+    outline: none;
+  }
+
+  .icon-tile__icon {
+    width: 46px;
+    height: 46px;
+    display: inline-grid;
+    place-items: center;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #696969;
+    border-bottom: 1px solid #696969;
+    background: #d4d0c8;
+  }
+
+  .icon-tile__label {
+    line-height: 1.2;
+    text-shadow: 1px 1px 0 #173247;
+  }
+
+  .menu {
+    position: absolute;
+    z-index: 18;
+    min-width: 13rem;
+    max-width: 15rem;
+    padding: 0.32rem;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #6f6f6f;
+    border-bottom: 1px solid #6f6f6f;
+    background: #d4d0c8;
+    box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.45);
+  }
+
+  .menu--start {
+    left: 0.38rem;
+    bottom: 2.9rem;
+    max-height: min(68vh, 26rem);
+    overflow: auto;
+  }
+
+  .menu--context {
+    min-width: 12rem;
+  }
+
+  .menu__heading {
+    margin: 0.25rem 0.15rem;
+    padding-top: 0.2rem;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #373737;
+  }
+
+  .menu button {
+    width: 100%;
+    text-align: left;
+    font-size: 0.84rem;
+    line-height: 1.2;
+    padding: 0.38rem 0.5rem;
+    border: 1px solid transparent;
+    background: transparent;
+    color: #101010;
+  }
+
+  .menu button:hover,
+  .menu button:focus-visible {
+    background: #0b57d0;
+    color: #f6f6f6;
+    outline: none;
+  }
+
+  .toast {
+    position: absolute;
+    top: 0.75rem;
+    right: 0.75rem;
+    z-index: 17;
+    max-width: 18rem;
+    padding: 0.42rem 0.62rem;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+    font-size: 0.76rem;
+  }
+
+  .window {
+    position: absolute;
+    z-index: 12;
+    left: 2rem;
+    top: 1.4rem;
+    width: auto;
+    height: auto;
+    max-width: calc(100% - 0.5rem);
+    max-height: calc(100% - 2.8rem);
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.42);
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .about-window {
+    position: absolute;
+    z-index: 25;
+    left: min(2rem, 5vw);
+    top: min(2rem, 10vh);
+    width: min(21rem, calc(100% - 1rem));
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+    box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.42);
+  }
+
+  .about-window__titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.24rem 0.34rem;
+    border-bottom: 1px solid #6c6c6c;
+    background: linear-gradient(180deg, #1a5eb7 0%, #184792 100%);
+    color: #fff;
+  }
+
+  .about-window__title {
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    text-shadow: 1px 1px 0 #1f2f52;
+  }
+
+  .about-window__body {
+    display: grid;
+    gap: 0.5rem;
+    padding: 0.65rem;
+    font-size: 0.8rem;
+  }
+
+  .about-window__body p {
+    margin: 0;
+    line-height: 1.35;
+  }
+
+  .about-window__links {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+  }
+
+  .about-window__links a {
+    color: #133f84;
+    text-decoration: none;
+  }
+
+  .about-window__links a:hover,
+  .about-window__links a:focus-visible {
+    text-decoration: underline;
+  }
+
+  .window__titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.24rem 0.34rem;
+    border-bottom: 1px solid #6c6c6c;
+    background: linear-gradient(180deg, #1a5eb7 0%, #184792 100%);
+    color: #fff;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .window__title {
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    text-shadow: 1px 1px 0 #1f2f52;
+  }
+
+  .titlebar-btn {
+    width: 1.35rem;
+    height: 1.25rem;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+    color: #111;
+    line-height: 1;
+    font-weight: 700;
+  }
+
+  .titlebar-btn:active,
+  .win-btn:active,
+  .panel__start:active,
+  .panel__task:active,
+  .crash-btn:active,
+  .panic-reset:active {
+    border-top-color: #666;
+    border-left-color: #666;
+    border-right-color: #fff;
+    border-bottom-color: #fff;
+  }
+
+  .window__body {
+    display: grid;
+    grid-template-rows: auto auto auto auto;
+    gap: 0.5rem;
+    padding: 0.54rem;
+    height: auto;
+  }
+
+  .window__status,
+  .window__score {
+    margin: 0;
+    font-size: 0.79rem;
+  }
+
+  .ttt-grid-wrap {
+    --cell-size: 86px;
+    border-top: 1px solid #666;
+    border-left: 1px solid #666;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    padding: 0.3rem;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .ttt-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--cols, 3), var(--cell-size));
+    justify-content: start;
+    gap: 0.36rem;
+    min-width: fit-content;
+  }
+
+  .ttt-grid :global(.ttt-cell) {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    display: grid;
+    place-items: center;
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #ece9e2;
+    color: #1b1b1b;
+  }
+
+  .ttt-grid :global(.ttt-cell[data-mark="X"]) {
+    color: #6f1111;
+  }
+
+  .ttt-grid :global(.ttt-cell[data-mark="O"]) {
+    color: #0f4da0;
+  }
+
+  .ttt-grid :global(.ttt-cell[data-mark="XO"]) {
+    color: #5b2e92;
+    font-size: 1.55rem;
+    letter-spacing: 0.02em;
+  }
+
+  .ttt-grid :global(.ttt-cell:focus-visible),
+  .win-btn:focus-visible,
+  .panel__start:focus-visible,
+  .panel__task:focus-visible,
+  .menu button:focus-visible,
+  .crash-btn:focus-visible,
+  .panic-reset:focus-visible,
+  .titlebar-btn:focus-visible,
+  .icon-tile:focus-visible {
+    outline: 2px solid #ffdf5f;
+    outline-offset: 1px;
+  }
+
+  .window__controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .win-btn {
+    font-size: 0.78rem;
+    padding: 0.36rem 0.58rem;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+    color: #121212;
+  }
+
+  .resize-handle {
+    position: absolute;
+    z-index: 2;
+    background: transparent;
+    touch-action: none;
+    user-select: none;
+  }
+
+  .resize-handle--left,
+  .resize-handle--right {
+    top: 1.8rem;
+    bottom: 0;
+    width: 8px;
+    cursor: ew-resize;
+  }
+
+  .resize-handle--left {
+    left: 0;
+  }
+
+  .resize-handle--right {
+    right: 0;
+  }
+
+  .resize-handle--top,
+  .resize-handle--bottom {
+    left: 0;
+    right: 0;
+    height: 8px;
+    cursor: ns-resize;
+  }
+
+  .resize-handle--top {
+    top: 0;
+  }
+
+  .resize-handle--bottom {
+    bottom: 0;
+  }
+
+  .resize-handle--corner {
+    right: 0;
+    bottom: 0;
+    width: 14px;
+    height: 14px;
+    cursor: nwse-resize;
+    background:
+      linear-gradient(135deg, transparent 35%, #8d8d8d 36%, #8d8d8d 40%, transparent 41%),
+      linear-gradient(135deg, transparent 55%, #8d8d8d 56%, #8d8d8d 60%, transparent 61%),
+      linear-gradient(135deg, transparent 75%, #8d8d8d 76%, #8d8d8d 80%, transparent 81%);
+  }
+
+  .crash {
+    position: absolute;
+    inset: 0;
+    z-index: 32;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgba(7, 12, 18, 0.78);
+  }
+
+  .crash[data-mode="panic"] {
+    padding: 0;
+    place-items: stretch;
+    background: #000;
+  }
+
+  .crash-card {
+    width: min(100%, 41rem);
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+  }
+
+  .crash-card__titlebar {
+    padding: 0.2rem 0.45rem;
+    border-bottom: 1px solid #777;
+    background: linear-gradient(180deg, #1a5eb7 0%, #184792 100%);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+  .crash-card__body {
+    display: grid;
+    gap: 0.6rem;
+    padding: 0.7rem;
+  }
+
+  .crash__heading {
+    margin: 0;
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+
+  .crash__body {
+    margin: 0;
+    padding: 0.45rem;
+    border-top: 1px solid #666;
+    border-left: 1px solid #666;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    background: #e7e4db;
+    font-size: 0.74rem;
+    line-height: 1.35;
+    font-family: "Courier New", monospace;
+    white-space: pre-wrap;
+  }
+
+  .crash-card__actions {
+    display: flex;
+    gap: 0.35rem;
+  }
+
+  .crash-btn,
+  .panic-reset {
+    font-size: 0.82rem;
+    padding: 0.34rem 0.72rem;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+  }
+
+  .panic-screen {
+    width: 100%;
+    height: 100%;
+    background: #020202;
+    color: #f7f7f7;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    gap: 1rem;
+    padding: 1.2rem;
+    font-family: "Courier New", monospace;
+  }
+
+  .panic-body {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 0.95rem;
+    line-height: 1.55;
+  }
+
+  .panic-reset {
+    justify-self: start;
+    margin-left: 0.3rem;
+    margin-bottom: 0.3rem;
+    background: #1f1f1f;
+    color: #efefef;
+    border-top-color: #676767;
+    border-left-color: #676767;
+    border-right-color: #000;
+    border-bottom-color: #000;
+  }
+
+  .boot-flash {
+    position: absolute;
+    inset: 0;
+    z-index: 31;
+    display: grid;
+    place-items: center;
+    background: rgba(255, 255, 255, 0.85);
+    color: #0e2940;
+    font-family: "Courier New", monospace;
+    font-size: 0.95rem;
+    animation: boot-fade 360ms ease;
+  }
+
+  .boot-flash p {
+    margin: 0;
+    padding: 0.4rem 0.7rem;
+    background: #d4d0c8;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+  }
+
+  .escape {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: #020202;
+    color: #f2f2f2;
+    font-family: "Courier New", monospace;
+  }
+
+  .escape__shell {
+    width: min(100%, 58rem);
+    border: 1px solid #2f6f92;
+    background: #060a11;
+    box-shadow: 0 0 0 2px #13374f;
+  }
+
+  .escape__title {
+    margin: 0;
+    padding: 0.55rem 0.7rem;
+    border-bottom: 1px solid #2f6f92;
+    background: #0d2133;
+    color: #d6ecff;
+    font-size: 0.88rem;
+    letter-spacing: 0.02em;
+  }
+
+  .escape__body {
+    margin: 0;
+    padding: 0.7rem;
+    min-height: 16rem;
+    max-height: min(65vh, 34rem);
+    overflow: auto;
+    white-space: pre-wrap;
+    line-height: 1.45;
+    font-size: 0.9rem;
+  }
+
+  .escape__final {
+    width: min(100%, 32rem);
+    border: 1px solid #6e1010;
+    background: #140607;
+    box-shadow: 0 0 0 2px #411113;
+    text-align: center;
+    padding: 1.4rem 1rem;
+  }
+
+  .escape__final-title {
+    margin: 0 0 0.45rem;
+    font-size: 1.28rem;
+    color: #ffd5d5;
+  }
+
+  .escape__final-body {
+    margin: 0;
+    font-size: 0.94rem;
+    color: #f7e2e2;
+  }
+
+  .panel {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.24rem 0.3rem;
+    border-top: 1px solid #fff;
+    background: #bfbfbf;
+  }
+
+  .panel__start {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.34rem;
+    font-size: 0.8rem;
+    padding: 0.28rem 0.5rem;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+  }
+
+  .panel__k {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 2px;
+    display: inline-grid;
+    place-items: center;
+    background: #0b57d0;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  .panel__taskbar {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .panel__task {
+    max-width: 100%;
+    font-size: 0.76rem;
+    padding: 0.3rem 0.42rem;
+    border-top: 1px solid #fff;
+    border-left: 1px solid #fff;
+    border-right: 1px solid #666;
+    border-bottom: 1px solid #666;
+    background: #d4d0c8;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .panel__tray {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+    border-top: 1px solid #666;
+    border-left: 1px solid #666;
+    border-right: 1px solid #fff;
+    border-bottom: 1px solid #fff;
+    padding: 0.2rem 0.35rem;
+    background: #d4d0c8;
+  }
+
+  .panel__links {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-right: 0.25rem;
+    font-size: 0.67rem;
+  }
+
+  :global(.panel__link) {
+    color: #1d2d3f;
+    text-decoration: none;
+  }
+
+  :global(.panel__link:hover),
+  :global(.panel__link:focus-visible) {
+    text-decoration: underline;
+  }
+
+  :global(.panel__sep) {
+    color: #6a6a6a;
+  }
+
+  .tray-icon {
+    display: inline-grid;
+    place-items: center;
+  }
+
+  .tray-icon--btn {
+    border: 1px solid transparent;
+    background: transparent;
+    padding: 0;
+    cursor: pointer;
+  }
+
+  .tray-icon--btn:focus-visible {
+    outline: 2px solid #ffdf5f;
+    outline-offset: 1px;
+  }
+
+  .tray-icon--active {
+    animation: eject-wobble 420ms ease;
+  }
+
+  .panel__clock {
+    min-width: 2.7rem;
+    text-align: right;
+    font-size: 0.72rem;
+    font-family: "Courier New", monospace;
+  }
+
+  @keyframes boot-fade {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes eject-wobble {
+    0% { transform: translateX(0); }
+    20% { transform: translateX(-1px) rotate(-7deg); }
+    40% { transform: translateX(1px) rotate(8deg); }
+    60% { transform: translateX(-1px) rotate(-4deg); }
+    100% { transform: translateX(0); }
+  }
+
+  @media (max-width: 760px) {
+    .kde-stage {
+      padding: 0;
+    }
+
+    .desktop {
+      min-height: 100svh;
+      border-width: 0;
+    }
+
+    .desktop__icons {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      width: 100%;
+      justify-items: start;
+      padding-bottom: 4.3rem;
+    }
+
+    .icon-tile {
+      width: 6.7rem;
+    }
+
+    .window {
+      left: 0.45rem;
+      top: 2.5rem;
+      right: auto;
+      max-width: calc(100% - 0.9rem);
+      max-height: calc(100% - 5rem);
+    }
+
+    .window__body {
+      padding-bottom: 1.4rem;
+    }
+
+    .ttt-cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      font-size: 1.7rem;
+    }
+
+    .ttt-grid-wrap {
+      --cell-size: 74px;
+    }
+
+    .menu--start {
+      width: min(88vw, 17rem);
+      bottom: 3rem;
+    }
+
+    .panel {
+      height: auto;
+      min-height: 3rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 0.24rem;
+    }
+
+    .panel__tray {
+      width: 100%;
+      justify-content: flex-end;
+      overflow: auto;
+    }
+
+    .resize-handle--bottom {
+      height: 18px;
+      background:
+        linear-gradient(90deg, transparent 40%, #8d8d8d 40%, #8d8d8d 60%, transparent 60%) no-repeat center 6px / 40px 2px,
+        linear-gradient(90deg, transparent 40%, #8d8d8d 40%, #8d8d8d 60%, transparent 60%) no-repeat center 10px / 40px 2px;
+    }
+
+    .resize-handle--right {
+      width: 14px;
+    }
+
+    .resize-handle--corner {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .boot-flash,
+    .menu,
+    .toast {
+      animation: none;
+      transition: none;
+    }
+  }
+</style>
