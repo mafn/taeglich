@@ -4,6 +4,7 @@ export interface DayMeta {
   tags?: string[];
   ogImage?: string;
   shellMode?: "default" | "compact" | "immersive";
+  renderH1?: boolean;
   /**
    * If true, this day is excluded from the main index.
    */
