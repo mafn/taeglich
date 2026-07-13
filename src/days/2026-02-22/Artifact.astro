@@ -1,0 +1,70 @@
+---
+const date = "2026-02-22";
+---
+
+<section class="relative isolate overflow-hidden">
+  <div
+    class="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-slate-50 via-white to-slate-50"
+    aria-hidden="true"
+  >
+  </div>
+  <div
+    class="pointer-events-none absolute -top-32 left-1/2 -z-10 size-[42rem] -translate-x-1/2 rounded-full bg-sky-200/30 blur-3xl"
+    aria-hidden="true"
+  >
+  </div>
+
+  <div class="mx-auto max-w-2xl px-4 py-14 sm:py-20">
+    <article
+      class="rounded-3xl border border-slate-200/70 bg-white/70 p-7 shadow-sm backdrop-blur sm:p-10"
+      aria-labelledby="note-title"
+    >
+      <header class="flex flex-wrap items-center justify-between gap-3">
+        <p
+          class="inline-flex items-center gap-2 font-mono text-xs tracking-widest text-slate-500"
+        >
+          <span aria-hidden="true">♦</span>
+          <time datetime={date}>{date}</time>
+        </p>
+
+        <p class="text-xs font-semibold tracking-wide text-slate-600">
+          small pause · daily doppelkopf
+        </p>
+      </header>
+
+      <h1
+        id="note-title"
+        class="mt-5 text-3xl leading-tight font-semibold text-balance text-slate-950 sm:text-4xl"
+      >
+        Sorry — I’m playing Doppelkopf for a few days.
+      </h1>
+
+      <p class="mt-4 text-base leading-relaxed text-pretty text-slate-700">
+        If you want to join: jump straight into{" "}
+        <a
+          href="/doppelkopf/classic/"
+          class="font-semibold text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-500 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+        >
+          Classic
+        </a>{" "}
+        or go full bracket in{" "}
+        <a
+          href="/doppelkopf/tournament/"
+          class="font-semibold text-slate-900 underline decoration-slate-300 underline-offset-4 hover:decoration-slate-500 focus-visible:rounded-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+        >
+          Tournament
+        </a>
+        .
+      </p>
+
+      <p class="mt-7">
+        <a
+          href="/doppelkopf/"
+          class="inline-flex items-center justify-center rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500"
+        >
+          Open Doppelkopf hub
+        </a>
+      </p>
+    </article>
+  </div>
+</section>
