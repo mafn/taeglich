@@ -49,6 +49,8 @@ test.describe("restart triptych", () => {
       page.getByText("Nothing is owed to the empty days."),
     ).toBeVisible();
     await expect(page.getByText("2026-07-13 · present")).toBeVisible();
+    await expect(page.locator("article > .composition > footer")).toBeVisible();
+    await expect(page.locator("body > footer")).toBeHidden();
   });
 
   test("July 14 keeps the fictional receipt and tax arithmetic intact", async ({
@@ -76,6 +78,9 @@ test.describe("restart triptych", () => {
     await expect(button).toHaveAccessibleName("Switch taegli.ch on");
     await expect(button).toHaveAttribute("aria-pressed", "false");
     await expect(page.getByText("The signal is live.")).toBeHidden();
+    const linksBefore = await page
+      .locator(".console > .site-links")
+      .boundingBox();
 
     await button.focus();
     await expect(button).toBeFocused();
@@ -90,6 +95,10 @@ test.describe("restart triptych", () => {
     await expect(page.locator(".state")).toHaveText("ON");
     const signal = page.getByText("The signal is live.");
     await expect(signal).toBeVisible();
+    const linksAfter = await page
+      .locator(".console > .site-links")
+      .boundingBox();
+    expect(linksAfter?.y).toBe(linksBefore?.y);
   });
 
   test("July 15 preserves the standby distinction in forced colors", async ({

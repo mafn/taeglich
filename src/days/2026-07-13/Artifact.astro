@@ -19,17 +19,18 @@ const days = Array.from({ length: 141 });
       }
     </div>
 
-    <div class="statement">
+    <footer class="statement">
       <p>Nothing is owed to the empty days.</p>
-      <p class="date">2026-07-13 · present</p>
-    </div>
-
-    <nav aria-label="Site" class="site-links">
-      <SiteLinks
-        linkClass="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-[#514c47] underline decoration-[#191714]/25 underline-offset-4 hover:decoration-[#191714] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#191714]"
-        separatorClass="text-[#777068]"
-      />
-    </nav>
+      <div class="footer-meta">
+        <p class="date">2026-07-13 · present</p>
+        <nav aria-label="Site" class="site-links">
+          <SiteLinks
+            linkClass="font-mono text-[0.65rem] uppercase tracking-[0.12em] text-[#514c47] underline decoration-[#191714]/25 underline-offset-4 hover:decoration-[#191714] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#191714]"
+            separatorClass="text-[#777068]"
+          />
+        </nav>
+      </div>
+    </footer>
 
     <p id="absence-description" class="sr-only">
       One hundred and forty outlined squares represent the unpublished days from
@@ -96,7 +97,6 @@ const days = Array.from({ length: 141 });
     display: flex;
     justify-content: flex-end;
     gap: 0.75rem;
-    margin-top: -2rem;
   }
 
   .eyebrow {
@@ -155,6 +155,12 @@ const days = Array.from({ length: 141 });
     color: #5f5952;
   }
 
+  .footer-meta {
+    display: grid;
+    justify-items: end;
+    gap: 1.25rem;
+  }
+
   @media (max-width: 40rem) {
     .field {
       grid-template-columns: repeat(16, minmax(0, 1fr));
@@ -166,9 +172,12 @@ const days = Array.from({ length: 141 });
       gap: 1.25rem;
     }
 
+    .footer-meta {
+      justify-items: start;
+    }
+
     .site-links {
       justify-content: flex-start;
-      margin-top: -1rem;
     }
   }
 
