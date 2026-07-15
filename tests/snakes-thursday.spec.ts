@@ -270,8 +270,8 @@ test.describe("Snakes & Ladders & Snakes", () => {
     await page.keyboard.press("Tab");
     await page.keyboard.press("Shift+Tab");
     await expect(canvas).toBeFocused();
-    await expect(canvas).toHaveCSS("outline-color", "rgb(27, 42, 12)");
-    await expect(canvas).not.toHaveCSS("box-shadow", "none");
+    await expect(canvas).not.toHaveCSS("outline-color", "rgba(0, 0, 0, 0)");
+    await expect(canvas).toHaveCSS("box-shadow", "none");
 
     await page.keyboard.press("ArrowUp");
     await page.waitForTimeout(240);

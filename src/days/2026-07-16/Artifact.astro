@@ -13,26 +13,59 @@ import SiteLinks from "../../components/SiteLinks.astro";
   pillBg="#a4b91a"
 />
 
-<section class="game-container" id="snakes-game" aria-labelledby="game-title">
-  <header class="title-header">
-    <p class="kicker">THE 15 × 15 WRAP-AROUND</p>
-    <h1 id="game-title">SNAKES &amp; LADDERS &amp; SNAKES</h1>
+<section
+  class="relative isolate flex min-h-[100svh] w-full flex-col items-center justify-center overflow-x-hidden bg-[var(--lcd)] p-[clamp(1rem,3vw,2rem)] font-mono text-[var(--ink)] max-[23rem]:px-3 forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]"
+  id="snakes-game"
+  aria-labelledby="game-title"
+  style="--lcd: #8fa20e; --lcd-raised: #a4b91a; --ink: #1b2a0c; --ink-soft: #35420b; forced-color-adjust: auto;"
+>
+  <div
+    class="pointer-events-none fixed inset-0 -z-10 bg-[var(--lcd)] forced-colors:bg-[Canvas]"
+  >
+  </div>
+
+  <header class="mb-[clamp(0.75rem,3vw,1.5rem)] text-center">
+    <p
+      class="m-0 mb-[0.3rem] text-[clamp(0.65rem,2vw,0.75rem)] font-bold tracking-[0.12em]"
+    >
+      THE 15 × 15 WRAP-AROUND
+    </p>
+    <h1
+      id="game-title"
+      class="m-0 max-w-[22ch] text-[clamp(1.1rem,4.5vw,1.65rem)] leading-[1.05] font-black tracking-tight"
+    >
+      SNAKES &amp; LADDERS &amp; SNAKES
+    </h1>
   </header>
 
-  <div class="game-wrapper">
-    <div class="hud" aria-hidden="true">
+  <div
+    class="w-[min(100%,37.5rem)] border-4 border-[var(--ink)] bg-[var(--ink)] shadow-[clamp(5px,1.5vw,10px)_clamp(5px,1.5vw,10px)_0_color-mix(in_srgb,var(--ink)_28%,transparent)] max-[23rem]:border-3 max-[23rem]:shadow-[5px_5px_0_color-mix(in_srgb,var(--ink)_28%,transparent)] forced-colors:border-[CanvasText]"
+  >
+    <div
+      class="grid grid-cols-3 border-b-4 border-[var(--ink)] bg-[var(--lcd)] px-[clamp(0.45rem,2vw,0.8rem)] py-[0.55rem] text-[clamp(0.72rem,3vw,1rem)] leading-none font-black tabular-nums max-[23rem]:border-b-3 forced-colors:bg-[Canvas]"
+      aria-hidden="true"
+    >
       <span id="score-display">PTS 000</span>
-      <span id="cell-display">CELL 001</span>
-      <span id="length-display">LEN 003</span>
+      <span id="cell-display" class="text-center">CELL 001</span>
+      <span id="length-display" class="text-right">LEN 003</span>
     </div>
 
-    <div class="screen" id="game-screen">
-      <p id="cheat-toast" class="cheat-toast" role="status" hidden>
+    <div
+      class="relative block aspect-square w-full overflow-hidden bg-[var(--lcd)] [image-rendering:pixelated] forced-colors:bg-[Canvas]"
+      id="game-screen"
+    >
+      <p
+        id="cheat-toast"
+        class="animate-toast-pop absolute top-[12%] left-1/2 z-20 m-0 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 bg-[var(--ink)] px-[0.8rem] py-[0.45rem] text-center text-[clamp(0.65rem,2.5vw,0.9rem)] font-black text-[var(--lcd-raised)] motion-reduce:animate-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]"
+        role="status"
+        hidden
+      >
         BOARD CLEARED · +5 LENGTH
       </p>
 
       <canvas
         id="game-canvas"
+        class="block h-full w-full focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] forced-colors:focus-visible:outline-[Highlight]"
         width="600"
         height="600"
         role="img"
@@ -43,16 +76,33 @@ import SiteLinks from "../../components/SiteLinks.astro";
         A 15 by 15 Snakes and Ladders board used as a wrap-around Snake game.
       </canvas>
 
-      <div id="game-overlay" class="overlay">
-        <div class="overlay-content">
-          <h2 id="overlay-title">THE WRAP-AROUND</h2>
-          <p id="overlay-copy">
+      <div
+        id="game-overlay"
+        class="absolute inset-0 z-10 overflow-y-auto overscroll-contain bg-[color-mix(in_srgb,var(--lcd)_96%,transparent)] text-center forced-colors:bg-[Canvas]"
+      >
+        <div
+          class="flex min-h-full w-full flex-col items-center justify-center p-[clamp(1rem,5vw,2rem)]"
+        >
+          <h2
+            id="overlay-title"
+            class="m-0 text-[clamp(1.25rem,5vw,2rem)] leading-none font-black"
+          >
+            THE WRAP-AROUND
+          </h2>
+          <p
+            id="overlay-copy"
+            class="m-0 mt-[0.65rem] max-w-[34ch] text-[clamp(0.75rem,2.8vw,0.95rem)] leading-[1.45]"
+          >
             Reach cell 225 to return to cell 1 with five extra segments.
           </p>
 
-          <div class="speed-selector" role="group" aria-label="Game speed">
+          <div
+            class="mt-[clamp(0.85rem,3vw,1.25rem)] flex flex-wrap justify-center gap-[0.45rem]"
+            role="group"
+            aria-label="Game speed"
+          >
             <button
-              class="speed-btn"
+              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
               type="button"
               data-speed="step"
               aria-pressed="false"
@@ -60,7 +110,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
               Step
             </button>
             <button
-              class="speed-btn"
+              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
               type="button"
               data-speed="220"
               aria-pressed="false"
@@ -68,7 +118,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
               Slow
             </button>
             <button
-              class="speed-btn"
+              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
               type="button"
               data-speed="160"
               aria-pressed="false"
@@ -76,7 +126,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
               Normal
             </button>
             <button
-              class="speed-btn"
+              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
               type="button"
               data-speed="100"
               aria-pressed="true"
@@ -85,51 +135,83 @@ import SiteLinks from "../../components/SiteLinks.astro";
             </button>
           </div>
 
-          <button id="game-action" class="primary-btn" type="button"
-            >Start game</button
+          <button
+            id="game-action"
+            class="primary-btn mt-4 min-h-[2.75rem] min-w-[9.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-[var(--ink)] px-[1.25rem] py-[0.75rem] text-[0.95rem] font-black text-[var(--lcd-raised)] uppercase hover:bg-[#0b1405] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
+            type="button">Start game</button
           >
         </div>
       </div>
 
       <noscript>
-        <p class="noscript-message">
+        <p
+          class="absolute inset-0 z-30 m-0 grid place-items-center bg-[var(--lcd)] p-8 text-center font-black forced-colors:bg-[Canvas]"
+        >
           JavaScript is required to play this game.
         </p>
       </noscript>
     </div>
   </div>
 
-  <div class="game-toolbar">
+  <div
+    class="mt-4 flex w-[min(100%,37.5rem)] justify-center has-[.pause-btn[hidden]]:hidden"
+  >
     <button
       id="pause-action"
-      class="pause-btn"
+      class="pause-btn min-h-[2.75rem] min-w-[8rem] cursor-pointer [touch-action:manipulation] rounded-[0.35rem] border-2 border-[var(--ink)] bg-transparent px-[1rem] py-[0.65rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight]"
       type="button"
       aria-controls="game-canvas"
       hidden>Pause</button
     >
   </div>
 
-  <div class="mobile-controls" aria-label="Touch controls">
-    <div class="d-pad">
-      <button class="control-btn" type="button" data-dir="left" disabled>
+  <div
+    class="mt-[1.25rem] hidden w-[min(100%,37.5rem)] flex-col items-center gap-[0.85rem] [@media(max-width:48rem)]:flex [@media(pointer:coarse)]:flex"
+    aria-label="Touch controls"
+  >
+    <div class="flex items-center gap-[0.65rem]">
+      <button
+        class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
+        type="button"
+        data-dir="left"
+        disabled
+      >
         <span aria-hidden="true">←</span><span class="sr-only">Move left</span>
       </button>
-      <div class="vertical-buttons">
-        <button class="control-btn" type="button" data-dir="up" disabled>
+      <div class="flex flex-col gap-[0.65rem]">
+        <button
+          class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
+          type="button"
+          data-dir="up"
+          disabled
+        >
           <span aria-hidden="true">↑</span><span class="sr-only">Move up</span>
         </button>
-        <button class="control-btn" type="button" data-dir="down" disabled>
+        <button
+          class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
+          type="button"
+          data-dir="down"
+          disabled
+        >
           <span aria-hidden="true">↓</span><span class="sr-only">Move down</span
           >
         </button>
       </div>
-      <button class="control-btn" type="button" data-dir="right" disabled>
+      <button
+        class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
+        type="button"
+        data-dir="right"
+        disabled
+      >
         <span aria-hidden="true">→</span><span class="sr-only">Move right</span>
       </button>
     </div>
   </div>
 
-  <p id="game-instructions" class="controls-hint">
+  <p
+    id="game-instructions"
+    class="mt-[1.25rem] text-center text-[clamp(0.68rem,2vw,0.8rem)] font-bold text-[var(--ink)] uppercase [@media(max-width:48rem)]:max-w-[30ch]"
+  >
     Arrow keys or W A S D move · Space pauses and resumes · P also pauses
   </p>
   <p id="game-status" class="sr-only" role="status" aria-live="polite">
@@ -149,7 +231,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
     </ul>
   </section>
 
-  <nav class="site-links" aria-label="More from taeglich">
+  <nav
+    class="mt-[clamp(1.5rem,5vw,3rem)] flex flex-wrap justify-center"
+    aria-label="More from taeglich"
+  >
     <SiteLinks
       linkClass="font-mono text-xs font-bold text-[#1b2a0c] underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1b2a0c]"
       separatorClass="px-1 text-[#1b2a0c]"
@@ -158,440 +243,14 @@ import SiteLinks from "../../components/SiteLinks.astro";
 </section>
 
 <style>
-  .game-container {
-    --lcd: #8fa20e;
-    --lcd-raised: #a4b91a;
-    --ink: #1b2a0c;
-    --ink-soft: #35420b;
-
-    box-sizing: border-box;
-    display: flex;
-    width: 100%;
-    min-height: 100vh;
-    min-height: 100svh;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    isolation: isolate;
-    overflow-x: hidden;
-    padding: clamp(1rem, 3vw, 2rem);
-    background: var(--lcd);
-    color: var(--ink);
-    font-family: "Courier New", Courier, monospace;
-  }
-
-  .game-container::before {
-    position: fixed;
-    z-index: -1;
-    inset: 0;
-    background: var(--lcd);
-    content: "";
-    pointer-events: none;
-  }
-
-  .title-header {
-    margin-bottom: clamp(0.75rem, 3vw, 1.5rem);
-    text-align: center;
-  }
-
-  .kicker {
-    margin: 0 0 0.3rem;
-    font-size: clamp(0.65rem, 2vw, 0.75rem);
-    font-weight: 700;
-    letter-spacing: 0.12em;
-  }
-
-  .title-header h1 {
-    max-width: 22ch;
-    margin: 0;
-    font-size: clamp(1.1rem, 4.5vw, 1.65rem);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-  }
-
-  .game-wrapper {
-    width: min(100%, 37.5rem);
-    border: 4px solid var(--ink);
-    background: var(--ink);
-    box-shadow: clamp(5px, 1.5vw, 10px) clamp(5px, 1.5vw, 10px) 0
-      color-mix(in srgb, var(--ink) 28%, transparent);
-  }
-
-  .hud {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    padding: 0.55rem clamp(0.45rem, 2vw, 0.8rem);
-    border-bottom: 4px solid var(--ink);
-    background: var(--lcd);
-    font-size: clamp(0.72rem, 3vw, 1rem);
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-    line-height: 1;
-  }
-
-  .hud span:nth-child(2) {
-    text-align: center;
-  }
-
-  .hud span:last-child {
-    text-align: right;
-  }
-
-  .screen {
-    position: relative;
-    display: block;
-    width: 100%;
-    aspect-ratio: 1;
-    overflow: hidden;
-    background: var(--lcd);
-    image-rendering: pixelated;
-  }
-
-  canvas {
-    display: block;
-    width: 100%;
-    height: 100%;
-  }
-
-  canvas:focus-visible {
-    outline: 3px solid var(--ink);
-    outline-offset: -7px;
-    box-shadow:
-      inset 0 0 0 10px var(--lcd),
-      inset 0 0 0 13px var(--ink);
-  }
-
-  .overlay {
-    position: absolute;
-    z-index: 10;
-    inset: 0;
-    overflow-y: auto;
-    background: color-mix(in srgb, var(--lcd) 96%, transparent);
-    text-align: center;
-    overscroll-behavior: contain;
-  }
-
-  .overlay-content {
-    box-sizing: border-box;
-    display: flex;
-    width: 100%;
-    min-height: 100%;
-    flex-direction: column;
-    align-items: center;
-    justify-content: safe center;
-    padding: clamp(1rem, 5vw, 2rem);
-  }
-
-  .overlay[hidden],
-  .cheat-toast[hidden] {
-    display: none !important;
-  }
-
-  .overlay h2 {
-    margin: 0;
-    font-size: clamp(1.25rem, 5vw, 2rem);
-    font-weight: 900;
-    line-height: 1;
-  }
-
-  .overlay p {
-    max-width: 34ch;
-    margin: 0.65rem 0 0;
-    font-size: clamp(0.75rem, 2.8vw, 0.95rem);
-    line-height: 1.45;
-  }
-
-  .cheat-toast {
-    position: absolute;
-    z-index: 20;
-    top: 12%;
-    left: 50%;
-    width: max-content;
-    max-width: calc(100% - 2rem);
-    margin: 0;
-    padding: 0.45rem 0.8rem;
-    transform: translateX(-50%);
-    animation: toast-pop 180ms ease-out;
-    background: var(--ink);
-    color: var(--lcd-raised);
-    font-size: clamp(0.65rem, 2.5vw, 0.9rem);
-    font-weight: 900;
-    text-align: center;
-  }
-
   @keyframes toast-pop {
     from {
       opacity: 0;
       transform: translate(-50%, -0.4rem);
     }
   }
-
-  .speed-selector {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 0.45rem;
-    margin-top: clamp(0.85rem, 3vw, 1.25rem);
-  }
-
-  .speed-btn,
-  .primary-btn,
-  .control-btn,
-  .pause-btn {
-    min-height: 2.75rem;
-    border: 2px solid var(--ink);
-    font: inherit;
-    font-weight: 900;
-    cursor: pointer;
-    touch-action: manipulation;
-  }
-
-  .speed-btn {
-    min-width: 4.5rem;
-    padding: 0.45rem 0.65rem;
-    background: transparent;
-    color: var(--ink);
-    font-size: 0.78rem;
-    text-transform: uppercase;
-  }
-
-  .speed-btn[aria-pressed="true"] {
-    background: var(--ink);
-    color: var(--lcd-raised);
-    box-shadow: inset 0 0 0 2px var(--lcd-raised);
-  }
-
-  .primary-btn {
-    min-width: 9.5rem;
-    margin-top: 1rem;
-    padding: 0.75rem 1.25rem;
-    background: var(--ink);
-    color: var(--lcd-raised);
-    font-size: 0.95rem;
-    text-transform: uppercase;
-  }
-
-  .speed-btn:hover,
-  .control-btn:hover {
-    background: var(--lcd-raised);
-  }
-
-  .speed-btn[aria-pressed="true"]:hover,
-  .primary-btn:hover {
-    background: #0b1405;
-  }
-
-  .speed-btn:focus-visible,
-  .primary-btn:focus-visible,
-  .control-btn:focus-visible,
-  .pause-btn:focus-visible {
-    outline: 3px solid var(--ink);
-    outline-offset: 3px;
-  }
-
-  .speed-btn:active,
-  .primary-btn:active,
-  .control-btn:active,
-  .pause-btn:active {
-    transform: translateY(2px);
-  }
-
-  .mobile-controls {
-    display: none;
-    width: min(100%, 37.5rem);
-    flex-direction: column;
-    align-items: center;
-    gap: 0.85rem;
-    margin-top: 1.25rem;
-  }
-
-  .game-toolbar {
-    display: flex;
-    width: min(100%, 37.5rem);
-    justify-content: center;
-    margin-top: 1rem;
-  }
-
-  .game-toolbar:has(.pause-btn[hidden]) {
-    display: none;
-  }
-
-  .pause-btn {
-    min-width: 8rem;
-    padding: 0.65rem 1rem;
-    border-radius: 0.35rem;
-    background: transparent;
-    color: var(--ink);
-    text-transform: uppercase;
-  }
-
-  .pause-btn[hidden] {
-    display: none;
-  }
-
-  .d-pad {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-  }
-
-  .vertical-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 0.65rem;
-  }
-
-  .control-btn {
-    display: grid;
-    width: 3.4rem;
-    height: 3.4rem;
-    place-items: center;
-    border-radius: 0.45rem;
-    background: var(--ink);
-    color: var(--lcd-raised);
-    font-size: 1.45rem;
-    line-height: 1;
-    user-select: none;
-  }
-
-  .control-btn:disabled {
-    cursor: not-allowed;
-    opacity: 0.48;
-  }
-
-  .controls-hint {
-    margin: 1.25rem 0 0;
-    color: var(--ink);
-    font-size: clamp(0.68rem, 2vw, 0.8rem);
-    font-weight: 700;
-    text-align: center;
-    text-transform: uppercase;
-  }
-
-  .site-links {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-top: clamp(1.5rem, 5vw, 3rem);
-  }
-
-  .noscript-message {
-    position: absolute;
-    z-index: 30;
-    inset: 0;
-    display: grid;
-    margin: 0;
-    place-items: center;
-    padding: 2rem;
-    background: var(--lcd);
-    font-weight: 900;
-    text-align: center;
-  }
-
-  @media (max-width: 48rem), (pointer: coarse) {
-    .mobile-controls {
-      display: flex;
-    }
-
-    .controls-hint {
-      max-width: 30ch;
-    }
-  }
-
-  @media (max-width: 23rem) {
-    .game-container {
-      padding-inline: 0.75rem;
-    }
-
-    .game-wrapper {
-      border-width: 3px;
-      box-shadow: 5px 5px 0 color-mix(in srgb, var(--ink) 28%, transparent);
-    }
-
-    .hud {
-      border-bottom-width: 3px;
-    }
-  }
-
-  @media (prefers-reduced-motion: reduce) {
-    .cheat-toast {
-      animation: none;
-    }
-
-    .speed-btn,
-    .primary-btn,
-    .control-btn,
-    .pause-btn {
-      transition: none;
-    }
-
-    .speed-btn:active,
-    .primary-btn:active,
-    .control-btn:active,
-    .pause-btn:active {
-      transform: none;
-    }
-  }
-
-  @media (forced-colors: active) {
-    .game-container,
-    .screen,
-    .hud,
-    .overlay,
-    .noscript-message {
-      forced-color-adjust: auto;
-      background: Canvas;
-      color: CanvasText;
-    }
-
-    .game-container::before {
-      background: Canvas;
-    }
-
-    .game-wrapper,
-    .speed-btn,
-    .primary-btn,
-    .control-btn,
-    .pause-btn {
-      border-color: CanvasText;
-    }
-
-    .speed-btn,
-    .primary-btn,
-    .control-btn,
-    .pause-btn {
-      forced-color-adjust: none;
-      background: ButtonFace;
-      color: ButtonText;
-    }
-
-    .speed-btn[aria-pressed="true"],
-    .primary-btn,
-    .control-btn,
-    .cheat-toast {
-      background: Highlight;
-      color: HighlightText;
-      border-color: Highlight;
-    }
-
-    .speed-btn[aria-pressed="true"] {
-      box-shadow: none;
-    }
-
-    .speed-btn:focus-visible,
-    .primary-btn:focus-visible,
-    .control-btn:focus-visible,
-    .pause-btn:focus-visible,
-    canvas:focus-visible {
-      outline-color: Highlight;
-    }
-
-    canvas:focus-visible {
-      box-shadow:
-        inset 0 0 0 10px Canvas,
-        inset 0 0 0 13px CanvasText;
-    }
+  .animate-toast-pop {
+    animation: toast-pop 180ms ease-out;
   }
 </style>
 
@@ -1066,17 +725,6 @@ import SiteLinks from "../../components/SiteLinks.astro";
     }
 
     if (food) {
-      const centerX = food.gx * cellSize + cellSize / 2;
-      const centerY = food.gy * cellSize + cellSize / 2;
-      context.strokeStyle = palette.accent;
-      context.lineWidth = 2;
-      context.beginPath();
-      context.moveTo(centerX, centerY - 17);
-      context.lineTo(centerX + 17, centerY);
-      context.lineTo(centerX, centerY + 17);
-      context.lineTo(centerX - 17, centerY);
-      context.closePath();
-      context.stroke();
       drawFoodIcon(
         context,
         foodType,
@@ -1135,16 +783,6 @@ import SiteLinks from "../../components/SiteLinks.astro";
         context.fill();
       }
     });
-
-    const finish = getCellCoord(TOTAL_CELLS);
-    context.strokeStyle = palette.accent;
-    context.lineWidth = 3;
-    context.strokeRect(
-      finish.gx * cellSize + 2,
-      finish.gy * cellSize + 2,
-      cellSize - 4,
-      cellSize - 4,
-    );
   }
 
   function drawLadder(start: Point, end: Point, cellSize: number) {
@@ -1287,7 +925,8 @@ import SiteLinks from "../../components/SiteLinks.astro";
   directionButtons.forEach((button) => {
     button.addEventListener("click", () => {
       const requestedDirection = button.dataset.dir as
-        DirectionName | undefined;
+        | DirectionName
+        | undefined;
       if (requestedDirection) move(requestedDirection);
     });
   });
