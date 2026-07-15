@@ -1,0 +1,95 @@
+---
+// DashboardScreen.astro
+---
+<div id="dashboard-screen" class="hidden">
+  <div id="dash-main-view">
+    <div class="border border-[#b0c4de] bg-white mb-4">
+      <div class="bg-[#0f4a8a] text-white font-bold text-sm p-2 flex flex-wrap justify-between">
+        <h2 tabindex="-1" id="dash-title" class="focus:outline-none">Private Banking RTGS Tier</h2>
+        <span>Bal: ₹1,02,50,440.00</span>
+      </div>
+      
+      <div class="p-4 grid grid-cols-2 md:grid-cols-3 gap-2">
+        <button type="button" data-feature="Statement" class="dummy-icon-btn border border-slate-200 p-4 flex flex-col items-center hover:bg-blue-50 focus:outline-blue-500 motion-reduce:transition-none transition-colors">
+          <span class="text-2xl mb-2">📊</span>
+          <span class="text-[11px] font-bold text-[#0f4a8a]">Account Statement</span>
+        </button>
+        <button type="button" data-feature="Credit Cards" class="dummy-icon-btn border border-slate-200 p-4 flex flex-col items-center hover:bg-blue-50 focus:outline-blue-500 motion-reduce:transition-none transition-colors">
+          <span class="text-2xl mb-2">💳</span>
+          <span class="text-[11px] font-bold text-[#0f4a8a]">Credit Cards</span>
+        </button>
+        <button type="button" id="btn-fund-transfer" class="border-2 border-[#0f4a8a] bg-blue-50 p-4 flex flex-col items-center hover:bg-blue-100 focus:outline-blue-500 motion-reduce:transition-none transition-colors">
+          <span class="text-2xl mb-2">💸</span>
+          <span class="text-[11px] font-bold text-[#0f4a8a]">Fund Transfer (RTGS)</span>
+        </button>
+        <button type="button" data-feature="Mutual Funds" class="dummy-icon-btn border border-slate-200 p-4 flex flex-col items-center hover:bg-blue-50 focus:outline-blue-500 motion-reduce:transition-none transition-colors">
+          <span class="text-2xl mb-2">📈</span>
+          <span class="text-[11px] font-bold text-[#0f4a8a]">Mutual Funds</span>
+        </button>
+        <button type="button" data-feature="Fixed Deposits" class="dummy-icon-btn border border-slate-200 p-4 flex flex-col items-center hover:bg-blue-50 focus:outline-blue-500 motion-reduce:transition-none transition-colors">
+          <span class="text-2xl mb-2">🔒</span>
+          <span class="text-[11px] font-bold text-[#0f4a8a]">Fixed Deposits</span>
+        </button>
+        <button type="button" data-feature="Profile Settings" class="dummy-icon-btn border border-slate-200 p-4 flex flex-col items-center hover:bg-blue-50 focus:outline-blue-500 motion-reduce:transition-none transition-colors">
+          <span class="text-2xl mb-2">⚙️</span>
+          <span class="text-[11px] font-bold text-[#0f4a8a]">Profile Settings</span>
+        </button>
+      </div>
+
+      <div class="p-4 border-t border-[#b0c4de] bg-yellow-50 text-[11px] text-slate-600">
+        <strong class="text-red-600">Important:</strong> Never transfer funds under police instruction. The bank will not be held liable for authorized transfers. <button type="button" id="link-resistance-dash" class="text-blue-600 hover:underline focus:outline-blue-500">Need help?</button>
+      </div>
+    </div>
+
+    <button type="button" id="banner-loan" class="block w-full border-4 border-[#ffcc00] bg-[#fff8cc] p-6 text-center hover:bg-[#fff099] focus:outline-blue-500 motion-reduce:transition-none transition-colors group cursor-pointer text-left">
+      <div class="text-xl font-black text-slate-800 mb-1 group-hover:underline">PRE-QUALIFIED PERSONAL CREDIT LINE</div>
+      <div class="text-3xl font-black text-red-600 mb-2 motion-safe:animate-pulse motion-reduce:animate-none">₹50 LAKH</div>
+      <div class="text-sm font-bold text-slate-800 mb-4">Indicative Rate: 23.99% p.a.*</div>
+      <div class="text-xs text-slate-600 mb-4">No documentation required. Instant disbursal to your primary account.</div>
+      <div class="inline-block bg-red-600 text-white font-black px-6 py-2">ACCEPT NOW</div>
+    </button>
+  </div>
+
+  <div id="dash-feature-view" class="hidden border border-[#b0c4de] bg-white mb-4 min-h-[400px]">
+    <div class="bg-[#0f4a8a] text-white font-bold text-sm p-2 flex flex-wrap justify-between">
+      <h2 tabindex="-1" id="feature-title" class="focus:outline-none">Feature</h2>
+    </div>
+    <div class="p-6">
+      <div class="text-lg font-bold text-[#0f4a8a] mb-4">Loading Data...</div>
+      <div class="bg-slate-100 p-4 font-mono text-xs text-slate-500">
+        Account: 110992388<br/>
+        Status: ACTIVE<br/>
+        Last updated: Today
+      </div>
+      <button type="button" id="btn-back-dash" class="mt-6 bg-slate-200 text-slate-700 font-bold px-4 py-2 border border-slate-400 hover:bg-slate-300">Back to Dashboard</button>
+    </div>
+  </div>
+
+  <!-- Delayed Hostile Ad Modal -->
+  <div id="ad-modal-overlay" class="fixed inset-0 bg-black/80 z-[3000] hidden flex-col items-center justify-center p-4">
+    <div class="bg-white max-w-lg w-full relative p-1 pb-6 border-4 border-yellow-500 shadow-2xl">
+      <button type="button" id="btn-close-ad" class="absolute -top-3 -right-3 bg-red-600 text-white rounded-full w-8 h-8 font-black flex items-center justify-center text-xs border-2 border-white shadow-md hover:bg-red-700 z-10 focus:outline-blue-500" aria-label="Close advertisement">X</button>
+      
+      <div class="bg-[#2a2a5a] text-white p-4 text-center">
+        <h3 class="text-2xl font-black italic tracking-tighter text-yellow-400">LUXURA PLATINUM</h3>
+        <p class="text-[10px] uppercase tracking-widest opacity-80">The credit card for the elite</p>
+      </div>
+      
+      <div class="p-6 text-center">
+        <div class="text-4xl font-black text-slate-800 mb-2 motion-safe:animate-bounce">₹10 LAKH</div>
+        <div class="text-sm font-bold text-slate-600 mb-6">Pre-approved limit waiting for you.</div>
+        
+        <ul class="text-left text-xs space-y-2 mb-6 ml-8 list-disc text-slate-700">
+          <li>Zero joining fee (if spent ₹50,000 in 30 days)</li>
+          <li>Complimentary domestic lounge access (once a year)</li>
+          <li>1% Fuel surcharge waiver</li>
+        </ul>
+        
+        <button type="button" id="btn-apply-ad" class="bg-yellow-500 hover:bg-yellow-600 text-slate-900 font-black px-8 py-3 text-lg rounded shadow-[4px_4px_0_rgba(0,0,0,0.2)] focus:outline-blue-500">APPLY INSTANTLY</button>
+      </div>
+      <div class="text-[8px] text-slate-400 text-center px-4 leading-tight mt-2">
+        *Terms and conditions apply. Issuance of credit card is at the sole discretion of the bank. Interest rate of 3.5% per month (42% annualized) applicable on outstanding balances.
+      </div>
+    </div>
+  </div>
+</div>

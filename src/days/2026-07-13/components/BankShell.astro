@@ -1,0 +1,67 @@
+---
+// BankShell.astro
+---
+<div class="bank-shell font-[Verdana,Arial,Helvetica,sans-serif] text-[12px] bg-[#f8f8f8] min-h-screen text-black relative">
+  <!-- Topmost Meta Header -->
+  <div class="bg-white text-right p-1 text-[10px] text-blue-800 border-b border-slate-200 flex justify-end gap-3 px-4">
+    <a href="#" class="hover:underline">Skip to main content</a>
+    <a href="#" class="hover:underline">About NCB</a>
+    <a href="#" class="hover:underline">Forms</a>
+    <a href="#" class="hover:underline">Net Banking Branches</a>
+    <select class="border border-slate-300 text-[10px]"><option>English</option><option>Hindi</option></select>
+  </div>
+
+  <!-- Global Header -->
+  <header class="bg-[#0f4a8a] text-white p-2 flex flex-col md:flex-row justify-between items-start md:items-end gap-2 overflow-hidden">
+    <div class="flex items-center gap-3">
+      <div class="bg-white text-[#0f4a8a] font-serif font-black px-2 py-1 text-xl border border-slate-400">
+        NCB
+      </div>
+      <div class="font-serif text-lg tracking-wide">
+        National Commerce Bank <span class="text-xs text-blue-200">| Online Banking</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Secondary Nav -->
+  <nav class="bg-[#0a3563] text-[11px] text-white flex flex-wrap gap-4 px-4 py-1 border-b-4 border-slate-400">
+    <a href="#" class="hover:underline font-bold">Home</a>
+    <a href="#" class="hover:underline font-bold">Products & Services</a>
+    <a href="#" class="hover:underline font-bold">How Do I (Help)</a>
+    <a href="#" class="hover:underline font-bold">Manage Mandates</a>
+    <a href="#" class="hover:underline font-bold text-red-200" id="nav-report-fraud">Report Fraud</a>
+    <a href="#" class="hover:underline font-bold">Contact Us</a>
+  </nav>
+
+  <!-- Accessible CSS Marquee -->
+  <div class="bg-white border-b border-slate-300 overflow-hidden relative h-6 flex items-center">
+    <div class="whitespace-nowrap animate-marquee text-[#d32f2f] font-bold text-[11px] flex items-center h-full absolute" aria-hidden="true">
+      SECURITY ALERT: NCB never asks for your PIN/OTP. Do not share credentials. | Mandatory PAN linkage required by 31-Dec. | <button type="button" tabindex="-1" id="btn-corrupt-cop-marquee" class="hover:underline text-red-600 font-bold focus:outline-blue-500">Avoid transferring funds under police instruction. Call 1800-NCB-SAFE immediately.</button> | BEWARE OF FRAUDSTERS
+    </div>
+  </div>
+  <button type="button" id="btn-corrupt-cop" class="sr-only">Avoid transferring funds under police instruction. Call 1800-NCB-SAFE immediately.</button>
+
+  <div class="max-w-6xl mx-auto mt-4 px-2 pb-12">
+    <slot />
+  </div>
+</div>
+
+<style>
+  @keyframes marquee {
+    0% { left: 100%; transform: translateX(0); }
+    100% { left: -100%; transform: translateX(0); }
+  }
+  .animate-marquee {
+    animation: marquee 25s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .animate-marquee {
+      animation: none;
+      position: static;
+      white-space: normal;
+    }
+  }
+</style>

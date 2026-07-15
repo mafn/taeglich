@@ -1,0 +1,92 @@
+---
+// LoginScreen.astro
+---
+<div id="login-screen" class="hidden">
+  <div class="bg-red-50 text-[#d32f2f] font-bold text-[11px] p-2 border border-red-200 mb-4 text-center">
+    Dear Customer, Mandatory login and profile password change introduced for added security.
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-[400px_1fr] gap-6">
+    <!-- Left Column: Login Form -->
+    <div>
+      <div class="bg-[#eef4fb] border border-[#b0c4de] p-4">
+        <div class="text-[#0f4a8a] font-bold text-sm mb-4 border-b border-[#b0c4de] pb-1">Personal Banking Login</div>
+        
+        <div class="space-y-4">
+          <div>
+            <label class="block text-[#0f4a8a] font-bold mb-1 text-[11px]" for="user-id">Username*</label>
+            <input type="text" id="user-id" autocomplete="off" value="CUST-883910" class="w-full border border-slate-400 p-1 min-h-[44px]" readonly />
+          </div>
+
+          <div>
+            <label class="block text-[#0f4a8a] font-bold mb-1 text-[11px]" for="pin-input">Password*</label>
+            <div class="flex gap-2 relative">
+              <input type="password" id="pin-input" autocomplete="new-password" maxlength="4" placeholder="****" class="w-32 border border-slate-400 p-1 text-center tracking-widest text-lg min-h-[44px] cursor-pointer bg-white" readonly />
+              
+              <!-- Virtual Keyboard DOM -->
+              <div id="virtual-keyboard" class="absolute top-full left-0 mt-1 bg-slate-200 border border-slate-400 p-2 shadow-[2px_2px_0_rgba(0,0,0,0.2)] hidden z-50 w-48">
+                <div class="text-[10px] text-blue-800 font-bold mb-2 flex justify-between items-center border-b border-slate-400 pb-1">
+                  Virtual Keypad <button type="button" id="vk-close" class="text-red-600 hover:bg-red-200 px-1 font-black">&times;</button>
+                </div>
+                <div id="vk-keys" class="grid grid-cols-3 gap-1 mb-2">
+                  <!-- JS injected buttons -->
+                </div>
+                <div class="flex justify-end gap-1">
+                  <button type="button" id="vk-clear" class="text-[10px] bg-slate-300 border border-slate-400 px-2 py-1 hover:bg-slate-400">Clear</button>
+                </div>
+              </div>
+            </div>
+            <label class="flex items-center gap-2 mt-2 text-[10px] text-slate-800 font-bold">
+              <input type="checkbox" id="v-keyboard-check" checked disabled />
+              Virtual Keyboard (Mandatory)
+            </label>
+          </div>
+
+          <div class="bg-yellow-50 p-3 border border-yellow-200">
+            <label class="block text-[#0f4a8a] font-bold mb-1 text-[11px]" for="captcha-input">Enter the text as shown in the image *</label>
+            <div class="flex items-center gap-3 mb-2">
+              <div class="bg-white border border-slate-300 p-2 select-none relative overflow-hidden" aria-hidden="true">
+                <!-- Decorative lines -->
+                <div class="absolute top-1/2 left-0 w-full h-[1px] bg-slate-400 rotate-12"></div>
+                <div class="absolute top-1/2 left-0 w-full h-[1px] bg-slate-400 -rotate-6"></div>
+                <span id="captcha-display" class="font-serif italic text-2xl tracking-widest text-slate-600 opacity-80" style="text-transform: lowercase;"></span>
+              </div>
+              <span class="sr-only" id="captcha-sr-text"></span>
+              <button type="button" class="text-blue-600 text-[10px] hover:underline" id="btn-refresh-captcha">🔄 Reload</button>
+            </div>
+            <input type="text" id="captcha-input" autocomplete="off" class="w-full border border-[#0f4a8a] p-1 min-h-[44px] uppercase" />
+            <div class="text-[10px] text-red-600 mt-1 hidden" id="captcha-error">Invalid CAPTCHA. Case matters!</div>
+          </div>
+
+          <div class="flex gap-2 pt-2">
+            <button type="button" id="btn-login" class="bg-[#466a8e] text-white font-bold px-6 py-1 border border-[#0f4a8a] hover:bg-blue-800 min-h-[44px]">Login</button>
+          </div>
+
+          <div class="mt-4 pt-4 border-t border-[#b0c4de] text-[10px] text-blue-800 flex flex-col gap-1">
+            <a href="#" class="hover:underline">New User ? Register here/Activate</a>
+            <a href="#" class="hover:underline">Forgot Username / Login Password</a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="mt-4 bg-blue-50 border border-blue-200 p-4 text-center">
+        <div class="text-[#0f4a8a] font-bold text-sm mb-2">UNAUTHORIZED TRANSACTIONS</div>
+        <div class="text-2xl font-black text-[#d32f2f] mb-2 tracking-widest">"ACT FAST"</div>
+        <button type="button" id="btn-act-fast" class="text-blue-800 hover:underline focus:outline-blue-500 font-bold text-xs">Click here to Report</button>
+      </div>
+    </div>
+
+    <!-- Right Column: Ad Banner -->
+    <div class="hidden md:block">
+      <img src="/sbi-banner.jpg" alt="Internet Banking Advertisement" class="w-full border border-slate-400 shadow-sm" />
+      <div class="bg-[#2a2a5a] text-white p-4 mt-2 text-[10px] space-y-2">
+        <div class="font-bold text-sm mb-2">Dear Customer,</div>
+        <ul class="list-disc pl-4 space-y-1 text-slate-200">
+          <li>OTP based login & Mandatory login password change after 180 days introduced for added security.</li>
+          <li>Please do not share OTP/password/user information with anyone. Bank never asks for such information.</li>
+          <li>For better control & security of your account, you can Lock or Unlock your INB access through link "Lock & Unlock User" available at bottom of this Page.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
