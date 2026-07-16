@@ -312,7 +312,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
 
   let snake: Point[] = [];
   let direction: Point = { gx: 1, gy: 0 };
-  let nextDirection: Point = { gx: 1, gy: 0 };
+  let directionQueue: Point[] = [];
   let food: Point | null = null;
   let foodType = 0;
   let ladders: Record<number, number> = {};
@@ -560,7 +560,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
       { gx: (start.gx - 2 + GRID_SIZE) % GRID_SIZE, gy: start.gy },
     ];
     direction = { gx: 1, gy: 0 };
-    nextDirection = { gx: 1, gy: 0 };
+    directionQueue = [];
     score = 0;
     frameCount = 0;
     gameRunning = true;
@@ -599,7 +599,9 @@ import SiteLinks from "../../components/SiteLinks.astro";
   }
 
   function tick() {
-    direction = nextDirection;
+    if (directionQueue.length > 0) {
+      direction = directionQueue.shift()!;
+    }
     let destination: Point = {
       gx: (snake[0].gx + direction.gx + GRID_SIZE) % GRID_SIZE,
       gy: (snake[0].gy + direction.gy + GRID_SIZE) % GRID_SIZE,
@@ -608,7 +610,10 @@ import SiteLinks from "../../components/SiteLinks.astro";
     let clearedBoard = false;
     let warpMessage = "";
 
-    if (enteredCell === TOTAL_CELLS) {
+    if (
+      enteredCell === TOTAL_CELLS &&
+      getCellFromCoord(snake[0]) === TOTAL_CELLS - 1
+    ) {
       destination = getCellCoord(1);
       clearedBoard = true;
     } else if (ladders[enteredCell]) {
@@ -851,20 +856,21 @@ import SiteLinks from "../../components/SiteLinks.astro";
 
   function changeDirection(name: DirectionName) {
     if (!gameRunning || gamePaused) return false;
-    if (name === "up" && direction.gy !== 1) {
-      nextDirection = { gx: 0, gy: -1 };
+    const referenceDir = directionQueue.at(-1) ?? direction;
+    if (name === "up" && referenceDir.gy !== 1) {
+      if (directionQueue.length < 2) directionQueue.push({ gx: 0, gy: -1 });
       return true;
     }
-    if (name === "down" && direction.gy !== -1) {
-      nextDirection = { gx: 0, gy: 1 };
+    if (name === "down" && referenceDir.gy !== -1) {
+      if (directionQueue.length < 2) directionQueue.push({ gx: 0, gy: 1 });
       return true;
     }
-    if (name === "left" && direction.gx !== 1) {
-      nextDirection = { gx: -1, gy: 0 };
+    if (name === "left" && referenceDir.gx !== 1) {
+      if (directionQueue.length < 2) directionQueue.push({ gx: -1, gy: 0 });
       return true;
     }
-    if (name === "right" && direction.gx !== -1) {
-      nextDirection = { gx: 1, gy: 0 };
+    if (name === "right" && referenceDir.gx !== -1) {
+      if (directionQueue.length < 2) directionQueue.push({ gx: 1, gy: 0 });
       return true;
     }
     return false;
