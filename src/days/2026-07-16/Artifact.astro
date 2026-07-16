@@ -325,6 +325,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
   let currentSpeed = 100;
   let animationFrame: number | null = null;
   let toastTimer: number | null = null;
+  let wrapBonusClaimed = false;
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const forcedColors = window.matchMedia("(forced-colors: active)");
@@ -562,6 +563,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
     direction = { gx: 1, gy: 0 };
     directionQueue = [];
     score = 0;
+    wrapBonusClaimed = false;
     frameCount = 0;
     gameRunning = true;
     gamePaused = false;
@@ -610,12 +612,12 @@ import SiteLinks from "../../components/SiteLinks.astro";
     let clearedBoard = false;
     let warpMessage = "";
 
-    if (
-      enteredCell === TOTAL_CELLS &&
-      getCellFromCoord(snake[0]) === TOTAL_CELLS - 1
-    ) {
+    if (enteredCell === TOTAL_CELLS) {
       destination = getCellCoord(1);
-      clearedBoard = true;
+      if (!wrapBonusClaimed) {
+        clearedBoard = true;
+        wrapBonusClaimed = true;
+      }
     } else if (ladders[enteredCell]) {
       const exit = ladders[enteredCell];
       destination = getCellCoord(exit);
