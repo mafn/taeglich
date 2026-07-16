@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const routes = ["/d/2026-07-13", "/d/2026-07-14", "/d/2026-07-15"];
+const routes = ["/d/2026-07-18", "/d/2026-07-19", "/d/2026-07-20"];
 const artifactSelectors = [".composition", ".receipt", ".console"];
 
 test.describe("restart triptych", () => {
@@ -48,7 +48,7 @@ test.describe("restart triptych", () => {
     await expect(
       page.getByText("Nothing is owed to the empty days."),
     ).toBeVisible();
-    await expect(page.getByText("2026-07-13 · present")).toBeVisible();
+    await expect(page.getByText("2026-07-18 · present")).toBeVisible();
     await expect(page.locator("article > .composition > footer")).toBeVisible();
     await expect(page.locator("body > footer")).toBeHidden();
   });
