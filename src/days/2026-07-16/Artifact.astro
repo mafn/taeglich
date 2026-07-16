@@ -643,7 +643,7 @@ import SiteLinks from "../../components/SiteLinks.astro";
     }
 
     if (clearedBoard) {
-      score += 100;
+      score += 5;
       const tail = snake.at(-1);
       if (tail) {
         for (let index = 0; index < 5; index += 1) snake.push({ ...tail });
