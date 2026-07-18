@@ -1,988 +1,382 @@
 ---
-import ShellTheme from "../../components/ShellTheme.astro";
 import SiteLinks from "../../components/SiteLinks.astro";
+import "@fontsource/vt323/latin-400.css";
 ---
 
-<ShellTheme
-  bg="#8fa20e"
-  text="#1b2a0c"
-  muted="#35420b"
-  border="#1b2a0c"
-  link="#1b2a0c"
-  linkHover="#0b1405"
-  pillBg="#a4b91a"
-/>
-
-<section
-  class="relative isolate flex min-h-[100svh] w-full flex-col items-center justify-center overflow-x-hidden bg-[var(--lcd)] p-[clamp(1rem,3vw,2rem)] font-mono text-[var(--ink)] max-[23rem]:px-3 forced-colors:bg-[Canvas] forced-colors:text-[CanvasText]"
-  id="snakes-game"
-  aria-labelledby="game-title"
-  style="--lcd: #8fa20e; --lcd-raised: #a4b91a; --ink: #1b2a0c; --ink-soft: #35420b; forced-color-adjust: auto;"
->
-  <div
-    class="pointer-events-none fixed inset-0 -z-10 bg-[var(--lcd)] forced-colors:bg-[Canvas]"
-  >
-  </div>
-
-  <header class="mb-[clamp(0.75rem,3vw,1.5rem)] text-center">
-    <p
-      class="m-0 mb-[0.3rem] text-[clamp(0.65rem,2vw,0.75rem)] font-bold tracking-[0.12em]"
-    >
-      THE 15 × 15 WRAP-AROUND
-    </p>
-    <h1
-      id="game-title"
-      class="m-0 max-w-[22ch] text-[clamp(1.1rem,4.5vw,1.65rem)] leading-[1.05] font-black tracking-tight"
-    >
-      SNAKES &amp; LADDERS &amp; SNAKES
-    </h1>
-  </header>
-
-  <div
-    class="w-[min(100%,37.5rem)] border-4 border-[var(--ink)] bg-[var(--ink)] shadow-[clamp(5px,1.5vw,10px)_clamp(5px,1.5vw,10px)_0_color-mix(in_srgb,var(--ink)_28%,transparent)] max-[23rem]:border-3 max-[23rem]:shadow-[5px_5px_0_color-mix(in_srgb,var(--ink)_28%,transparent)] forced-colors:border-[CanvasText]"
-  >
-    <div
-      class="grid grid-cols-3 border-b-4 border-[var(--ink)] bg-[var(--lcd)] px-[clamp(0.45rem,2vw,0.8rem)] py-[0.55rem] text-[clamp(0.72rem,3vw,1rem)] leading-none font-black tabular-nums max-[23rem]:border-b-3 forced-colors:bg-[Canvas]"
-      aria-hidden="true"
-    >
-      <span id="score-display">PTS 000</span>
-      <span id="cell-display" class="text-center">CELL 001</span>
-      <span id="length-display" class="text-right">LEN 003</span>
-    </div>
-
-    <div
-      class="relative block aspect-square w-full overflow-hidden bg-[var(--lcd)] [image-rendering:pixelated] forced-colors:bg-[Canvas]"
-      id="game-screen"
-    >
-      <p
-        id="cheat-toast"
-        class="animate-toast-pop absolute top-[12%] left-1/2 z-20 m-0 w-max max-w-[calc(100%-2rem)] -translate-x-1/2 bg-[var(--ink)] px-[0.8rem] py-[0.45rem] text-center text-[clamp(0.65rem,2.5vw,0.9rem)] font-black text-[var(--lcd-raised)] motion-reduce:animate-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText]"
-        role="status"
-        hidden
-      >
-        BOARD CLEARED · +5 LENGTH
-      </p>
-
-      <canvas
-        id="game-canvas"
-        class="block h-full w-full focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] forced-colors:focus-visible:outline-[Highlight]"
-        width="600"
-        height="600"
-        role="img"
-        aria-label="Snake at cell 1, length 3, with 0 points."
-        aria-describedby="game-instructions game-status board-map"
-        tabindex="-1"
-      >
-        A 15 by 15 Snakes and Ladders board used as a wrap-around Snake game.
-      </canvas>
-
-      <div
-        id="game-overlay"
-        class="absolute inset-0 z-10 overflow-y-auto overscroll-contain bg-[color-mix(in_srgb,var(--lcd)_96%,transparent)] text-center forced-colors:bg-[Canvas]"
-      >
-        <div
-          class="flex min-h-full w-full flex-col items-center justify-center p-[clamp(1rem,5vw,2rem)]"
-        >
-          <h2
-            id="overlay-title"
-            class="m-0 text-[clamp(1.25rem,5vw,2rem)] leading-none font-black"
-          >
-            THE WRAP-AROUND
-          </h2>
-          <p
-            id="overlay-copy"
-            class="m-0 mt-[0.65rem] max-w-[34ch] text-[clamp(0.75rem,2.8vw,0.95rem)] leading-[1.45]"
-          >
-            Reach cell 225 to return to cell 1 with five extra segments.
-          </p>
-
-          <div
-            class="mt-[clamp(0.85rem,3vw,1.25rem)] flex flex-wrap justify-center gap-[0.45rem]"
-            role="group"
-            aria-label="Game speed"
-          >
-            <button
-              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
-              type="button"
-              data-speed="step"
-              aria-pressed="false"
-            >
-              Step
-            </button>
-            <button
-              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
-              type="button"
-              data-speed="220"
-              aria-pressed="false"
-            >
-              Slow
-            </button>
-            <button
-              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
-              type="button"
-              data-speed="160"
-              aria-pressed="false"
-            >
-              Normal
-            </button>
-            <button
-              class="speed-btn min-h-[2.75rem] min-w-[4.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-transparent px-[0.65rem] py-[0.45rem] text-[0.78rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] aria-pressed:bg-[var(--ink)] aria-pressed:text-[var(--lcd-raised)] aria-pressed:shadow-[inset_0_0_0_2px_var(--lcd-raised)] aria-pressed:hover:bg-[#0b1405] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight] forced-colors:aria-pressed:border-[Highlight] forced-colors:aria-pressed:bg-[Highlight] forced-colors:aria-pressed:text-[HighlightText] forced-colors:aria-pressed:shadow-none"
-              type="button"
-              data-speed="100"
-              aria-pressed="true"
-            >
-              Fast
-            </button>
-          </div>
-
-          <button
-            id="game-action"
-            class="primary-btn mt-4 min-h-[2.75rem] min-w-[9.5rem] cursor-pointer [touch-action:manipulation] border-2 border-[var(--ink)] bg-[var(--ink)] px-[1.25rem] py-[0.75rem] text-[0.95rem] font-black text-[var(--lcd-raised)] uppercase hover:bg-[#0b1405] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
-            type="button">Start game</button
-          >
-        </div>
-      </div>
-
-      <noscript>
-        <p
-          class="absolute inset-0 z-30 m-0 grid place-items-center bg-[var(--lcd)] p-8 text-center font-black forced-colors:bg-[Canvas]"
-        >
-          JavaScript is required to play this game.
-        </p>
-      </noscript>
-    </div>
-  </div>
-
-  <div
-    class="mt-4 flex w-[min(100%,37.5rem)] justify-center has-[.pause-btn[hidden]]:hidden"
-  >
-    <button
-      id="pause-action"
-      class="pause-btn min-h-[2.75rem] min-w-[8rem] cursor-pointer [touch-action:manipulation] rounded-[0.35rem] border-2 border-[var(--ink)] bg-transparent px-[1rem] py-[0.65rem] font-black text-[var(--ink)] uppercase hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] motion-reduce:active:transform-none forced-colors:border-[CanvasText] forced-colors:bg-[ButtonFace] forced-colors:text-[ButtonText] forced-colors:focus-visible:outline-[Highlight]"
-      type="button"
-      aria-controls="game-canvas"
-      hidden>Pause</button
-    >
-  </div>
-
-  <div
-    class="mt-[1.25rem] hidden w-[min(100%,37.5rem)] flex-col items-center gap-[0.85rem] [@media(max-width:48rem)]:flex [@media(pointer:coarse)]:flex"
-    aria-label="Touch controls"
-  >
-    <div class="flex items-center gap-[0.65rem]">
-      <button
-        class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
-        type="button"
-        data-dir="left"
-        disabled
-      >
-        <span aria-hidden="true">←</span><span class="sr-only">Move left</span>
-      </button>
-      <div class="flex flex-col gap-[0.65rem]">
-        <button
-          class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
-          type="button"
-          data-dir="up"
-          disabled
-        >
-          <span aria-hidden="true">↑</span><span class="sr-only">Move up</span>
-        </button>
-        <button
-          class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
-          type="button"
-          data-dir="down"
-          disabled
-        >
-          <span aria-hidden="true">↓</span><span class="sr-only">Move down</span
-          >
-        </button>
-      </div>
-      <button
-        class="control-btn grid h-[3.4rem] w-[3.4rem] [touch-action:manipulation] place-items-center rounded-[0.45rem] border-2 border-[var(--ink)] bg-[var(--ink)] text-[1.45rem] leading-none text-[var(--lcd-raised)] select-none hover:bg-[var(--lcd-raised)] focus-visible:outline-3 focus-visible:outline-offset-3 focus-visible:outline-[var(--ink)] active:translate-y-[2px] disabled:cursor-not-allowed disabled:opacity-48 motion-reduce:active:transform-none forced-colors:border-[Highlight] forced-colors:bg-[Highlight] forced-colors:text-[HighlightText] forced-colors:focus-visible:outline-[Highlight]"
-        type="button"
-        data-dir="right"
-        disabled
-      >
-        <span aria-hidden="true">→</span><span class="sr-only">Move right</span>
-      </button>
-    </div>
-  </div>
-
-  <p
-    id="game-instructions"
-    class="mt-[1.25rem] text-center text-[clamp(0.68rem,2vw,0.8rem)] font-bold text-[var(--ink)] uppercase [@media(max-width:48rem)]:max-w-[30ch]"
-  >
-    Arrow keys or W A S D move · Space pauses and resumes · P also pauses
-  </p>
-  <p id="game-status" class="sr-only" role="status" aria-live="polite">
-    Ready. Choose a speed, then start the game.
-  </p>
-
-  <section id="board-map" class="sr-only" aria-labelledby="board-map-title">
-    <h2 id="board-map-title">Board map</h2>
-    <p id="food-map">Food is placed when the game starts.</p>
-    <h3>Ladders</h3>
-    <ul id="ladder-map">
-      <li>Generated when the game starts.</li>
-    </ul>
-    <h3>Board snakes</h3>
-    <ul id="snake-map">
-      <li>Generated when the game starts.</li>
-    </ul>
-  </section>
-
-  <nav
-    class="mt-[clamp(1.5rem,5vw,3rem)] flex flex-wrap justify-center"
-    aria-label="More from taeglich"
-  >
+<div class="counter" lang="de">
+  <nav aria-label="Site" class="site-links">
     <SiteLinks
-      linkClass="font-mono text-xs font-bold text-[#1b2a0c] underline-offset-4 hover:underline focus-visible:rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1b2a0c]"
-      separatorClass="px-1 text-[#1b2a0c]"
+      linkClass="text-[0.6rem] uppercase tracking-[0.08em] text-[#d8d5cc] underline decoration-[#d8d5cc]/35 underline-offset-4 hover:text-white hover:decoration-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+      separatorClass="text-[#88857d]"
     />
   </nav>
-</section>
+  <article class="receipt" aria-labelledby="receipt-title">
+    <div class="receipt-inner">
+      <header>
+        <p class="brand">TÄGLICH WENIG</p>
+        <h1 id="receipt-title">BETRIEBSGESELLSCHAFT MBH</h1>
+        <p>Land- und forstwirtschaftlicher Nebenbetrieb</p>
+        <address>
+          Am Leerlauf 140<br />
+          00000 Nirgendwo
+        </address>
+        <p>Amtsgericht Nirgendwo · HRB 404404</p>
+        <p>USt-IdNr.: DE000000000</p>
+      </header>
+
+      <div class="rule"></div>
+      <div class="spread strong"><span>KASSENBON</span><span>#0141</span></div>
+      <div class="spread"><span>Kasse</span><span>TAEGLICH-01</span></div>
+      <div class="spread"><span>Bedienung</span><span>WIEDERANFANG</span></div>
+      <div class="spread">
+        <span>Datum</span><time datetime="2026-07-21">21.07.2026</time>
+      </div>
+      <div class="spread">
+        <span>Beginn</span><time datetime="2026-07-21T20:26:00+02:00"
+          >20:26:00</time
+        >
+      </div>
+      <div class="spread">
+        <span>Ende</span><time datetime="2026-07-21T20:27:00+02:00"
+          >20:27:00</time
+        >
+      </div>
+
+      <div class="rule"></div>
+      <section aria-label="Positionen" class="items">
+        <div class="line-item">
+          <span>1 × TAGESSEITE <small>A</small></span><span>4,20</span>
+        </div>
+        <div class="line-item">
+          <span>1 × KLEINE IDEE <small>A</small></span><span>6,90</span>
+        </div>
+        <div class="line-item">
+          <span>1 × STIMMUNG DES TAGES <small>B</small></span><span>3,50</span>
+        </div>
+        <div class="line-item">
+          <span>1 × DATUM, ZUM MITNEHMEN <small>B</small></span><span>1,40</span
+          >
+        </div>
+        <div class="line-item two-line">
+          <span
+            >1 × SOLARMODUL<br /><em>FÜR DEN NEUSTART</em>
+            <small>C</small></span
+          ><span>10,00</span>
+        </div>
+        <div class="line-item">
+          <span>1 × WALDIDEE <small>D</small></span><span>5,55</span>
+        </div>
+        <div class="line-item">
+          <span>1 × FREILANDSTIMMUNG <small>E</small></span><span>7,80</span>
+        </div>
+      </section>
+
+      <div class="rule"></div>
+      <div class="spread"><span>ZWISCHENSUMME</span><span>39,35</span></div>
+      <div class="tip">
+        <div class="spread strong">
+          <span>PFLICHTTRINKGELD <small>A</small></span><span>55,09</span>
+        </div>
+        <div class="spread"><span>140,00 %</span><span>automatisch</span></div>
+      </div>
+      <div class="rule heavy"></div>
+      <div class="spread total"><span>GESAMT</span><span>94,44 EUR</span></div>
+      <div class="spread"><span>GEGEBEN BAR</span><span>100,00 EUR</span></div>
+      <div class="spread"><span>RÜCKGELD</span><span>5,56 EUR</span></div>
+
+      <div class="rule"></div>
+      <table>
+        <caption>Umsatzsteueraufschlüsselung</caption>
+        <thead
+          ><tr
+            ><th abbr="Steuersatz">USt</th><th>Netto</th><th abbr="Steuerbetrag"
+              >USt</th
+            ><th>Brutto</th></tr
+          ></thead
+        >
+        <tbody>
+          <tr><td>A 19%</td><td>55,62</td><td>10,57</td><td>66,19</td></tr>
+          <tr><td>B 7%</td><td>4,58</td><td>0,32</td><td>4,90</td></tr>
+          <tr><td>C 0%</td><td>10,00</td><td>0,00</td><td>10,00</td></tr>
+          <tr><td>D 5,5%</td><td>5,26</td><td>0,29</td><td>5,55</td></tr>
+          <tr><td>E 7,8%</td><td>7,24</td><td>0,56</td><td>7,80</td></tr>
+        </tbody>
+        <tfoot
+          ><tr><th>SUMME</th><th>82,70</th><th>11,74</th><th>94,44</th></tr
+          ></tfoot
+        >
+      </table>
+
+      <div class="rule"></div>
+      <section aria-label="Technische Sicherheitseinrichtung" class="tse">
+        <div class="spread"><span>Vorgang</span><span>BELEG</span></div>
+        <div class="spread">
+          <span>Transaktionsnr.</span><span>NICHT VERGEBEN</span>
+        </div>
+        <div class="spread"><span>Signaturzähler</span><span>—</span></div>
+        <div class="spread"><span>Prüfwert</span><span>—</span></div>
+        <p class="failure">*** TSE-AUSFALL ***</p>
+        <p>
+          Ausfallgrund:<br /><strong>TSE NICHT ERREICHBAR</strong>
+        </p>
+        <p>Letzte Transaktion:<br /><strong>22.02.2026</strong></p>
+        <p>Seriennr. Kasse:<br />544145474C4943482D3031</p>
+        <p class="serial">
+          Seriennr. TSE:<br />00000000000000000000000000000000<br
+          />00000000000000000000000000000000
+        </p>
+      </section>
+
+      <div class="rule"></div>
+      <footer>
+        <p class="thanks">VIELEN DANK FÜR NICHTS.</p>
+        <p class="next">NÄCHSTE SEITE: MORGEN</p>
+        <p class="fine-print">
+          Das Pflichttrinkgeld ist freiwillig verpflichtend und wurde bereits zu
+          Ihrer Bequemlichkeit ausgewählt. Der Nullsteuersatz für das
+          Neustartmodul gilt nur bei Montage auf oder in der Nähe einer
+          Hoffnung. Die Durchschnittssätze D und E setzen eine hinreichend
+          landwirtschaftliche Hoffnung voraus. Reklamationen bitte innerhalb von
+          140 Tagen einreichen. Diese Frist ist bereits abgelaufen.
+        </p>
+      </footer>
+    </div>
+  </article>
+</div>
 
 <style>
-  @keyframes toast-pop {
-    from {
-      opacity: 0;
-      transform: translate(-50%, -0.4rem);
+  .counter {
+    min-height: 100svh;
+    display: grid;
+    place-items: start center;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 50% 0%, #45433e, transparent 45rem), #1e1d1a;
+    padding: clamp(5rem, 8vw, 6rem) 0.75rem clamp(5rem, 9vw, 8rem);
+    color: #191816;
+  }
+
+  .receipt {
+    position: relative;
+    width: min(100%, 29rem);
+    filter: drop-shadow(0 1.5rem 1.4rem rgba(0, 0, 0, 0.45));
+    transform: rotate(-0.35deg);
+  }
+
+  .receipt-inner {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(51, 56, 52, 0.035),
+        transparent 8%,
+        transparent 91%,
+        rgba(51, 56, 52, 0.035)
+      ),
+      #f8f7f1;
+    padding: clamp(2rem, 8vw, 3.25rem) clamp(1.15rem, 7vw, 2.4rem) 3.75rem;
+    font-family: "VT323", "Courier New", monospace;
+    font-size: clamp(0.94rem, 3.5vw, 1.08rem);
+    line-height: 1.28;
+    letter-spacing: 0.018em;
+    text-shadow: 0.2px 0 currentColor;
+  }
+
+  .receipt-inner::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.12;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0 4px,
+      rgba(255, 255, 255, 0.72) 5px
+    );
+    mix-blend-mode: screen;
+  }
+
+  header,
+  footer {
+    text-align: center;
+  }
+  header p,
+  header h1,
+  address {
+    margin: 0;
+  }
+  address {
+    font-style: normal;
+    margin: 0.65rem 0;
+  }
+  .brand {
+    font-size: 1.45em;
+    font-weight: 850;
+    letter-spacing: 0.08em;
+  }
+  h1 {
+    font-size: 0.94em;
+    font-weight: 750;
+    letter-spacing: 0.03em;
+  }
+  .rule {
+    height: 1px;
+    border-top: 1px dashed currentColor;
+    margin: 1rem 0;
+    opacity: 0.78;
+  }
+  .rule.heavy {
+    border-top: 3px double currentColor;
+    height: 3px;
+  }
+  .spread,
+  .line-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+  .spread > :last-child,
+  .line-item > :last-child {
+    flex: none;
+    text-align: right;
+  }
+  .strong {
+    font-weight: 800;
+  }
+  .items {
+    display: grid;
+    gap: 0.72rem;
+  }
+  .two-line {
+    align-items: end;
+  }
+  em {
+    font-style: normal;
+    padding-left: 2ch;
+  }
+  small {
+    font: inherit;
+    font-size: 0.78em;
+    vertical-align: top;
+  }
+  .tip {
+    border: 1px solid currentColor;
+    padding: 0.55rem 0.65rem;
+    margin: 0.8rem -0.35rem;
+  }
+  .total {
+    align-items: baseline;
+    font-size: 1.25em;
+    font-weight: 900;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font: inherit;
+  }
+  caption {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  th,
+  td {
+    padding: 0.12rem 0;
+    text-align: right;
+    font-weight: 400;
+  }
+  th:first-child,
+  td:first-child {
+    text-align: left;
+  }
+  thead th,
+  tfoot th {
+    font-weight: 800;
+  }
+  tfoot {
+    border-top: 1px solid currentColor;
+  }
+  .tse p {
+    margin: 1rem 0 0;
+  }
+  .failure {
+    padding: 0.45rem;
+    border: 2px solid currentColor;
+    text-align: center;
+    font-size: 1.1em;
+    font-weight: 900;
+    letter-spacing: 0.06em;
+  }
+  .serial {
+    overflow-wrap: anywhere;
+  }
+  .thanks {
+    margin: 1.4rem 0 0;
+    font-size: 1.08em;
+    font-weight: 900;
+  }
+  .next {
+    margin: 0.7rem 0 2.25rem;
+    letter-spacing: 0.08em;
+  }
+  .fine-print {
+    margin: 0;
+    text-align: justify;
+    font-size: 0.68em;
+    line-height: 1.45;
+    opacity: 0.8;
+  }
+  .site-links {
+    position: fixed;
+    z-index: 10;
+    top: 1rem;
+    right: 1rem;
+    display: flex;
+    justify-content: center;
+    gap: 0.55rem;
+    border: 1px solid rgba(216, 213, 204, 0.2);
+    border-radius: 999px;
+    background: rgba(30, 29, 26, 0.9);
+    padding: 0.5rem 0.7rem;
+  }
+
+  @media (max-width: 25rem) {
+    .receipt-inner {
+      padding-inline: 0.85rem;
+    }
+    .brand {
+      font-size: 1.25em;
     }
   }
-  .animate-toast-pop {
-    animation: toast-pop 180ms ease-out;
+
+  @media (forced-colors: active) {
+    .receipt {
+      filter: none;
+    }
+    .receipt-inner::after {
+      display: none;
+    }
+    .receipt-inner {
+      border: 2px solid CanvasText;
+      background: Canvas;
+      color: CanvasText;
+    }
+    .rule,
+    .tip,
+    .failure,
+    tfoot,
+    .site-links {
+      border-color: CanvasText;
+    }
+    .fine-print {
+      opacity: 1;
+    }
   }
 </style>
-
-<script>
-  import { drawFoodIcon } from "./food-icons";
-
-  type Point = { gx: number; gy: number };
-  type DirectionName = "up" | "down" | "left" | "right";
-  type Palette = { background: string; ink: string; accent: string };
-
-  const GRID_SIZE = 15;
-  const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
-  const CANVAS_SIZE = 600;
-  const ROUTES_PER_TYPE = 4;
-  const DEFAULT_INK = "#1b2a0c";
-  const DEFAULT_LCD = "#8fa20e";
-  const DEFAULT_ACCENT = "#1b2a0c";
-
-  const getGameRoot = () => {
-    const element = document.querySelector<HTMLElement>("#snakes-game");
-    if (!element) throw new Error("Missing Snakes game root");
-    return element;
-  };
-  const root = getGameRoot();
-
-  const getElement = <T extends Element>(selector: string) => {
-    const element = root.querySelector<T>(selector);
-    if (!element) throw new Error(`Missing Snakes game element: ${selector}`);
-    return element;
-  };
-
-  const canvas = getElement<HTMLCanvasElement>("#game-canvas");
-  const getCanvasContext = (target: HTMLCanvasElement) => {
-    const value = target.getContext("2d");
-    if (!value) throw new Error("Canvas 2D context is unavailable");
-    return value;
-  };
-  const context = getCanvasContext(canvas);
-
-  const overlay = getElement<HTMLElement>("#game-overlay");
-  const overlayTitle = getElement<HTMLElement>("#overlay-title");
-  const overlayCopy = getElement<HTMLElement>("#overlay-copy");
-  const gameAction = getElement<HTMLButtonElement>("#game-action");
-  const pauseAction = getElement<HTMLButtonElement>("#pause-action");
-  const cheatToast = getElement<HTMLElement>("#cheat-toast");
-  const status = getElement<HTMLElement>("#game-status");
-  const foodMap = getElement<HTMLElement>("#food-map");
-  const ladderMap = getElement<HTMLUListElement>("#ladder-map");
-  const snakeMap = getElement<HTMLUListElement>("#snake-map");
-  const scoreDisplay = getElement<HTMLElement>("#score-display");
-  const cellDisplay = getElement<HTMLElement>("#cell-display");
-  const lengthDisplay = getElement<HTMLElement>("#length-display");
-  const speedButtons = Array.from(
-    root.querySelectorAll<HTMLButtonElement>("[data-speed]"),
-  );
-  const directionButtons = Array.from(
-    root.querySelectorAll<HTMLButtonElement>("[data-dir]"),
-  );
-
-  let snake: Point[] = [];
-  let direction: Point = { gx: 1, gy: 0 };
-  let directionQueue: Point[] = [];
-  let food: Point | null = null;
-  let foodType = 0;
-  let ladders: Record<number, number> = {};
-  let boardSnakes: Record<number, number> = {};
-  let gameRunning = false;
-  let gamePaused = false;
-  let lastTick = 0;
-  let score = 0;
-  let frameCount = 0;
-  let currentSpeed = 100;
-  let animationFrame: number | null = null;
-  let toastTimer: number | null = null;
-  let wrapBonusClaimed = false;
-
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const forcedColors = window.matchMedia("(forced-colors: active)");
-  let palette = resolvePalette();
-
-  function resolveSystemColor(value: string) {
-    const probe = document.createElement("span");
-    probe.style.color = value;
-    probe.hidden = true;
-    root.append(probe);
-    const resolved = getComputedStyle(probe).color;
-    probe.remove();
-    return resolved;
-  }
-
-  function resolvePalette(): Palette {
-    const nextPalette = forcedColors.matches
-      ? {
-          background: resolveSystemColor("Canvas"),
-          ink: resolveSystemColor("CanvasText"),
-          accent: resolveSystemColor("Highlight"),
-        }
-      : {
-          background: DEFAULT_LCD,
-          ink: DEFAULT_INK,
-          accent: DEFAULT_ACCENT,
-        };
-    canvas.dataset.paletteMode = forcedColors.matches ? "forced" : "lcd";
-    canvas.dataset.backgroundColor = nextPalette.background;
-    canvas.dataset.inkColor = nextPalette.ink;
-    return nextPalette;
-  }
-
-  function getCellCoord(cell: number): Point {
-    const row = Math.floor((cell - 1) / GRID_SIZE);
-    const offset = (cell - 1) % GRID_SIZE;
-    const gx = row % 2 === 0 ? offset : GRID_SIZE - 1 - offset;
-    const gy = GRID_SIZE - 1 - row;
-    return { gx, gy };
-  }
-
-  function getCellFromCoord({ gx, gy }: Point) {
-    const row = GRID_SIZE - 1 - gy;
-    const offset = row % 2 === 0 ? gx : GRID_SIZE - 1 - gx;
-    return row * GRID_SIZE + offset + 1;
-  }
-
-  function randomInteger(min: number, max: number) {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  }
-
-  function routesCross(a: Point, b: Point, c: Point, d: Point) {
-    const cross = (origin: Point, first: Point, second: Point) =>
-      (first.gx - origin.gx) * (second.gy - origin.gy) -
-      (first.gy - origin.gy) * (second.gx - origin.gx);
-    const firstPair = cross(a, b, c) * cross(a, b, d);
-    const secondPair = cross(c, d, a) * cross(c, d, b);
-    return firstPair <= 0 && secondPair <= 0;
-  }
-
-  function routeWouldCross(
-    startCell: number,
-    endCell: number,
-    routes: Array<[Point, Point]>,
-  ) {
-    const start = getCellCoord(startCell);
-    const end = getCellCoord(endCell);
-    return routes.some(([routeStart, routeEnd]) =>
-      routesCross(start, end, routeStart, routeEnd),
-    );
-  }
-
-  function replaceMapList(
-    target: HTMLUListElement,
-    entries: Array<[string, number]>,
-    label: string,
-  ) {
-    const items = entries.map(([start, end]) => {
-      const item = document.createElement("li");
-      item.textContent = `${label} from cell ${start} to cell ${end}.`;
-      return item;
-    });
-    target.replaceChildren(...items);
-  }
-
-  function updateBoardMap() {
-    replaceMapList(ladderMap, Object.entries(ladders), "Ladder");
-    replaceMapList(snakeMap, Object.entries(boardSnakes), "Snake");
-    foodMap.textContent = food
-      ? `Food is at cell ${getCellFromCoord(food)}.`
-      : "No food remains on the board.";
-  }
-
-  function generateBoard() {
-    ladders = {};
-    boardSnakes = {};
-    const used = new Set([1, TOTAL_CELLS]);
-    const routes: Array<[Point, Point]> = [];
-
-    let attempts = 0;
-    while (Object.keys(ladders).length < ROUTES_PER_TYPE && attempts < 5_000) {
-      attempts += 1;
-      const start = randomInteger(2, TOTAL_CELLS - GRID_SIZE);
-      const end = randomInteger(
-        start + GRID_SIZE,
-        Math.min(TOTAL_CELLS - 1, start + 75),
-      );
-      if (
-        used.has(start) ||
-        used.has(end) ||
-        routeWouldCross(start, end, routes)
-      )
-        continue;
-      ladders[start] = end;
-      used.add(start);
-      used.add(end);
-      routes.push([getCellCoord(start), getCellCoord(end)]);
-    }
-
-    attempts = 0;
-    while (
-      Object.keys(boardSnakes).length < ROUTES_PER_TYPE &&
-      attempts < 5_000
-    ) {
-      attempts += 1;
-      const head = randomInteger(GRID_SIZE + 1, TOTAL_CELLS - 2);
-      const tail = randomInteger(Math.max(2, head - 75), head - GRID_SIZE);
-      if (
-        used.has(head) ||
-        used.has(tail) ||
-        routeWouldCross(head, tail, routes)
-      )
-        continue;
-      boardSnakes[head] = tail;
-      used.add(head);
-      used.add(tail);
-      routes.push([getCellCoord(head), getCellCoord(tail)]);
-    }
-
-    updateBoardMap();
-  }
-
-  function setControlsRunning(running: boolean) {
-    directionButtons.forEach((button) => {
-      button.disabled = !running;
-    });
-  }
-
-  function showOverlay(title: string, copy: string, action: string) {
-    overlayTitle.textContent = title;
-    overlayCopy.textContent = copy;
-    gameAction.textContent = action;
-    overlay.hidden = false;
-    canvas.tabIndex = -1;
-    pauseAction.hidden = true;
-    setControlsRunning(false);
-  }
-
-  function hideOverlay() {
-    overlay.hidden = true;
-    canvas.tabIndex = 0;
-    pauseAction.hidden = false;
-    setControlsRunning(!gamePaused);
-  }
-
-  function spawnFood() {
-    const occupied = new Set(snake.map((point) => getCellFromCoord(point)));
-    const candidates: Point[] = [];
-
-    for (let cell = 1; cell < TOTAL_CELLS; cell += 1) {
-      if (occupied.has(cell) || ladders[cell] || boardSnakes[cell]) continue;
-      candidates.push(getCellCoord(cell));
-    }
-
-    if (candidates.length === 0) {
-      food = null;
-      updateBoardMap();
-      return false;
-    }
-
-    food = candidates[randomInteger(0, candidates.length - 1)];
-    foodType = randomInteger(0, 11);
-    updateBoardMap();
-    return true;
-  }
-
-  function updateHUD() {
-    const headCell = getCellFromCoord(snake[0]);
-    scoreDisplay.textContent = `PTS ${String(score).padStart(3, "0")}`;
-    cellDisplay.textContent = `CELL ${String(headCell).padStart(3, "0")}`;
-    lengthDisplay.textContent = `LEN ${String(snake.length).padStart(3, "0")}`;
-    canvas.setAttribute(
-      "aria-label",
-      `Snake at cell ${headCell}, length ${snake.length}, with ${score} points${
-        gamePaused ? ", paused" : currentSpeed === 0 ? ", step mode" : ""
-      }.`,
-    );
-  }
-
-  function setPaused(paused: boolean) {
-    if (!gameRunning || gamePaused === paused) return;
-    gamePaused = paused;
-    pauseAction.textContent = paused ? "Resume" : "Pause";
-    setControlsRunning(!paused);
-    updateHUD();
-
-    if (paused) {
-      if (animationFrame !== null) cancelAnimationFrame(animationFrame);
-      animationFrame = null;
-      status.textContent = "Game paused.";
-      return;
-    }
-
-    status.textContent =
-      currentSpeed === 0
-        ? "Game resumed in step mode. Use a direction control for each move."
-        : "Game resumed.";
-    lastTick = performance.now();
-    if (currentSpeed > 0) animationFrame = requestAnimationFrame(gameLoop);
-  }
-
-  function initialiseGame() {
-    const scrollPosition = { x: window.scrollX, y: window.scrollY };
-    if (animationFrame !== null) cancelAnimationFrame(animationFrame);
-    if (toastTimer !== null) window.clearTimeout(toastTimer);
-    cheatToast.hidden = true;
-
-    generateBoard();
-    const start = getCellCoord(1);
-    snake = [
-      start,
-      { gx: (start.gx - 1 + GRID_SIZE) % GRID_SIZE, gy: start.gy },
-      { gx: (start.gx - 2 + GRID_SIZE) % GRID_SIZE, gy: start.gy },
-    ];
-    direction = { gx: 1, gy: 0 };
-    directionQueue = [];
-    score = 0;
-    wrapBonusClaimed = false;
-    frameCount = 0;
-    gameRunning = true;
-    gamePaused = false;
-    pauseAction.textContent = "Pause";
-    spawnFood();
-    lastTick = performance.now();
-    hideOverlay();
-    updateHUD();
-    status.textContent =
-      currentSpeed === 0
-        ? "Game started in step mode at cell 1. Use a direction control for each move."
-        : "Game started at cell 1 with a length of 3.";
-    canvas.focus({ preventScroll: true });
-    requestAnimationFrame(() => {
-      window.scrollTo(scrollPosition.x, scrollPosition.y);
-    });
-    draw();
-    if (currentSpeed > 0) animationFrame = requestAnimationFrame(gameLoop);
-  }
-
-  function gameLoop(time: number) {
-    if (!gameRunning || gamePaused || currentSpeed === 0) return;
-    frameCount += 1;
-    if (time - lastTick >= currentSpeed) {
-      tick();
-      lastTick = time;
-    }
-    draw();
-    if (gameRunning && !gamePaused && currentSpeed > 0)
-      animationFrame = requestAnimationFrame(gameLoop);
-  }
-
-  function pointsMatch(a: Point, b: Point) {
-    return a.gx === b.gx && a.gy === b.gy;
-  }
-
-  function tick() {
-    if (directionQueue.length > 0) {
-      direction = directionQueue.shift()!;
-    }
-    let destination: Point = {
-      gx: (snake[0].gx + direction.gx + GRID_SIZE) % GRID_SIZE,
-      gy: (snake[0].gy + direction.gy + GRID_SIZE) % GRID_SIZE,
-    };
-    const enteredCell = getCellFromCoord(destination);
-    let clearedBoard = false;
-    let warpMessage = "";
-
-    if (enteredCell === TOTAL_CELLS) {
-      destination = getCellCoord(1);
-      if (!wrapBonusClaimed) {
-        clearedBoard = true;
-        wrapBonusClaimed = true;
-      }
-    } else if (ladders[enteredCell]) {
-      const exit = ladders[enteredCell];
-      destination = getCellCoord(exit);
-      warpMessage = `Ladder from cell ${enteredCell} to cell ${exit}.`;
-    } else if (boardSnakes[enteredCell]) {
-      const exit = boardSnakes[enteredCell];
-      destination = getCellCoord(exit);
-      warpMessage = `Snake from cell ${enteredCell} to cell ${exit}.`;
-    }
-
-    const ateFood = food !== null && pointsMatch(destination, food);
-    const bodyToCheck = ateFood || clearedBoard ? snake : snake.slice(0, -1);
-    if (bodyToCheck.some((part) => pointsMatch(part, destination))) {
-      endGame("SELF COLLISION");
-      return;
-    }
-
-    snake.unshift(destination);
-    if (ateFood) {
-      score += 10;
-    } else {
-      snake.pop();
-    }
-
-    if (clearedBoard) {
-      score += 100;
-      const tail = snake.at(-1);
-      if (tail) {
-        for (let index = 0; index < 5; index += 1) snake.push({ ...tail });
-      }
-      showCheat();
-    }
-
-    if (ateFood && !spawnFood()) {
-      updateHUD();
-      endGame(
-        "BOARD FILLED",
-        `Food collected at cell ${getCellFromCoord(snake[0])}. No food remains on the board.`,
-      );
-      return;
-    }
-
-    updateHUD();
-    const currentCell = getCellFromCoord(snake[0]);
-    const currentFood = food
-      ? `Food is at cell ${getCellFromCoord(food)}.`
-      : "No food remains on the board.";
-    if (clearedBoard) {
-      status.textContent = `Board cleared.${ateFood ? ` Food collected at cell ${currentCell}.` : ""} Current cell ${currentCell}, ${score} points, length ${snake.length}. ${ateFood ? "New " : ""}${ateFood ? currentFood.toLowerCase() : currentFood}`;
-    } else if (warpMessage) {
-      status.textContent = `${warpMessage}${ateFood ? ` Food collected at cell ${currentCell}.` : ""} Current cell ${currentCell}. ${ateFood ? "New " : ""}${ateFood ? currentFood.toLowerCase() : currentFood}`;
-    } else if (ateFood) {
-      status.textContent = `Food collected at cell ${currentCell}. ${score} points, length ${snake.length}. New ${currentFood.toLowerCase()}`;
-    } else if (currentSpeed === 0) {
-      status.textContent = `Moved to cell ${currentCell}. ${currentFood}`;
-    }
-  }
-
-  function showCheat() {
-    if (toastTimer !== null) window.clearTimeout(toastTimer);
-    cheatToast.hidden = false;
-    toastTimer = window.setTimeout(() => {
-      cheatToast.hidden = true;
-      toastTimer = null;
-    }, 2_000);
-  }
-
-  function draw() {
-    const cellSize = CANVAS_SIZE / GRID_SIZE;
-    context.fillStyle = palette.background;
-    context.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    context.fillStyle = palette.ink;
-
-    const labelledCells = new Set<number>([1, TOTAL_CELLS]);
-    const endpointCells = new Set<number>([1, TOTAL_CELLS]);
-    for (const [start, end] of [
-      ...Object.entries(ladders),
-      ...Object.entries(boardSnakes),
-    ]) {
-      labelledCells.add(Number(start));
-      labelledCells.add(end);
-      endpointCells.add(Number(start));
-      endpointCells.add(end);
-    }
-    if (food) labelledCells.add(getCellFromCoord(food));
-
-    for (let cell = 1; cell <= TOTAL_CELLS; cell += 1) {
-      if (cell % 5 !== 0 && !labelledCells.has(cell)) continue;
-      const { gx, gy } = getCellCoord(cell);
-      const label = String(cell);
-      context.font = endpointCells.has(cell)
-        ? "bold 14px monospace"
-        : "bold 13px monospace";
-      const x = gx * cellSize + 3;
-      const y = gy * cellSize + 14;
-      context.fillText(label, x, y);
-      if (endpointCells.has(cell)) {
-        context.fillRect(
-          x,
-          y + 2,
-          Math.min(context.measureText(label).width, cellSize - 6),
-          2,
-        );
-      }
-    }
-
-    for (const [start, end] of Object.entries(ladders)) {
-      drawLadder(getCellCoord(Number(start)), getCellCoord(end), cellSize);
-    }
-    for (const [head, tail] of Object.entries(boardSnakes)) {
-      drawBoardSnake(getCellCoord(Number(head)), getCellCoord(tail), cellSize);
-    }
-
-    if (food) {
-      drawFoodIcon(
-        context,
-        foodType,
-        food.gx * cellSize,
-        food.gy * cellSize,
-        palette.accent,
-        palette.background,
-      );
-    }
-
-    snake.forEach((part, index) => {
-      context.fillStyle = forcedColors.matches ? palette.accent : palette.ink;
-      const x = part.gx * cellSize;
-      const y = part.gy * cellSize;
-      if (index === 0) {
-        context.beginPath();
-        context.roundRect(x, y, cellSize, cellSize, 4);
-        context.fill();
-        context.fillStyle = palette.background;
-        const eye = 3;
-        if (direction.gx === 1) {
-          context.fillRect(x + cellSize - 5, y + 4, eye, eye);
-          context.fillRect(x + cellSize - 5, y + cellSize - 7, eye, eye);
-        } else if (direction.gx === -1) {
-          context.fillRect(x + 2, y + 4, eye, eye);
-          context.fillRect(x + 2, y + cellSize - 7, eye, eye);
-        } else if (direction.gy === 1) {
-          context.fillRect(x + 4, y + cellSize - 5, eye, eye);
-          context.fillRect(x + cellSize - 7, y + cellSize - 5, eye, eye);
-        } else {
-          context.fillRect(x + 4, y + 2, eye, eye);
-          context.fillRect(x + cellSize - 7, y + 2, eye, eye);
-        }
-
-        if (reducedMotion.matches || frameCount % 20 < 10) {
-          context.fillStyle = forcedColors.matches
-            ? palette.accent
-            : palette.ink;
-          context.fillRect(
-            x + cellSize / 2 + direction.gx * (cellSize / 2) - 1,
-            y + cellSize / 2 + direction.gy * (cellSize / 2) - 1,
-            direction.gx ? 4 : 2,
-            direction.gy ? 4 : 2,
-          );
-        }
-      } else {
-        const padding = 2;
-        context.beginPath();
-        context.roundRect(
-          x + padding,
-          y + padding,
-          cellSize - padding * 2,
-          cellSize - padding * 2,
-          6,
-        );
-        context.fill();
-      }
-    });
-  }
-
-  function drawLadder(start: Point, end: Point, cellSize: number) {
-    const x1 = start.gx * cellSize + cellSize / 2;
-    const y1 = start.gy * cellSize + cellSize / 2;
-    const x2 = end.gx * cellSize + cellSize / 2;
-    const y2 = end.gy * cellSize + cellSize / 2;
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-    const perpendicularX = Math.cos(angle + Math.PI / 2) * 5;
-    const perpendicularY = Math.sin(angle + Math.PI / 2) * 5;
-
-    context.strokeStyle = palette.ink;
-    context.lineWidth = 3;
-    context.lineCap = "round";
-    context.beginPath();
-    context.moveTo(x1 - perpendicularX, y1 - perpendicularY);
-    context.lineTo(x2 - perpendicularX, y2 - perpendicularY);
-    context.stroke();
-    context.beginPath();
-    context.moveTo(x1 + perpendicularX, y1 + perpendicularY);
-    context.lineTo(x2 + perpendicularX, y2 + perpendicularY);
-    context.stroke();
-    context.lineWidth = 1.5;
-    for (let rung = 1; rung < 6; rung += 1) {
-      const x = x1 + (x2 - x1) * (rung / 6);
-      const y = y1 + (y2 - y1) * (rung / 6);
-      context.beginPath();
-      context.moveTo(x - perpendicularX, y - perpendicularY);
-      context.lineTo(x + perpendicularX, y + perpendicularY);
-      context.stroke();
-    }
-  }
-
-  function drawBoardSnake(head: Point, tail: Point, cellSize: number) {
-    const x1 = head.gx * cellSize + cellSize / 2;
-    const y1 = head.gy * cellSize + cellSize / 2;
-    const x2 = tail.gx * cellSize + cellSize / 2;
-    const y2 = tail.gy * cellSize + cellSize / 2;
-    const distance = Math.hypot(x2 - x1, y2 - y1);
-    const angle = Math.atan2(y2 - y1, x2 - x1);
-
-    context.strokeStyle = palette.ink;
-    context.lineWidth = 2.5;
-    context.beginPath();
-    context.moveTo(x1, y1);
-    for (let step = 0; step <= distance; step += 4) {
-      context.lineTo(
-        x1 + Math.cos(angle) * step + Math.sin(angle) * Math.sin(step / 8) * 6,
-        y1 + Math.sin(angle) * step + Math.cos(angle) * Math.sin(step / 8) * 6,
-      );
-    }
-    context.stroke();
-    context.fillStyle = palette.ink;
-    context.beginPath();
-    context.arc(x1, y1, 4, 0, Math.PI * 2);
-    context.fill();
-  }
-
-  function endGame(title: string, eventAnnouncement = "") {
-    gameRunning = false;
-    gamePaused = false;
-    showOverlay(title, `${score} points · length ${snake.length}`, "Try again");
-    status.textContent = `${eventAnnouncement}${eventAnnouncement ? " " : ""}${title}. Current cell ${getCellFromCoord(snake[0])}. Final score ${score}, length ${snake.length}.`;
-    requestAnimationFrame(() => gameAction.focus({ preventScroll: true }));
-  }
-
-  function changeDirection(name: DirectionName) {
-    if (!gameRunning || gamePaused) return false;
-    const referenceDir = directionQueue.at(-1) ?? direction;
-    if (name === "up" && referenceDir.gy !== 1) {
-      if (directionQueue.length < 2) directionQueue.push({ gx: 0, gy: -1 });
-      return true;
-    }
-    if (name === "down" && referenceDir.gy !== -1) {
-      if (directionQueue.length < 2) directionQueue.push({ gx: 0, gy: 1 });
-      return true;
-    }
-    if (name === "left" && referenceDir.gx !== 1) {
-      if (directionQueue.length < 2) directionQueue.push({ gx: -1, gy: 0 });
-      return true;
-    }
-    if (name === "right" && referenceDir.gx !== -1) {
-      if (directionQueue.length < 2) directionQueue.push({ gx: 1, gy: 0 });
-      return true;
-    }
-    return false;
-  }
-
-  function move(name: DirectionName) {
-    if (!changeDirection(name)) return;
-    if (currentSpeed === 0) {
-      tick();
-      draw();
-    }
-  }
-
-  const directionByKey: Record<string, DirectionName> = {
-    ArrowUp: "up",
-    w: "up",
-    ArrowDown: "down",
-    s: "down",
-    ArrowLeft: "left",
-    a: "left",
-    ArrowRight: "right",
-    d: "right",
-  };
-
-  document.addEventListener("keydown", (event) => {
-    if (event.altKey || event.ctrlKey || event.metaKey) return;
-    const target = event.target;
-    if (
-      target instanceof Element &&
-      target.closest("button, a, input, select, textarea, [contenteditable]")
-    ) {
-      return;
-    }
-
-    if (!gameRunning && event.code === "Space") {
-      event.preventDefault();
-      initialiseGame();
-      return;
-    }
-
-    if (
-      gameRunning &&
-      (event.code === "Space" || event.key.toLowerCase() === "p")
-    ) {
-      event.preventDefault();
-      setPaused(!gamePaused);
-      return;
-    }
-
-    const requestedDirection =
-      directionByKey[event.key.toLowerCase()] ?? directionByKey[event.key];
-    if (gameRunning && requestedDirection) {
-      event.preventDefault();
-      move(requestedDirection);
-    }
-  });
-
-  directionButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      const requestedDirection = button.dataset.dir as
-        | DirectionName
-        | undefined;
-      if (requestedDirection) move(requestedDirection);
-    });
-  });
-
-  let speedExplicitlyChosen = false;
-
-  function selectSpeed(button: HTMLButtonElement, explicit: boolean) {
-    const speed = button.dataset.speed;
-    currentSpeed = speed === "step" ? 0 : Number(speed);
-    if (!Number.isFinite(currentSpeed)) return;
-    if (explicit) speedExplicitlyChosen = true;
-    speedButtons.forEach((candidate) => {
-      candidate.setAttribute("aria-pressed", String(candidate === button));
-    });
-  }
-
-  speedButtons.forEach((button) => {
-    button.addEventListener("click", () => {
-      selectSpeed(button, true);
-    });
-  });
-
-  gameAction.addEventListener("click", initialiseGame);
-  pauseAction.addEventListener("click", () => setPaused(!gamePaused));
-
-  document.addEventListener("visibilitychange", () => {
-    if (document.hidden && gameRunning && !gamePaused) setPaused(true);
-  });
-
-  reducedMotion.addEventListener("change", () => {
-    if (speedExplicitlyChosen) return;
-    const preferred = speedButtons.find(
-      (button) =>
-        button.dataset.speed === (reducedMotion.matches ? "step" : "100"),
-    );
-    if (preferred) selectSpeed(preferred, false);
-  });
-
-  forcedColors.addEventListener("change", () => {
-    palette = resolvePalette();
-    draw();
-  });
-
-  const initialSpeed = speedButtons.find(
-    (button) =>
-      button.dataset.speed === (reducedMotion.matches ? "step" : "100"),
-  );
-  if (initialSpeed) selectSpeed(initialSpeed, false);
-
-  draw();
-</script>

@@ -1,0 +1,273 @@
+---
+import SiteLinks from "../../components/SiteLinks.astro";
+---
+
+<div id="power-artifact" class="power-room" data-state="standby">
+  <div class="noise" aria-hidden="true"></div>
+  <section class="console" aria-labelledby="power-title">
+    <p class="wordmark">taegli.ch</p>
+    <h1 id="power-title">Power</h1>
+
+    <button
+      class="power-button"
+      type="button"
+      aria-pressed="false"
+      aria-label="Switch taegli.ch on"
+    >
+      <span class="button-face" aria-hidden="true">
+        <svg viewBox="0 0 64 64" role="presentation">
+          <path d="M32 8v22M17.5 17.5a23 23 0 1 0 29 0"></path>
+        </svg>
+      </span>
+    </button>
+
+    <p class="state" aria-live="polite" aria-atomic="true">STANDBY</p>
+    <p class="signal">The signal is live.</p>
+    <nav aria-label="Site" class="site-links">
+      <SiteLinks
+        linkClass="font-mono text-[0.62rem] uppercase tracking-[0.1em] text-[#aaa9a3] underline decoration-[#aaa9a3]/35 underline-offset-4 hover:text-[#e4e3dd] hover:decoration-[#e4e3dd] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#e7e4da]"
+        separatorClass="text-[#666761]"
+      />
+    </nav>
+  </section>
+</div>
+
+<script is:inline>
+  const room = document.querySelector("#power-artifact");
+  const button = room?.querySelector(".power-button");
+  const state = room?.querySelector(".state");
+
+  button?.addEventListener("click", () => {
+    const isOn = button.getAttribute("aria-pressed") !== "true";
+    button.setAttribute("aria-pressed", String(isOn));
+    button.setAttribute(
+      "aria-label",
+      isOn ? "Switch taegli.ch to standby" : "Switch taegli.ch on",
+    );
+    room?.setAttribute("data-state", isOn ? "on" : "standby");
+    if (state) state.textContent = isOn ? "ON" : "STANDBY";
+  });
+</script>
+
+<style>
+  .power-room {
+    --glow: #9dff9b;
+    min-height: 100svh;
+    display: grid;
+    place-items: center;
+    position: relative;
+    overflow: hidden;
+    background: #050606;
+    color: #85847e;
+    transition:
+      background-color 1.1s ease,
+      color 0.8s ease;
+  }
+
+  .power-room::before {
+    content: "";
+    position: absolute;
+    width: min(90vw, 45rem);
+    aspect-ratio: 1;
+    border-radius: 50%;
+    background: radial-gradient(
+      circle,
+      rgba(104, 255, 123, 0.11),
+      transparent 68%
+    );
+    opacity: 0;
+    transform: scale(0.75);
+    transition:
+      opacity 1.2s ease,
+      transform 1.2s ease;
+  }
+
+  .noise {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0 3px,
+      rgba(255, 255, 255, 0.014) 4px
+    );
+  }
+
+  .console {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    justify-items: center;
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+
+  h1 {
+    margin: 0 0 clamp(3rem, 10vh, 6rem);
+    color: #8b8a84;
+    font:
+      500 clamp(0.72rem, 2vw, 0.82rem)/1 "JetBrains Mono Variable",
+      monospace;
+    letter-spacing: 0.32em;
+    text-transform: uppercase;
+  }
+
+  .wordmark {
+    margin: 0 0 0.75rem;
+    color: #c5c3ba;
+    font:
+      520 clamp(1.5rem, 5vw, 2.35rem)/1 "Space Grotesk Variable",
+      sans-serif;
+    letter-spacing: -0.045em;
+  }
+
+  .power-button {
+    width: clamp(7rem, 25vw, 9.5rem);
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    appearance: none;
+    border: 0;
+    border-radius: 50%;
+    background: #090a0a;
+    padding: 0.65rem;
+    box-shadow:
+      0 1.2rem 2.5rem #000,
+      inset 0 1px 1px #292a29,
+      0 0 0 1px #292a29;
+    cursor: pointer;
+  }
+
+  .power-button:focus-visible {
+    outline: 3px solid #e7e4da;
+    outline-offset: 7px;
+  }
+
+  .button-face {
+    width: 100%;
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border: 1px solid #30312f;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #20211f, #0b0c0b 58%);
+    box-shadow:
+      inset 0 2px 2px rgba(255, 255, 255, 0.06),
+      inset 0 -8px 15px #050505,
+      0 4px 5px #000;
+    transform: translateY(-2px);
+    transition:
+      transform 0.16s ease,
+      box-shadow 0.5s ease;
+  }
+
+  .button-face svg {
+    width: 45%;
+    fill: none;
+    stroke: #62635f;
+    stroke-width: 4;
+    stroke-linecap: round;
+    transition:
+      stroke 0.7s ease,
+      filter 0.7s ease;
+  }
+  .power-button:active .button-face {
+    transform: translateY(1px);
+  }
+
+  .state {
+    margin: 2.25rem 0 0;
+    font:
+      600 0.74rem/1 "JetBrains Mono Variable",
+      monospace;
+    letter-spacing: 0.28em;
+  }
+
+  .signal {
+    margin: 0.85rem 0 0;
+    color: transparent;
+    visibility: hidden;
+    font:
+      400 0.9rem/1.4 "Space Grotesk Variable",
+      sans-serif;
+    opacity: 0;
+    transition:
+      color 0.7s ease 0.25s,
+      opacity 0.7s ease 0.25s;
+  }
+
+  .site-links {
+    display: flex;
+    gap: 0.65rem;
+    margin-top: clamp(2.5rem, 9vh, 5rem);
+  }
+
+  .power-room[data-state="on"] {
+    background: #070b08;
+    color: var(--glow);
+  }
+  .power-room[data-state="on"]::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  .power-room[data-state="on"] .button-face {
+    border-color: #739175;
+    background: linear-gradient(145deg, #263529, #0b100c 58%);
+    box-shadow:
+      inset 0 2px 3px rgba(255, 255, 255, 0.09),
+      inset 0 -8px 15px #050805,
+      0 0 2.8rem rgba(116, 255, 126, 0.3);
+  }
+  .power-room[data-state="on"] svg {
+    stroke: var(--glow);
+    filter: drop-shadow(0 0 6px var(--glow));
+  }
+  .power-room[data-state="on"] .signal {
+    color: #b9c9ba;
+    visibility: visible;
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .power-room,
+    .power-room::before,
+    .button-face,
+    .button-face svg,
+    .signal {
+      transition-duration: 0.01ms;
+      transition-delay: 0ms;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .power-room,
+    .power-button,
+    .button-face {
+      forced-color-adjust: none;
+    }
+    .power-room {
+      background: Canvas;
+      color: CanvasText;
+    }
+    .power-button {
+      border: 2px solid ButtonText;
+      background: ButtonFace;
+    }
+    .power-button:focus-visible {
+      outline-color: Highlight;
+    }
+    .button-face {
+      background: ButtonFace;
+      border-color: ButtonText;
+    }
+    .button-face svg,
+    .power-room[data-state="on"] svg {
+      stroke: ButtonText;
+      filter: none;
+    }
+    .signal,
+    .power-room[data-state="on"] .signal {
+      color: CanvasText;
+    }
+  }
+</style>

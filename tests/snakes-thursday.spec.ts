@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
-const route = "/d/2026-07-21";
+const route = "/d/2026-07-23";
 
 type Point = { gx: number; gy: number };
 type Move = "ArrowUp" | "ArrowDown" | "ArrowLeft" | "ArrowRight";
@@ -130,7 +130,7 @@ test.describe("Snakes & Ladders & Snakes", () => {
     await expect(page.locator("main")).toHaveCount(1);
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       "href",
-      "https://taegli.ch/d/2026-07-21",
+      "https://taegli.ch/d/2026-07-23",
     );
 
     const canvas = page.locator("#game-canvas");

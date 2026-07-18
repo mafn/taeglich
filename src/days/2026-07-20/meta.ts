@@ -1,9 +1,10 @@
 import { defineDay } from "../../lib/day";
 
 export default defineDay({
-  title: "Power",
-  description: "A single switch brings the signal back online.",
-  tags: ["daily", "interactive", "reboot", "minimal"],
+  title: "No Backfill",
+  description:
+    "One hundred and forty-seven empty days, followed by one present square.",
+  tags: ["daily", "return", "minimal", "generative"],
   shellMode: "immersive",
   renderH1: false,
 });
